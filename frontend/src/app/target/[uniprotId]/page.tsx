@@ -123,14 +123,22 @@ export default function TargetPage() {
                 {target.gene_name}
               </span>
             )}
-            {hasPredictions && (
+            <div className="ml-auto flex gap-2">
               <Link
-                href={`/target/${target.uniprot_id}/compare`}
-                className="ml-auto rounded-lg bg-blue-500/20 px-4 py-1.5 text-sm font-medium text-blue-400 hover:bg-blue-500/30 transition-colors"
+                href={`/target/${target.uniprot_id}/report`}
+                className="rounded-lg bg-emerald-500/20 px-4 py-1.5 text-sm font-medium text-emerald-400 hover:bg-emerald-500/30 transition-colors"
               >
-                Compare ligands
+                Druggability report
               </Link>
-            )}
+              {hasPredictions && (
+                <Link
+                  href={`/target/${target.uniprot_id}/compare`}
+                  className="rounded-lg bg-blue-500/20 px-4 py-1.5 text-sm font-medium text-blue-400 hover:bg-blue-500/30 transition-colors"
+                >
+                  Compare ligands
+                </Link>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-4 text-sm">
             <span className="italic text-muted">{target.organism}</span>

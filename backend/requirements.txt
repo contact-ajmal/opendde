@@ -9,3 +9,4 @@ biopython
 supabase
 redis
 python-multipart
+reportlab

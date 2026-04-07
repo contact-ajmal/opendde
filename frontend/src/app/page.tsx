@@ -1,6 +1,7 @@
 import { Crosshair, FlaskConical, Box } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
 import ExampleTargets from '@/components/ExampleTargets';
+import AnimatedLayout from '@/components/AnimatedLayout';
 
 const features = [
   {
@@ -40,7 +41,7 @@ const howItWorks = [
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center px-4 py-20">
+    <AnimatedLayout><main className="flex min-h-screen flex-col items-center px-4 py-20">
       <div className="flex flex-col items-center gap-8 text-center">
         {/* Hero */}
         <div>
@@ -114,6 +115,6 @@ export default function Home() {
           </p>
         </footer>
       </div>
-    </main>
+    </main></AnimatedLayout>
   );
 }

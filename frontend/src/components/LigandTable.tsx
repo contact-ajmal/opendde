@@ -105,7 +105,7 @@ export default function LigandTable({ ligands, onPredictComplex }: LigandTablePr
           </thead>
           <tbody>
             {sorted.map((lig) => (
-              <tr key={lig.chembl_id} className="border-b border-border last:border-0 hover:bg-[var(--hover-row)]">
+              <tr key={lig.chembl_id} className="group border-b border-border last:border-0 hover:bg-[var(--hover-row)] transition-colors duration-150 border-l-2 border-l-transparent hover:border-l-[var(--accent)]">
                 <td className="px-4 py-2">
                   {lig.image_url ? (
                     <img
@@ -114,7 +114,7 @@ export default function LigandTable({ ligands, onPredictComplex }: LigandTablePr
                       loading="lazy"
                       width={60}
                       height={60}
-                      className="rounded bg-white"
+                      className="rounded bg-white transition-transform duration-150 group-hover:scale-105"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
                         (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
@@ -134,7 +134,7 @@ export default function LigandTable({ ligands, onPredictComplex }: LigandTablePr
                   <button
                     onClick={() => onPredictComplex?.(lig)}
                     disabled={!onPredictComplex}
-                    className="rounded bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/30 active:scale-[0.97] transition-transform disabled:cursor-not-allowed disabled:opacity-40"
                     title={!onPredictComplex ? 'Coming in next update' : undefined}
                   >
                     Predict complex

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import ViewerToolbar from './ViewerToolbar';
 
 const THREEDMOL_CDN =
@@ -76,6 +77,7 @@ export default function StructureViewer({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toolbarVisible, setToolbarVisible] = useState(true);
+  const [pocketsJustLoaded, setPocketsJustLoaded] = useState(false);
 
   // Auto-hide toolbar after 3 seconds of no mouse movement
   const resetHideTimer = useCallback(() => {
@@ -183,8 +185,14 @@ export default function StructureViewer({
 
   // Pocket highlights — store in ref and apply
   useEffect(() => {
+    const hadHighlights = highlightsRef.current && highlightsRef.current.length > 0;
     highlightsRef.current = pocketHighlights;
     reapplyHighlights();
+    // Pulse border when pockets first arrive
+    if (!hadHighlights && pocketHighlights && pocketHighlights.length > 0) {
+      setPocketsJustLoaded(true);
+      setTimeout(() => setPocketsJustLoaded(false), 2000);
+    }
   }, [pocketHighlights, reapplyHighlights]);
 
   // Focus point
@@ -219,10 +227,13 @@ export default function StructureViewer({
   }
 
   return (
-    <div
+    <motion.div
       ref={wrapperRef}
-      className="relative w-full rounded-lg border-2 border-[var(--border)] overflow-hidden"
+      className={`relative w-full rounded-lg border-2 overflow-hidden ${pocketsJustLoaded ? 'border-pulse' : 'border-[var(--border)]'}`}
       style={{ height }}
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
@@ -241,6 +252,6 @@ export default function StructureViewer({
           onStyleChange={reapplyHighlights}
         />
       )}
-    </div>
+    </motion.div>
   );
 }

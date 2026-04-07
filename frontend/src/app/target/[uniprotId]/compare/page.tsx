@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import StructureViewer from '@/components/StructureViewer';
+import AnimatedLayout from '@/components/AnimatedLayout';
 import { apiGet } from '@/lib/api';
 
 interface Prediction {
@@ -57,7 +58,7 @@ export default function ComparePage() {
   }
 
   return (
-    <main className="min-h-screen p-6">
+    <AnimatedLayout><main className="min-h-screen p-6">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6">
           <Link
@@ -195,6 +196,6 @@ export default function ComparePage() {
           </>
         )}
       </div>
-    </main>
+    </main></AnimatedLayout>
   );
 }

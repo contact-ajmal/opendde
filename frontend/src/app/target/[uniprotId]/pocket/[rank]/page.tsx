@@ -6,6 +6,7 @@ import Link from 'next/link';
 import StructureViewer, { type PocketHighlight } from '@/components/StructureViewer';
 import LigandTable from '@/components/LigandTable';
 import PredictionWorkflow from '@/components/PredictionWorkflow';
+import AnimatedLayout from '@/components/AnimatedLayout';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse, KnownLigand, LigandsResponse } from '@/lib/types';
 
@@ -113,7 +114,7 @@ export default function PocketDetailPage() {
         : 'text-red-400';
 
   return (
-    <main className="min-h-screen p-6">
+    <AnimatedLayout><main className="min-h-screen p-6">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-6">
@@ -276,7 +277,7 @@ export default function PocketDetailPage() {
             <button
               onClick={handleCustomPredict}
               disabled={!customSmiles.trim()}
-              className="rounded-lg bg-emerald-500 px-6 py-2 font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-lg bg-emerald-500 px-6 py-2 font-medium text-white hover:bg-emerald-600 active:scale-[0.97] transition-transform disabled:cursor-not-allowed disabled:opacity-40"
             >
               Predict complex
             </button>
@@ -293,6 +294,6 @@ export default function PocketDetailPage() {
           ligand={selectedLigand}
         />
       )}
-    </main>
+    </main></AnimatedLayout>
   );
 }

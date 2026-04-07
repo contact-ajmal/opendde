@@ -41,7 +41,7 @@ export default function SearchBar() {
         <button
           type="submit"
           disabled={loading || !query.trim()}
-          className="rounded-lg bg-emerald-500 px-6 py-3 font-medium text-white hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="rounded-lg bg-emerald-500 px-6 py-3 font-medium text-white hover:bg-emerald-600 active:scale-[0.97] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />

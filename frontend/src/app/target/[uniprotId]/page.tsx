@@ -6,6 +6,7 @@ import Link from 'next/link';
 import StructureViewer, { type PocketHighlight } from '@/components/StructureViewer';
 import PocketPanel from '@/components/PocketPanel';
 import { StructureViewerSkeleton, PocketPanelSkeleton } from '@/components/Skeletons';
+import AnimatedLayout from '@/components/AnimatedLayout';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse } from '@/lib/types';
 
@@ -111,7 +112,7 @@ export default function TargetPage() {
     : null;
 
   return (
-    <main className="min-h-screen p-6">
+    <AnimatedLayout><main className="min-h-screen p-6">
       <div className="mx-auto max-w-7xl">
         {/* Target Header */}
         <div className="mb-6">
@@ -190,6 +191,6 @@ export default function TargetPage() {
           </div>
         </div>
       </div>
-    </main>
+    </main></AnimatedLayout>
   );
 }

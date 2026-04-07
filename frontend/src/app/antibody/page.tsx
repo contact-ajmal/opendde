@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import AnimatedLayout from '@/components/AnimatedLayout';
 import { apiPost } from '@/lib/api';
 import StructureViewer, { type PocketHighlight } from '@/components/StructureViewer';
 
@@ -90,7 +91,7 @@ export default function AntibodyPage() {
     : [];
 
   return (
-    <main className="min-h-screen p-6">
+    <AnimatedLayout><main className="min-h-screen p-6">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <div className="mb-6">
@@ -152,7 +153,7 @@ export default function AntibodyPage() {
         <button
           onClick={handlePredict}
           disabled={loading || !heavy.trim() || !light.trim()}
-          className="mb-6 w-full rounded-lg bg-emerald-500 py-3 font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+          className="mb-6 w-full rounded-lg bg-emerald-500 py-3 font-medium text-white hover:bg-emerald-600 active:scale-[0.97] transition-all disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? (
             <span className="flex items-center justify-center gap-2">
@@ -249,6 +250,6 @@ export default function AntibodyPage() {
           </div>
         )}
       </div>
-    </main>
+    </main></AnimatedLayout>
   );
 }

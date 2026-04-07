@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import targets, pockets, ligands, predictions, antibody, export, search, stats, properties, reports, report_pdf
+from routers import targets, pockets, ligands, predictions, antibody, export, search, stats, properties, reports, report_pdf, similar
 
 
 @asynccontextmanager
@@ -33,6 +33,7 @@ app.include_router(stats.router, prefix="/api/v1")
 app.include_router(properties.router, prefix="/api/v1")
 app.include_router(reports.router, prefix="/api/v1")
 app.include_router(report_pdf.router, prefix="/api/v1")
+app.include_router(similar.router, prefix="/api/v1")
 
 
 @app.get("/api/v1/health")

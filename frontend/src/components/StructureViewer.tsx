@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import ViewerToolbar from './ViewerToolbar';
 
 const THREEDMOL_CDN =
   'https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.4.0/3Dmol-min.js';
@@ -67,10 +68,70 @@ export default function StructureViewer({
   focusPoint,
   onReady,
 }: StructureViewerProps) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<any>(null);
+  const highlightsRef = useRef<PocketHighlight[] | undefined>(undefined);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [toolbarVisible, setToolbarVisible] = useState(true);
+
+  // Auto-hide toolbar after 3 seconds of no mouse movement
+  const resetHideTimer = useCallback(() => {
+    setToolbarVisible(true);
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => setToolbarVisible(false), 3000);
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    resetHideTimer();
+  }, [resetHideTimer]);
+
+  const handleMouseMove = useCallback(() => {
+    resetHideTimer();
+  }, [resetHideTimer]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    setToolbarVisible(false);
+  }, []);
+
+  // Reapply pocket highlights (called after toolbar style changes)
+  const reapplyHighlights = useCallback(() => {
+    const viewer = viewerRef.current;
+    const highlights = highlightsRef.current;
+    if (!viewer || !highlights) return;
+
+    viewer.removeAllSurfaces();
+
+    for (const pocket of highlights) {
+      const parsed = pocket.residues.map(parseResidue).filter(Boolean) as {
+        resi: number;
+        chain: string;
+      }[];
+      if (parsed.length === 0) continue;
+
+      const byChain: Record<string, number[]> = {};
+      for (const { resi, chain } of parsed) {
+        if (!byChain[chain]) byChain[chain] = [];
+        byChain[chain].push(resi);
+      }
+
+      const color = pocket.color || getPocketColor(pocket.rank);
+      const opacity = pocket.selected ? 0.8 : 0.3;
+
+      for (const [chain, residues] of Object.entries(byChain)) {
+        viewer.addSurface(
+          window.$3Dmol.SurfaceType.VDW,
+          { opacity, color },
+          { resi: residues, chain }
+        );
+      }
+    }
+
+    viewer.render();
+  }, []);
 
   // Mount: load 3Dmol, fetch structure, create viewer
   useEffect(() => {
@@ -120,41 +181,11 @@ export default function StructureViewer({
     };
   }, [structureUrl]);
 
-  // Pocket highlights
+  // Pocket highlights — store in ref and apply
   useEffect(() => {
-    const viewer = viewerRef.current;
-    if (!viewer || !pocketHighlights) return;
-
-    viewer.removeAllSurfaces();
-
-    for (const pocket of pocketHighlights) {
-      const parsed = pocket.residues.map(parseResidue).filter(Boolean) as {
-        resi: number;
-        chain: string;
-      }[];
-      if (parsed.length === 0) continue;
-
-      // Group by chain
-      const byChain: Record<string, number[]> = {};
-      for (const { resi, chain } of parsed) {
-        if (!byChain[chain]) byChain[chain] = [];
-        byChain[chain].push(resi);
-      }
-
-      const color = pocket.color || getPocketColor(pocket.rank);
-      const opacity = pocket.selected ? 0.8 : 0.3;
-
-      for (const [chain, residues] of Object.entries(byChain)) {
-        viewer.addSurface(
-          window.$3Dmol.SurfaceType.VDW,
-          { opacity, color },
-          { resi: residues, chain }
-        );
-      }
-    }
-
-    viewer.render();
-  }, [pocketHighlights]);
+    highlightsRef.current = pocketHighlights;
+    reapplyHighlights();
+  }, [pocketHighlights, reapplyHighlights]);
 
   // Focus point
   useEffect(() => {
@@ -188,13 +219,28 @@ export default function StructureViewer({
   }
 
   return (
-    <div className="relative w-full rounded-lg border border-border overflow-hidden" style={{ height }}>
+    <div
+      ref={wrapperRef}
+      className="relative w-full rounded-lg border border-border overflow-hidden"
+      style={{ height }}
+      onMouseEnter={handleMouseEnter}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
       {loading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
       )}
       <div ref={containerRef} className="h-full w-full" />
+      {!loading && viewerRef.current && (
+        <ViewerToolbar
+          viewer={viewerRef.current}
+          containerEl={wrapperRef.current}
+          visible={toolbarVisible}
+          onStyleChange={reapplyHighlights}
+        />
+      )}
     </div>
   );
 }

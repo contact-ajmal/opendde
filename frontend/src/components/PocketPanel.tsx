@@ -44,11 +44,11 @@ export default function PocketPanel({
             className={`flex items-start gap-3 rounded-lg border p-3 text-left transition-colors ${
               isSelected
                 ? 'border-emerald-500 bg-emerald-500/10'
-                : 'border-border bg-surface hover:border-slate-600'
+                : 'border-border bg-surface hover:border-[var(--border-hover)]'
             }`}
           >
             {/* Rank badge */}
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-800 text-sm font-bold text-foreground">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[var(--surface-alt)] text-sm font-bold text-foreground">
               {pocket.rank}
             </div>
 
@@ -63,7 +63,7 @@ export default function PocketPanel({
               </div>
 
               {/* Druggability bar */}
-              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
+              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[var(--bar-track)]">
                 <div
                   className={`h-full rounded-full ${druggabilityColor(pocket.druggability)}`}
                   style={{ width: `${Math.max(pocket.druggability * 100, 2)}%` }}

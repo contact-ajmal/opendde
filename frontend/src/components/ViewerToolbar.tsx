@@ -144,10 +144,11 @@ export default function ViewerToolbar({ viewer, containerEl, visible, onStyleCha
     'flex h-9 w-9 items-center justify-center rounded-md text-sm transition-colors';
   const btnActive = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
   const btnInactive = 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 border border-transparent';
+  // Toolbar always uses dark colors since it overlays the always-dark 3D viewer
 
   return (
     <div
-      className={`absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 rounded-lg bg-slate-800/90 px-3 py-1.5 backdrop-blur-sm transition-opacity duration-300 ${
+      className={`absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 rounded-lg bg-[#1e293b]/90 px-3 py-1.5 backdrop-blur-sm transition-opacity duration-300 ${
         visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}
     >

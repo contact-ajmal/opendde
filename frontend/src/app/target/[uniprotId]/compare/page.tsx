@@ -96,17 +96,17 @@ export default function ComparePage() {
                   <BarChart data={chartData}>
                     <XAxis
                       dataKey="name"
-                      tick={{ fill: '#94a3b8', fontSize: 12 }}
-                      axisLine={{ stroke: '#334155' }}
+                      tick={{ fill: 'var(--chart-tick)', fontSize: 12 }}
+                      axisLine={{ stroke: 'var(--chart-axis)' }}
                       tickLine={false}
                     />
                     <YAxis hide />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#0f172a',
-                        border: '1px solid #334155',
+                        backgroundColor: 'var(--tooltip-bg)',
+                        border: '1px solid var(--tooltip-border)',
                         borderRadius: '8px',
-                        color: '#f8fafc',
+                        color: 'var(--text)',
                       }}
                     />
                     <Bar dataKey="index" name="Prediction" radius={[4, 4, 0, 0]}>
@@ -137,7 +137,7 @@ export default function ComparePage() {
                   {predictions.map((pred) => (
                     <tr
                       key={pred.prediction_id}
-                      className="border-b border-border last:border-0 hover:bg-slate-800/50"
+                      className="border-b border-border last:border-0 hover:bg-[var(--hover-row)]"
                     >
                       <td className="px-4 py-3">
                         <span className="font-medium text-foreground">
@@ -152,7 +152,7 @@ export default function ComparePage() {
                           className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                             pred.status === 'complete'
                               ? 'bg-emerald-500/20 text-emerald-400'
-                              : 'bg-slate-700 text-slate-400'
+                              : 'bg-[var(--prepared-bg)] text-[var(--prepared-text)]'
                           }`}
                         >
                           {pred.status === 'complete' ? 'Complete' : 'Prepared'}

@@ -114,7 +114,7 @@ export default function PredictionWorkflow({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="relative mx-4 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl border border-border bg-slate-950 p-6">
+      <div className="relative mx-4 max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl glass-panel p-6">
         {/* Close button */}
         <button
           onClick={handleClose}
@@ -133,7 +133,7 @@ export default function PredictionWorkflow({
                     ? 'bg-emerald-500 text-white'
                     : i < step
                       ? 'bg-emerald-500/20 text-emerald-400'
-                      : 'bg-slate-800 text-muted'
+                      : 'bg-[var(--surface-alt)] text-muted'
                 }`}
               >
                 {i + 1}
@@ -144,7 +144,7 @@ export default function PredictionWorkflow({
                 {s}
               </span>
               {i < STEPS.length - 1 && (
-                <div className={`h-px w-8 ${i < step ? 'bg-emerald-500' : 'bg-slate-700'}`} />
+                <div className={`h-px w-8 ${i < step ? 'bg-emerald-500' : 'bg-[var(--border)]'}`} />
               )}
             </div>
           ))}
@@ -211,12 +211,12 @@ export default function PredictionWorkflow({
                 <span className="text-sm font-medium text-foreground">Job JSON</span>
                 <button
                   onClick={handleCopy}
-                  className="rounded bg-slate-800 px-3 py-1 text-xs text-foreground hover:bg-slate-700"
+                  className="rounded bg-[var(--surface-alt)] px-3 py-1 text-xs text-foreground hover:bg-[var(--surface-hover)]"
                 >
                   {copied ? 'Copied!' : 'Copy'}
                 </button>
               </div>
-              <pre className="max-h-64 overflow-auto rounded-lg border border-border bg-slate-900 p-4 text-xs text-emerald-400">
+              <pre className="max-h-64 overflow-auto rounded-lg border border-border bg-[var(--code-bg)] p-4 text-xs text-[var(--accent)]">
                 {prepareData.job_json_pretty}
               </pre>
             </div>
@@ -263,7 +263,7 @@ export default function PredictionWorkflow({
               className={`flex h-48 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
                 dragOver
                   ? 'border-emerald-500 bg-emerald-500/10'
-                  : 'border-border bg-surface hover:border-slate-600'
+                  : 'border-border bg-surface hover:border-[var(--border-hover)]'
               }`}
             >
               {loading ? (

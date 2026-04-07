@@ -109,7 +109,7 @@ export default function Home() {
               GitHub
             </a>
           </div>
-          <p className="mt-2 text-center text-xs text-slate-600">
+          <p className="mt-2 text-center text-xs text-muted-2">
             Inspired by Isomorphic Labs&apos; IsoDDE
           </p>
         </footer>

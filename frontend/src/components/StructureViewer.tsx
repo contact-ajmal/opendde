@@ -221,7 +221,7 @@ export default function StructureViewer({
   return (
     <div
       ref={wrapperRef}
-      className="relative w-full rounded-lg border border-border overflow-hidden"
+      className="relative w-full rounded-lg border-2 border-[var(--border)] overflow-hidden"
       style={{ height }}
       onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}

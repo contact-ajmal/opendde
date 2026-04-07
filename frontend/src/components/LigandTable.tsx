@@ -21,8 +21,8 @@ function phaseBadge(phase: number, label: string) {
     4: 'bg-emerald-500/20 text-emerald-400',
     3: 'bg-blue-500/20 text-blue-400',
     2: 'bg-amber-500/20 text-amber-400',
-    1: 'bg-slate-500/20 text-slate-300',
-    0: 'bg-slate-800 text-slate-500',
+    1: 'bg-[var(--phase-1-bg)] text-[var(--phase-1-text)]',
+    0: 'bg-[var(--phase-0-bg)] text-[var(--phase-0-text)]',
   };
   return (
     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${styles[phase] || styles[0]}`}>
@@ -38,7 +38,7 @@ function activityBadge(type: string) {
     Kd: 'bg-amber-500/20 text-amber-400',
   };
   return (
-    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${colors[type] || 'bg-slate-700 text-slate-300'}`}>
+    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${colors[type] || 'bg-[var(--badge-muted-bg)] text-[var(--badge-muted-text)]'}`}>
       {type}
     </span>
   );
@@ -105,7 +105,7 @@ export default function LigandTable({ ligands, onPredictComplex }: LigandTablePr
           </thead>
           <tbody>
             {sorted.map((lig) => (
-              <tr key={lig.chembl_id} className="border-b border-border last:border-0 hover:bg-slate-800/50">
+              <tr key={lig.chembl_id} className="border-b border-border last:border-0 hover:bg-[var(--hover-row)]">
                 <td className="px-4 py-2">
                   {lig.image_url ? (
                     <img
@@ -121,7 +121,7 @@ export default function LigandTable({ ligands, onPredictComplex }: LigandTablePr
                       }}
                     />
                   ) : null}
-                  <div className={`h-[60px] w-[60px] rounded bg-slate-700 ${lig.image_url ? 'hidden' : ''}`} />
+                  <div className={`h-[60px] w-[60px] rounded bg-[var(--surface-alt)] ${lig.image_url ? 'hidden' : ''}`} />
                 </td>
                 <td className="px-4 py-2">
                   <div className="font-medium text-foreground">{lig.name}</div>

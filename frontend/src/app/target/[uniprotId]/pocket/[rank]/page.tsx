@@ -133,7 +133,7 @@ export default function PocketDetailPage() {
             <div className="relative ml-auto">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
-                className="rounded-lg border border-border bg-surface px-4 py-1.5 text-sm font-medium text-foreground hover:bg-slate-800 transition-colors"
+                className="rounded-lg border border-border bg-surface px-4 py-1.5 text-sm font-medium text-foreground hover:bg-[var(--surface-hover)] transition-colors"
               >
                 Export ▾
               </button>
@@ -143,7 +143,7 @@ export default function PocketDetailPage() {
                     <a
                       href={`${API_BASE}${target.structure_url}`}
                       download
-                      className="block px-4 py-2 text-sm text-foreground hover:bg-slate-800 transition-colors"
+                      className="block px-4 py-2 text-sm text-foreground hover:bg-[var(--surface-hover)] transition-colors"
                       onClick={() => setExportOpen(false)}
                     >
                       Download structure (CIF)
@@ -152,7 +152,7 @@ export default function PocketDetailPage() {
                   <a
                     href={`${API_BASE}/api/v1/export/pockets/${params.uniprotId}`}
                     download
-                    className="block px-4 py-2 text-sm text-foreground hover:bg-slate-800 transition-colors"
+                    className="block px-4 py-2 text-sm text-foreground hover:bg-[var(--surface-hover)] transition-colors"
                     onClick={() => setExportOpen(false)}
                   >
                     Download pockets (CSV)
@@ -160,7 +160,7 @@ export default function PocketDetailPage() {
                   <a
                     href={`${API_BASE}/api/v1/export/ligands/${params.uniprotId}`}
                     download
-                    className="block px-4 py-2 text-sm text-foreground hover:bg-slate-800 transition-colors"
+                    className="block px-4 py-2 text-sm text-foreground hover:bg-[var(--surface-hover)] transition-colors"
                     onClick={() => setExportOpen(false)}
                   >
                     Download ligands (CSV)
@@ -189,7 +189,7 @@ export default function PocketDetailPage() {
           </div>
 
           <div className="w-full md:w-[45%] md:flex-shrink-0">
-            <div className="rounded-lg border border-border bg-surface p-6">
+            <div className="glass-panel p-6">
               <h2 className="mb-4 text-lg font-semibold text-foreground">Pocket Details</h2>
 
               <div className="space-y-4">
@@ -202,7 +202,7 @@ export default function PocketDetailPage() {
                   <span className={`font-medium ${druggColor}`}>{druggPct}%</span>
                 </div>
                 <div>
-                  <div className="mb-1 h-2 w-full overflow-hidden rounded-full bg-slate-800">
+                  <div className="mb-1 h-2 w-full overflow-hidden rounded-full bg-[var(--surface-alt)]">
                     <div
                       className={`h-full rounded-full ${
                         pocket.druggability >= 0.7
@@ -232,7 +232,7 @@ export default function PocketDetailPage() {
                     {pocket.residues.slice(0, 30).map((r) => (
                       <span
                         key={r}
-                        className="rounded bg-slate-800 px-1.5 py-0.5 text-xs text-muted"
+                        className="rounded bg-[var(--surface-alt)] px-1.5 py-0.5 text-xs text-muted"
                       >
                         {r}
                       </span>

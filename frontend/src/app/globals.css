@@ -2,7 +2,97 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Dark theme (default) ─────────────────────────────────── */
+:root {
+  --bg: #0a0f1e;
+  --surface: #111827;
+  --surface-hover: #1a2236;
+  --surface-alt: #1e293b;
+  --border: #1e293b;
+  --border-hover: #334155;
+  --text: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --accent: #10b981;
+  --accent-hover: #34d399;
+  --accent-muted: rgba(16, 185, 129, 0.2);
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --kbd-bg: #1e293b;
+  --kbd-border: #334155;
+  --skeleton: #1e293b;
+  --bar-track: #1e293b;
+  --badge-muted-bg: #1e293b;
+  --badge-muted-text: #94a3b8;
+  --code-bg: #111827;
+  --hover-row: rgba(30, 41, 59, 0.5);
+  --glass-bg: rgba(17, 24, 39, 0.8);
+  --glass-border: rgba(30, 41, 59, 0.6);
+  --overlay: rgba(0, 0, 0, 0.6);
+  --nav-bg: rgba(17, 24, 39, 0.95);
+  --phase-0-bg: #1e293b;
+  --phase-0-text: #64748b;
+  --phase-1-bg: rgba(100, 116, 139, 0.2);
+  --phase-1-text: #cbd5e1;
+  --prepared-bg: #334155;
+  --prepared-text: #94a3b8;
+  --tooltip-bg: #0f172a;
+  --tooltip-border: #334155;
+  --chart-tick: #94a3b8;
+  --chart-axis: #334155;
+}
+
+/* ── Light theme ──────────────────────────────────────────── */
+.light {
+  --bg: #fafaf8;
+  --surface: #ffffff;
+  --surface-hover: #f8fafc;
+  --surface-alt: #f1f5f9;
+  --border: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --text: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #94a3b8;
+  --accent: #059669;
+  --accent-hover: #10b981;
+  --accent-muted: rgba(5, 150, 105, 0.12);
+  --danger: #dc2626;
+  --warning: #d97706;
+  --kbd-bg: #f1f5f9;
+  --kbd-border: #cbd5e1;
+  --skeleton: #e2e8f0;
+  --bar-track: #e2e8f0;
+  --badge-muted-bg: #f1f5f9;
+  --badge-muted-text: #475569;
+  --code-bg: #f8fafc;
+  --hover-row: rgba(241, 245, 249, 0.7);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(226, 232, 240, 0.8);
+  --overlay: rgba(0, 0, 0, 0.3);
+  --nav-bg: rgba(255, 255, 255, 0.95);
+  --phase-0-bg: #f1f5f9;
+  --phase-0-text: #64748b;
+  --phase-1-bg: rgba(100, 116, 139, 0.1);
+  --phase-1-text: #475569;
+  --prepared-bg: #e2e8f0;
+  --prepared-text: #475569;
+  --tooltip-bg: #ffffff;
+  --tooltip-border: #e2e8f0;
+  --chart-tick: #475569;
+  --chart-axis: #e2e8f0;
+}
+
 body {
-  background-color: #020617;
-  color: #f8fafc;
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── Glassmorphism panels ─────────────────────────────────── */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 0.5px solid var(--glass-border);
+  border-radius: 12px;
 }

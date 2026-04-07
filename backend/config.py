@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     STRUCTURE_CACHE: str = "/data/structures"
     P2RANK_SERVICE_URL: str = "http://p2rank:8001"
     IMMUNEBUILDER_SERVICE_URL: str = "http://immunebuilder:8002"
+    RDKIT_SERVICE_URL: str = "http://rdkit:8003"
 
 
 settings = Settings()

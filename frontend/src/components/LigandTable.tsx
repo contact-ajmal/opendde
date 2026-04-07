@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import type { KnownLigand } from '@/lib/types';
+import DruglikenessCard from './DruglikenessCard';
 
 interface LigandTableProps {
   ligands: KnownLigand[];
@@ -47,6 +49,7 @@ function activityBadge(type: string) {
 export default function LigandTable({ ligands, onPredictComplex }: LigandTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('activity_value_nm');
   const [sortAsc, setSortAsc] = useState(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -104,44 +107,77 @@ export default function LigandTable({ ligands, onPredictComplex }: LigandTablePr
             </tr>
           </thead>
           <tbody>
-            {sorted.map((lig) => (
-              <tr key={lig.chembl_id} className="group border-b border-border last:border-0 hover:bg-[var(--hover-row)] transition-colors duration-150 border-l-2 border-l-transparent hover:border-l-[var(--accent)]">
-                <td className="px-4 py-2">
-                  {lig.image_url ? (
-                    <img
-                      src={lig.image_url}
-                      alt={lig.name}
-                      loading="lazy"
-                      width={60}
-                      height={60}
-                      className="rounded bg-white transition-transform duration-150 group-hover:scale-105"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                      }}
-                    />
-                  ) : null}
-                  <div className={`h-[60px] w-[60px] rounded bg-[var(--surface-alt)] ${lig.image_url ? 'hidden' : ''}`} />
-                </td>
-                <td className="px-4 py-2">
-                  <div className="font-medium text-foreground">{lig.name}</div>
-                  <div className="text-xs text-muted">{lig.chembl_id}</div>
-                </td>
-                <td className="px-4 py-2">{activityBadge(lig.activity_type)}</td>
-                <td className="px-4 py-2 text-foreground">{formatActivity(lig.activity_value_nm)}</td>
-                <td className="px-4 py-2">{phaseBadge(lig.clinical_phase, lig.clinical_phase_label)}</td>
-                <td className="px-4 py-2">
-                  <button
-                    onClick={() => onPredictComplex?.(lig)}
-                    disabled={!onPredictComplex}
-                    className="rounded bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/30 active:scale-[0.97] transition-transform disabled:cursor-not-allowed disabled:opacity-40"
-                    title={!onPredictComplex ? 'Coming in next update' : undefined}
+            {sorted.map((lig) => {
+              const isExpanded = expandedId === lig.chembl_id;
+              return (
+                <tr key={lig.chembl_id} className="group border-b border-border last:border-0">
+                  {/* Main row - click to expand */}
+                  <td
+                    colSpan={6}
+                    className="p-0"
                   >
-                    Predict complex
-                  </button>
-                </td>
-              </tr>
-            ))}
+                    <div
+                      className={`flex items-center transition-colors duration-150 border-l-2 cursor-pointer ${
+                        isExpanded
+                          ? 'border-l-[var(--accent)] bg-[var(--hover-row)]'
+                          : 'border-l-transparent hover:bg-[var(--hover-row)] hover:border-l-[var(--accent)]'
+                      }`}
+                      onClick={() => setExpandedId(isExpanded ? null : lig.chembl_id)}
+                    >
+                      <div className="w-[90px] px-4 py-2 flex-shrink-0">
+                        {lig.image_url ? (
+                          <img
+                            src={lig.image_url}
+                            alt={lig.name}
+                            loading="lazy"
+                            width={60}
+                            height={60}
+                            className="rounded bg-white transition-transform duration-150 group-hover:scale-105"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                              (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
+                        <div className={`h-[60px] w-[60px] rounded bg-[var(--surface-alt)] ${lig.image_url ? 'hidden' : ''}`} />
+                      </div>
+                      <div className="min-w-[120px] px-4 py-2">
+                        <div className="font-medium text-foreground">{lig.name}</div>
+                        <div className="text-xs text-muted">{lig.chembl_id}</div>
+                      </div>
+                      <div className="px-4 py-2">{activityBadge(lig.activity_type)}</div>
+                      <div className="px-4 py-2 text-foreground">{formatActivity(lig.activity_value_nm)}</div>
+                      <div className="px-4 py-2">{phaseBadge(lig.clinical_phase, lig.clinical_phase_label)}</div>
+                      <div className="px-4 py-2 flex items-center gap-2">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onPredictComplex?.(lig); }}
+                          disabled={!onPredictComplex}
+                          className="rounded bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/30 active:scale-[0.97] transition-transform disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          Predict
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setExpandedId(isExpanded ? null : lig.chembl_id); }}
+                          className="rounded px-2 py-1 text-xs text-muted hover:text-foreground transition-colors"
+                          title="Druglikeness properties"
+                        >
+                          {isExpanded ? '▲' : '▼'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Expanded druglikeness card */}
+                    <AnimatePresence>
+                      {isExpanded && lig.smiles && (
+                        <div className="border-t border-border bg-[var(--surface-hover)] px-4 py-3">
+                          <DruglikenessCard smiles={lig.smiles} />
+                        </div>
+                      )}
+                    </AnimatePresence>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

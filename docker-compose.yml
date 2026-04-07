@@ -27,6 +27,7 @@ services:
       - STRUCTURE_CACHE=/data/structures
       - P2RANK_SERVICE_URL=http://p2rank:8001
       - IMMUNEBUILDER_SERVICE_URL=http://immunebuilder:8002
+      - RDKIT_SERVICE_URL=http://rdkit:8003
     volumes:
       - ./backend:/app
       - structure-cache:/data/structures
@@ -53,6 +54,13 @@ services:
       - "8002:8002"
     volumes:
       - antibody-data:/data/antibodies
+
+  rdkit:
+    build:
+      context: ./services/rdkit
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
 
   redis:
     image: redis:7-alpine

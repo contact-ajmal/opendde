@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+httpx
+python-dotenv
+aiofiles
+pydantic
+pydantic-settings
+biopython
+supabase
+redis

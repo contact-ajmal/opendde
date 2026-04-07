@@ -1,0 +1,65 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    depends_on:
+      - backend
+    command: npm run dev
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - REDIS_URL=redis://redis:6379
+      - STRUCTURE_CACHE=/data/structures
+      - P2RANK_SERVICE_URL=http://p2rank:8001
+      - IMMUNEBUILDER_SERVICE_URL=http://immunebuilder:8002
+    volumes:
+      - ./backend:/app
+      - structure-cache:/data/structures
+    depends_on:
+      - redis
+      - p2rank
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  p2rank:
+    build:
+      context: ./services/p2rank
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    volumes:
+      - structure-cache:/data/structures
+
+  immunebuilder:
+    build:
+      context: ./services/immunebuilder
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    profiles:
+      - antibody
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  structure-cache:
+  redis-data:

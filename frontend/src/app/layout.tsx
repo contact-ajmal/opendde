@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import Navbar from '@/components/Navbar';
 
 export const metadata: Metadata = {
   title: 'OpenDDE — Open Drug Design Engine',
@@ -19,19 +20,12 @@ export default function RootLayout({
             '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
         }}
       >
-        <nav className="fixed top-0 z-50 w-full border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-          <div className="mx-auto flex h-14 max-w-6xl items-center px-6">
-            <a href="/" className="text-lg font-bold text-emerald-500 hover:text-emerald-400 transition-colors">
-              OpenDDE
-            </a>
-            <div className="ml-8 flex items-center gap-6">
-              <a href="/antibody" className="text-sm text-slate-400 hover:text-foreground transition-colors">
-                Antibody
-              </a>
-            </div>
-          </div>
-        </nav>
+        <Navbar />
         <div className="pt-14">
+          {/* Mobile notice */}
+          <div className="block px-4 py-2 text-center text-xs text-amber-400 bg-amber-500/10 border-b border-amber-500/20 md:hidden">
+            Desktop recommended for best experience
+          </div>
           {children}
         </div>
       </body>

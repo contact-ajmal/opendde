@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import StructureViewer, { type PocketHighlight } from '@/components/StructureViewer';
 import PocketPanel from '@/components/PocketPanel';
+import { StructureViewerSkeleton, PocketPanelSkeleton } from '@/components/Skeletons';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse } from '@/lib/types';
 
@@ -153,9 +154,9 @@ export default function TargetPage() {
         </div>
 
         {/* Two-column layout: viewer + pocket panel */}
-        <div className="flex gap-6">
+        <div className="flex flex-col gap-6 md:flex-row">
           {/* 3D Viewer (70%) */}
-          <div className="w-[70%] flex-shrink-0">
+          <div className="w-full md:w-[70%] md:flex-shrink-0">
             {structureUrl ? (
               <StructureViewer
                 structureUrl={structureUrl}
@@ -171,22 +172,9 @@ export default function TargetPage() {
           </div>
 
           {/* Pocket Panel sidebar (30%) */}
-          <div className="w-[30%] flex-shrink-0">
+          <div className="w-full md:w-[30%] md:flex-shrink-0">
             {pocketsLoading ? (
-              <div className="flex flex-col gap-2">
-                <h2 className="text-lg font-semibold text-foreground mb-2">
-                  Binding Pockets
-                </h2>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className="h-20 animate-pulse rounded-lg border border-border bg-surface"
-                  />
-                ))}
-                <p className="mt-2 text-center text-xs text-muted">
-                  Running P2Rank prediction…
-                </p>
-              </div>
+              <PocketPanelSkeleton />
             ) : pockets.length > 0 ? (
               <PocketPanel
                 pockets={pockets}

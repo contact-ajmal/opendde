@@ -9,6 +9,8 @@ import PredictionWorkflow from '@/components/PredictionWorkflow';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse, KnownLigand, LigandsResponse } from '@/lib/types';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
 export default function PocketDetailPage() {
   const params = useParams<{ uniprotId: string; rank: string }>();
   const rankNum = parseInt(params.rank, 10);
@@ -23,6 +25,7 @@ export default function PocketDetailPage() {
   const [workflowOpen, setWorkflowOpen] = useState(false);
   const [selectedLigand, setSelectedLigand] = useState<{ smiles: string; name: string } | null>(null);
   const [customSmiles, setCustomSmiles] = useState('');
+  const [exportOpen, setExportOpen] = useState(false);
 
   useEffect(() => {
     async function fetchAll() {
@@ -120,15 +123,57 @@ export default function PocketDetailPage() {
           >
             ← Back to all pockets
           </Link>
-          <h1 className="mt-2 text-2xl font-bold text-foreground">
-            Pocket #{pocket.rank}{' '}
-            <span className="text-lg font-normal text-muted">for {target.name}</span>
-          </h1>
+          <div className="mt-2 flex items-center gap-4">
+            <h1 className="text-2xl font-bold text-foreground">
+              Pocket #{pocket.rank}{' '}
+              <span className="text-lg font-normal text-muted">for {target.name}</span>
+            </h1>
+
+            {/* Export dropdown */}
+            <div className="relative ml-auto">
+              <button
+                onClick={() => setExportOpen(!exportOpen)}
+                className="rounded-lg border border-border bg-surface px-4 py-1.5 text-sm font-medium text-foreground hover:bg-slate-800 transition-colors"
+              >
+                Export ▾
+              </button>
+              {exportOpen && (
+                <div className="absolute right-0 z-20 mt-1 w-56 rounded-lg border border-border bg-surface py-1 shadow-lg">
+                  {target.structure_url && (
+                    <a
+                      href={`${API_BASE}${target.structure_url}`}
+                      download
+                      className="block px-4 py-2 text-sm text-foreground hover:bg-slate-800 transition-colors"
+                      onClick={() => setExportOpen(false)}
+                    >
+                      Download structure (CIF)
+                    </a>
+                  )}
+                  <a
+                    href={`${API_BASE}/api/v1/export/pockets/${params.uniprotId}`}
+                    download
+                    className="block px-4 py-2 text-sm text-foreground hover:bg-slate-800 transition-colors"
+                    onClick={() => setExportOpen(false)}
+                  >
+                    Download pockets (CSV)
+                  </a>
+                  <a
+                    href={`${API_BASE}/api/v1/export/ligands/${params.uniprotId}`}
+                    download
+                    className="block px-4 py-2 text-sm text-foreground hover:bg-slate-800 transition-colors"
+                    onClick={() => setExportOpen(false)}
+                  >
+                    Download ligands (CSV)
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Two columns: viewer + pocket info */}
-        <div className="mb-8 flex gap-6">
-          <div className="w-[55%] flex-shrink-0">
+        <div className="mb-8 flex flex-col gap-6 md:flex-row">
+          <div className="w-full md:w-[55%] md:flex-shrink-0">
             {structureUrl ? (
               <StructureViewer
                 structureUrl={structureUrl}
@@ -143,7 +188,7 @@ export default function PocketDetailPage() {
             )}
           </div>
 
-          <div className="w-[45%] flex-shrink-0">
+          <div className="w-full md:w-[45%] md:flex-shrink-0">
             <div className="rounded-lg border border-border bg-surface p-6">
               <h2 className="mb-4 text-lg font-semibold text-foreground">Pocket Details</h2>
 

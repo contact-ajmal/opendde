@@ -8,6 +8,7 @@ import LigandTable from '@/components/LigandTable';
 import PredictionWorkflow from '@/components/PredictionWorkflow';
 import AnimatedLayout from '@/components/AnimatedLayout';
 import CustomLigandSection from '@/components/CustomLigandSection';
+import PocketMap from '@/components/PocketMap';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse, KnownLigand, LigandsResponse } from '@/lib/types';
 
@@ -244,6 +245,16 @@ export default function PocketDetailPage() {
               </div>
 
               <p className="mt-4 text-xs text-muted">Powered by P2Rank</p>
+            </div>
+
+            {/* Pocket residue interaction map */}
+            <div className="mt-4 glass-panel p-5">
+              <h3 className="mb-3 text-sm font-semibold text-foreground">Residue Interaction Map</h3>
+              <PocketMap
+                uniprotId={params.uniprotId}
+                rank={pocket.rank}
+                druggability={pocket.druggability}
+              />
             </div>
           </div>
         </div>

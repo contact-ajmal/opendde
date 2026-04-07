@@ -43,3 +43,17 @@ export interface LigandsResponse {
   ligand_count: number;
   ligands: KnownLigand[];
 }
+
+export interface PrepareResponse {
+  prediction_id: string;
+  job_json: any;
+  job_json_pretty: string;
+  alphafold_server_url: string;
+  instructions: string[];
+}
+
+export interface UploadResponse {
+  prediction_id: string;
+  structure_url: string;
+  status: string;
+}

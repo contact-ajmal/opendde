@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import StructureViewer, { type PocketHighlight } from '@/components/StructureViewer';
 import LigandTable from '@/components/LigandTable';
+import PredictionWorkflow from '@/components/PredictionWorkflow';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse, KnownLigand, LigandsResponse } from '@/lib/types';
 
@@ -17,6 +18,11 @@ export default function PocketDetailPage() {
   const [ligands, setLigands] = useState<KnownLigand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Prediction workflow state
+  const [workflowOpen, setWorkflowOpen] = useState(false);
+  const [selectedLigand, setSelectedLigand] = useState<{ smiles: string; name: string } | null>(null);
+  const [customSmiles, setCustomSmiles] = useState('');
 
   useEffect(() => {
     async function fetchAll() {
@@ -54,6 +60,18 @@ export default function PocketDetailPage() {
     if (!pocket) return undefined;
     return { x: pocket.center_x, y: pocket.center_y, z: pocket.center_z };
   }, [pocket]);
+
+  function handlePredictComplex(lig: KnownLigand) {
+    setSelectedLigand({ smiles: lig.smiles, name: lig.name });
+    setWorkflowOpen(true);
+  }
+
+  function handleCustomPredict() {
+    const trimmed = customSmiles.trim();
+    if (!trimmed) return;
+    setSelectedLigand({ smiles: trimmed, name: 'Custom ligand' });
+    setWorkflowOpen(true);
+  }
 
   if (loading) {
     return (
@@ -110,7 +128,6 @@ export default function PocketDetailPage() {
 
         {/* Two columns: viewer + pocket info */}
         <div className="mb-8 flex gap-6">
-          {/* Viewer (55%) */}
           <div className="w-[55%] flex-shrink-0">
             {structureUrl ? (
               <StructureViewer
@@ -126,7 +143,6 @@ export default function PocketDetailPage() {
             )}
           </div>
 
-          {/* Pocket info (45%) */}
           <div className="w-[45%] flex-shrink-0">
             <div className="rounded-lg border border-border bg-surface p-6">
               <h2 className="mb-4 text-lg font-semibold text-foreground">Pocket Details</h2>
@@ -193,7 +209,7 @@ export default function PocketDetailPage() {
         {/* Ligand table */}
         {ligands.length > 0 && (
           <div className="mb-8">
-            <LigandTable ligands={ligands} />
+            <LigandTable ligands={ligands} onPredictComplex={handlePredictComplex} />
           </div>
         )}
 
@@ -206,20 +222,32 @@ export default function PocketDetailPage() {
           <div className="flex gap-2">
             <input
               type="text"
+              value={customSmiles}
+              onChange={(e) => setCustomSmiles(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCustomPredict()}
               placeholder="e.g. CC(=O)Oc1ccccc1C(=O)O"
               className="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-foreground placeholder:text-muted outline-none focus:border-primary transition-colors"
             />
             <button
-              disabled
-              className="rounded-lg bg-emerald-500 px-6 py-2 font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
-              title="Coming in next update"
+              onClick={handleCustomPredict}
+              disabled={!customSmiles.trim()}
+              className="rounded-lg bg-emerald-500 px-6 py-2 font-medium text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Predict complex
             </button>
           </div>
-          <p className="mt-2 text-xs text-muted">Coming in next update</p>
         </div>
       </div>
+
+      {/* Prediction workflow modal */}
+      {target && (
+        <PredictionWorkflow
+          isOpen={workflowOpen}
+          onClose={() => setWorkflowOpen(false)}
+          targetInfo={target}
+          ligand={selectedLigand}
+        />
+      )}
     </main>
   );
 }

@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import targets, pockets, ligands
+from routers import targets, pockets, ligands, predictions
 
 
 @asynccontextmanager
@@ -25,6 +25,7 @@ app.add_middleware(
 app.include_router(targets.router, prefix="/api/v1")
 app.include_router(pockets.router, prefix="/api/v1")
 app.include_router(ligands.router, prefix="/api/v1")
+app.include_router(predictions.router, prefix="/api/v1")
 
 
 @app.get("/api/v1/health")

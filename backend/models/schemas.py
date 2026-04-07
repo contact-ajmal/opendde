@@ -5,6 +5,27 @@ class TargetResolveRequest(BaseModel):
     query: str
 
 
+class PocketResult(BaseModel):
+    rank: int
+    score: float
+    center_x: float
+    center_y: float
+    center_z: float
+    residues: list[str]
+    residue_count: int
+    druggability: float
+
+
+class PocketsRequest(BaseModel):
+    uniprot_id: str
+
+
+class PocketsResponse(BaseModel):
+    uniprot_id: str
+    pocket_count: int
+    pockets: list[PocketResult]
+
+
 class TargetInfo(BaseModel):
     uniprot_id: str
     name: str

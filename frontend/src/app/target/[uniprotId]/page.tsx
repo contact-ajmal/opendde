@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import StructureViewer, { type PocketHighlight } from '@/components/StructureViewer';
 import PocketPanel from '@/components/PocketPanel';
-import { apiPost } from '@/lib/api';
+import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse } from '@/lib/types';
 
 export default function TargetPage() {
@@ -17,6 +17,7 @@ export default function TargetPage() {
   const [pockets, setPockets] = useState<PocketResult[]>([]);
   const [pocketsLoading, setPocketsLoading] = useState(false);
   const [selectedPocket, setSelectedPocket] = useState<number | null>(null);
+  const [hasPredictions, setHasPredictions] = useState(false);
 
   // Resolve target
   useEffect(() => {
@@ -54,6 +55,13 @@ export default function TargetPage() {
       }
     }
     fetchPockets();
+
+    // Check for predictions
+    apiGet(`/target/${target!.uniprot_id}/predictions`)
+      .then((data: any) => {
+        if (data.predictions?.length > 0) setHasPredictions(true);
+      })
+      .catch(() => {});
   }, [target?.uniprot_id]);
 
   // Build pocket highlights for the viewer
@@ -112,6 +120,14 @@ export default function TargetPage() {
               <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-sm font-medium text-emerald-400">
                 {target.gene_name}
               </span>
+            )}
+            {hasPredictions && (
+              <Link
+                href={`/target/${target.uniprot_id}/compare`}
+                className="ml-auto rounded-lg bg-blue-500/20 px-4 py-1.5 text-sm font-medium text-blue-400 hover:bg-blue-500/30 transition-colors"
+              >
+                Compare ligands
+              </Link>
             )}
           </div>
           <div className="flex items-center gap-4 text-sm">

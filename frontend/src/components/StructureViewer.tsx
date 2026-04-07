@@ -11,6 +11,7 @@ export interface PocketHighlight {
   rank: number;
   residues: string[]; // P2Rank format: "A_123" or "ALA_123_A"
   selected: boolean;
+  color?: string; // optional explicit color override
 }
 
 interface FocusPoint {
@@ -140,7 +141,7 @@ export default function StructureViewer({
         byChain[chain].push(resi);
       }
 
-      const color = getPocketColor(pocket.rank);
+      const color = pocket.color || getPocketColor(pocket.rank);
       const opacity = pocket.selected ? 0.8 : 0.3;
 
       for (const [chain, residues] of Object.entries(byChain)) {

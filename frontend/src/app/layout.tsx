@@ -24,6 +24,11 @@ export default function RootLayout({
             <a href="/" className="text-lg font-bold text-emerald-500 hover:text-emerald-400 transition-colors">
               OpenDDE
             </a>
+            <div className="ml-8 flex items-center gap-6">
+              <a href="/antibody" className="text-sm text-slate-400 hover:text-foreground transition-colors">
+                Antibody
+              </a>
+            </div>
           </div>
         </nav>
         <div className="pt-14">

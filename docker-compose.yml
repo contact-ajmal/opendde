@@ -30,6 +30,7 @@ services:
     volumes:
       - ./backend:/app
       - structure-cache:/data/structures
+      - antibody-data:/data/antibodies
     depends_on:
       - redis
       - p2rank
@@ -50,8 +51,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8002:8002"
-    profiles:
-      - antibody
+    volumes:
+      - antibody-data:/data/antibodies
 
   redis:
     image: redis:7-alpine
@@ -63,3 +64,4 @@ services:
 volumes:
   structure-cache:
   redis-data:
+  antibody-data:

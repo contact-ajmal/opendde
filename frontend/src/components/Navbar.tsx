@@ -52,6 +52,13 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-6">
+          <button
+            onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+            className="hidden sm:flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-xs text-slate-400 hover:text-slate-300 hover:border-slate-600 transition-colors"
+          >
+            Search
+            <kbd className="rounded border border-slate-600 bg-slate-800 px-1 py-0.5 text-[10px] text-slate-500">⌘K</kbd>
+          </button>
           <Link
             href="/antibody"
             className={`text-sm transition-colors ${

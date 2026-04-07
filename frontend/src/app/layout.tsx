@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import Navbar from '@/components/Navbar';
+import CommandPalette from '@/components/CommandPalette';
 
 export const metadata: Metadata = {
   title: 'OpenDDE — Open Drug Design Engine',
@@ -21,6 +22,7 @@ export default function RootLayout({
         }}
       >
         <Navbar />
+        <CommandPalette />
         <div className="pt-14">
           {/* Mobile notice */}
           <div className="block px-4 py-2 text-center text-xs text-amber-400 bg-amber-500/10 border-b border-amber-500/20 md:hidden">

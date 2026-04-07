@@ -7,6 +7,7 @@ import StructureViewer, { type PocketHighlight } from '@/components/StructureVie
 import LigandTable from '@/components/LigandTable';
 import PredictionWorkflow from '@/components/PredictionWorkflow';
 import AnimatedLayout from '@/components/AnimatedLayout';
+import CustomLigandSection from '@/components/CustomLigandSection';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse, KnownLigand, LigandsResponse } from '@/lib/types';
 
@@ -25,7 +26,7 @@ export default function PocketDetailPage() {
   // Prediction workflow state
   const [workflowOpen, setWorkflowOpen] = useState(false);
   const [selectedLigand, setSelectedLigand] = useState<{ smiles: string; name: string } | null>(null);
-  const [customSmiles, setCustomSmiles] = useState('');
+
   const [exportOpen, setExportOpen] = useState(false);
 
   useEffect(() => {
@@ -70,12 +71,7 @@ export default function PocketDetailPage() {
     setWorkflowOpen(true);
   }
 
-  function handleCustomPredict() {
-    const trimmed = customSmiles.trim();
-    if (!trimmed) return;
-    setSelectedLigand({ smiles: trimmed, name: 'Custom ligand' });
-    setWorkflowOpen(true);
-  }
+
 
   if (loading) {
     return (
@@ -259,30 +255,11 @@ export default function PocketDetailPage() {
           </div>
         )}
 
-        {/* Custom SMILES input */}
-        <div className="rounded-lg border border-border bg-surface p-6">
-          <h3 className="mb-3 text-lg font-semibold text-foreground">Custom Ligand</h3>
-          <p className="mb-3 text-sm text-muted">
-            Enter a SMILES string to predict binding to this pocket.
-          </p>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={customSmiles}
-              onChange={(e) => setCustomSmiles(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleCustomPredict()}
-              placeholder="e.g. CC(=O)Oc1ccccc1C(=O)O"
-              className="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-foreground placeholder:text-muted outline-none focus:border-primary transition-colors"
-            />
-            <button
-              onClick={handleCustomPredict}
-              disabled={!customSmiles.trim()}
-              className="rounded-lg bg-emerald-500 px-6 py-2 font-medium text-white hover:bg-emerald-600 active:scale-[0.97] transition-transform disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Predict complex
-            </button>
-          </div>
-        </div>
+        {/* Custom ligand with SMILES input + molecule editor */}
+        <CustomLigandSection onPredict={(smiles, name) => {
+          setSelectedLigand({ smiles, name });
+          setWorkflowOpen(true);
+        }} />
       </div>
 
       {/* Prediction workflow modal */}

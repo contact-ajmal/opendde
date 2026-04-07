@@ -1,9 +1,12 @@
 import uvicorn
+from io import BytesIO
+
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
 from pydantic import BaseModel
 
 from rdkit import Chem
-from rdkit.Chem import Descriptors, Lipinski, AllChem, DataStructs
+from rdkit.Chem import Descriptors, Lipinski, AllChem, DataStructs, Draw
 
 app = FastAPI(title="RDKit Properties Service")
 
@@ -19,6 +22,12 @@ class SimilarityInput(BaseModel):
 
 class BatchInput(BaseModel):
     smiles_list: list[str]
+
+
+class DepictInput(BaseModel):
+    smiles: str
+    width: int = 300
+    height: int = 200
 
 
 def calculate_properties(smiles: str) -> dict:
@@ -97,6 +106,26 @@ async def get_batch_properties(body: BatchInput):
         except ValueError:
             results.append({"smiles": smiles, "error": "Invalid SMILES"})
     return results
+
+
+@app.post("/depict")
+async def depict(body: DepictInput):
+    mol = Chem.MolFromSmiles(body.smiles)
+    if mol is None:
+        raise HTTPException(status_code=400, detail="Invalid SMILES")
+    img = Draw.MolToImage(mol, size=(body.width, body.height))
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    return Response(content=buf.getvalue(), media_type="image/png")
+
+
+@app.post("/validate")
+async def validate(body: SmilesInput):
+    mol = Chem.MolFromSmiles(body.smiles)
+    if mol is None:
+        return {"valid": False, "canonical_smiles": None, "error": "Invalid SMILES string"}
+    canonical = Chem.MolToSmiles(mol)
+    return {"valid": True, "canonical_smiles": canonical, "error": None}
 
 
 @app.get("/health")

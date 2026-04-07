@@ -26,3 +26,20 @@ export interface PocketsResponse {
   pocket_count: number;
   pockets: PocketResult[];
 }
+
+export interface KnownLigand {
+  chembl_id: string;
+  name: string;
+  smiles: string;
+  activity_type: string;
+  activity_value_nm: number;
+  clinical_phase: number;
+  clinical_phase_label: string;
+  image_url: string | null;
+}
+
+export interface LigandsResponse {
+  uniprot_id: string;
+  ligand_count: number;
+  ligands: KnownLigand[];
+}

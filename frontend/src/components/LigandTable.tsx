@@ -1,0 +1,150 @@
+'use client';
+
+import { useState } from 'react';
+import type { KnownLigand } from '@/lib/types';
+
+interface LigandTableProps {
+  ligands: KnownLigand[];
+  onPredictComplex?: (ligand: KnownLigand) => void;
+}
+
+type SortKey = 'name' | 'activity_value_nm' | 'clinical_phase';
+
+function formatActivity(value: number): string {
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)} mM`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1)} μM`;
+  return `${value.toFixed(1)} nM`;
+}
+
+function phaseBadge(phase: number, label: string) {
+  const styles: Record<number, string> = {
+    4: 'bg-emerald-500/20 text-emerald-400',
+    3: 'bg-blue-500/20 text-blue-400',
+    2: 'bg-amber-500/20 text-amber-400',
+    1: 'bg-slate-500/20 text-slate-300',
+    0: 'bg-slate-800 text-slate-500',
+  };
+  return (
+    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${styles[phase] || styles[0]}`}>
+      {label}
+    </span>
+  );
+}
+
+function activityBadge(type: string) {
+  const colors: Record<string, string> = {
+    IC50: 'bg-blue-500/20 text-blue-400',
+    Ki: 'bg-purple-500/20 text-purple-400',
+    Kd: 'bg-amber-500/20 text-amber-400',
+  };
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${colors[type] || 'bg-slate-700 text-slate-300'}`}>
+      {type}
+    </span>
+  );
+}
+
+export default function LigandTable({ ligands, onPredictComplex }: LigandTableProps) {
+  const [sortKey, setSortKey] = useState<SortKey>('activity_value_nm');
+  const [sortAsc, setSortAsc] = useState(true);
+
+  function handleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortAsc(!sortAsc);
+    } else {
+      setSortKey(key);
+      setSortAsc(true);
+    }
+  }
+
+  const sorted = [...ligands].sort((a, b) => {
+    const mul = sortAsc ? 1 : -1;
+    if (sortKey === 'name') return mul * a.name.localeCompare(b.name);
+    if (sortKey === 'clinical_phase') return mul * (a.clinical_phase - b.clinical_phase);
+    return mul * (a.activity_value_nm - b.activity_value_nm);
+  });
+
+  const sortIcon = (key: SortKey) => {
+    if (sortKey !== key) return ' ↕';
+    return sortAsc ? ' ↑' : ' ↓';
+  };
+
+  return (
+    <div>
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-foreground">Known Ligands</h3>
+        <span className="text-sm text-muted">{ligands.length} compounds</span>
+      </div>
+
+      <div className="overflow-x-auto rounded-lg border border-border">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border bg-surface">
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted">Structure</th>
+              <th
+                className="cursor-pointer px-4 py-3 text-left text-xs font-medium text-muted hover:text-foreground"
+                onClick={() => handleSort('name')}
+              >
+                Name{sortIcon('name')}
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted">Activity</th>
+              <th
+                className="cursor-pointer px-4 py-3 text-left text-xs font-medium text-muted hover:text-foreground"
+                onClick={() => handleSort('activity_value_nm')}
+              >
+                Value{sortIcon('activity_value_nm')}
+              </th>
+              <th
+                className="cursor-pointer px-4 py-3 text-left text-xs font-medium text-muted hover:text-foreground"
+                onClick={() => handleSort('clinical_phase')}
+              >
+                Phase{sortIcon('clinical_phase')}
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((lig) => (
+              <tr key={lig.chembl_id} className="border-b border-border last:border-0 hover:bg-slate-800/50">
+                <td className="px-4 py-2">
+                  {lig.image_url ? (
+                    <img
+                      src={lig.image_url}
+                      alt={lig.name}
+                      loading="lazy"
+                      width={60}
+                      height={60}
+                      className="rounded bg-white"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  <div className={`h-[60px] w-[60px] rounded bg-slate-700 ${lig.image_url ? 'hidden' : ''}`} />
+                </td>
+                <td className="px-4 py-2">
+                  <div className="font-medium text-foreground">{lig.name}</div>
+                  <div className="text-xs text-muted">{lig.chembl_id}</div>
+                </td>
+                <td className="px-4 py-2">{activityBadge(lig.activity_type)}</td>
+                <td className="px-4 py-2 text-foreground">{formatActivity(lig.activity_value_nm)}</td>
+                <td className="px-4 py-2">{phaseBadge(lig.clinical_phase, lig.clinical_phase_label)}</td>
+                <td className="px-4 py-2">
+                  <button
+                    onClick={() => onPredictComplex?.(lig)}
+                    disabled={!onPredictComplex}
+                    className="rounded bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-40"
+                    title={!onPredictComplex ? 'Coming in next update' : undefined}
+                  >
+                    Predict complex
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

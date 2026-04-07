@@ -26,6 +26,23 @@ class PocketsResponse(BaseModel):
     pockets: list[PocketResult]
 
 
+class KnownLigand(BaseModel):
+    chembl_id: str
+    name: str
+    smiles: str
+    activity_type: str
+    activity_value_nm: float
+    clinical_phase: int
+    clinical_phase_label: str
+    image_url: str | None = None
+
+
+class LigandsResponse(BaseModel):
+    uniprot_id: str
+    ligand_count: int
+    ligands: list[KnownLigand]
+
+
 class TargetInfo(BaseModel):
     uniprot_id: str
     name: str

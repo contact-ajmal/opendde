@@ -5,13 +5,15 @@ import { useEffect, useRef, useState } from 'react';
 const THREEDMOL_CDN =
   'https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.4.0/3Dmol-min.js';
 
-interface Highlight {
-  residues: number[];
-  chain: string;
-  color: string;
+const POCKET_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#64748b'];
+
+export interface PocketHighlight {
+  rank: number;
+  residues: string[]; // P2Rank format: "A_123" or "ALA_123_A"
+  selected: boolean;
 }
 
-interface FocusResidue {
+interface FocusPoint {
   x: number;
   y: number;
   z: number;
@@ -20,8 +22,8 @@ interface FocusResidue {
 interface StructureViewerProps {
   structureUrl: string;
   height?: string;
-  highlights?: Highlight[];
-  focusResidue?: FocusResidue;
+  pocketHighlights?: PocketHighlight[];
+  focusPoint?: FocusPoint;
   onReady?: () => void;
 }
 
@@ -39,11 +41,29 @@ function load3Dmol(): Promise<void> {
   });
 }
 
+/** Parse P2Rank residue ID like "A_123" or "ALA_123_A" into { resi, chain } */
+function parseResidue(id: string): { resi: number; chain: string } | null {
+  const parts = id.split('_');
+  if (parts.length === 2) {
+    // Format: "A_123" (chain_resi)
+    return { chain: parts[0], resi: parseInt(parts[1], 10) };
+  }
+  if (parts.length === 3) {
+    // Format: "ALA_123_A" (name_resi_chain)
+    return { chain: parts[2], resi: parseInt(parts[1], 10) };
+  }
+  return null;
+}
+
+function getPocketColor(rank: number): string {
+  return POCKET_COLORS[Math.min(rank - 1, POCKET_COLORS.length - 1)];
+}
+
 export default function StructureViewer({
   structureUrl,
   height = '500px',
-  highlights,
-  focusResidue,
+  pocketHighlights,
+  focusPoint,
   onReady,
 }: StructureViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -67,7 +87,6 @@ export default function StructureViewer({
 
         const format = structureUrl.endsWith('.cif') ? 'cif' : 'pdb';
 
-        // Clear any previous viewer
         if (viewerRef.current) {
           viewerRef.current.clear();
           viewerRef.current = null;
@@ -100,37 +119,51 @@ export default function StructureViewer({
     };
   }, [structureUrl]);
 
-  // Highlights
+  // Pocket highlights
   useEffect(() => {
     const viewer = viewerRef.current;
-    if (!viewer || !highlights) return;
+    if (!viewer || !pocketHighlights) return;
 
     viewer.removeAllSurfaces();
-    for (const h of highlights) {
-      viewer.addSurface(
-        window.$3Dmol.SurfaceType.VDW,
-        { opacity: 0.7, color: h.color },
-        { resi: h.residues, chain: h.chain }
-      );
-    }
-    viewer.render();
-  }, [highlights]);
 
-  // Focus residue
+    for (const pocket of pocketHighlights) {
+      const parsed = pocket.residues.map(parseResidue).filter(Boolean) as {
+        resi: number;
+        chain: string;
+      }[];
+      if (parsed.length === 0) continue;
+
+      // Group by chain
+      const byChain: Record<string, number[]> = {};
+      for (const { resi, chain } of parsed) {
+        if (!byChain[chain]) byChain[chain] = [];
+        byChain[chain].push(resi);
+      }
+
+      const color = getPocketColor(pocket.rank);
+      const opacity = pocket.selected ? 0.8 : 0.3;
+
+      for (const [chain, residues] of Object.entries(byChain)) {
+        viewer.addSurface(
+          window.$3Dmol.SurfaceType.VDW,
+          { opacity, color },
+          { resi: residues, chain }
+        );
+      }
+    }
+
+    viewer.render();
+  }, [pocketHighlights]);
+
+  // Focus point
   useEffect(() => {
     const viewer = viewerRef.current;
-    if (!viewer || !focusResidue) return;
+    if (!viewer || !focusPoint) return;
 
-    viewer.center(
-      { x: focusResidue.x, y: focusResidue.y, z: focusResidue.z },
-      1000
-    );
-    viewer.zoomTo(
-      { x: focusResidue.x, y: focusResidue.y, z: focusResidue.z },
-      1000
-    );
+    viewer.center(focusPoint, 1000);
+    viewer.zoomTo(focusPoint, 1000);
     viewer.render();
-  }, [focusResidue]);
+  }, [focusPoint]);
 
   // Cleanup on unmount
   useEffect(() => {

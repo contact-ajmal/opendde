@@ -1,22 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import StructureViewer from '@/components/StructureViewer';
+import StructureViewer, { type PocketHighlight } from '@/components/StructureViewer';
+import PocketPanel from '@/components/PocketPanel';
 import { apiPost } from '@/lib/api';
-
-interface TargetInfo {
-  uniprot_id: string;
-  name: string;
-  gene_name: string | null;
-  organism: string;
-  sequence: string;
-  length: number;
-  structure_source: string | null;
-  structure_url: string | null;
-  plddt_mean: number | null;
-}
+import type { TargetInfo, PocketResult, PocketsResponse } from '@/lib/types';
 
 export default function TargetPage() {
   const params = useParams<{ uniprotId: string }>();
@@ -24,6 +14,11 @@ export default function TargetPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [pockets, setPockets] = useState<PocketResult[]>([]);
+  const [pocketsLoading, setPocketsLoading] = useState(false);
+  const [selectedPocket, setSelectedPocket] = useState<number | null>(null);
+
+  // Resolve target
   useEffect(() => {
     async function resolve() {
       try {
@@ -37,6 +32,46 @@ export default function TargetPage() {
     }
     resolve();
   }, [params.uniprotId]);
+
+  // Fetch pockets after target resolved
+  useEffect(() => {
+    if (!target?.uniprot_id) return;
+
+    async function fetchPockets() {
+      setPocketsLoading(true);
+      try {
+        const data: PocketsResponse = await apiPost('/pockets', {
+          uniprot_id: target!.uniprot_id,
+        });
+        setPockets(data.pockets);
+        if (data.pockets.length > 0) {
+          setSelectedPocket(data.pockets[0].rank);
+        }
+      } catch {
+        // Pockets are optional — don't block the page
+      } finally {
+        setPocketsLoading(false);
+      }
+    }
+    fetchPockets();
+  }, [target?.uniprot_id]);
+
+  // Build pocket highlights for the viewer
+  const pocketHighlights: PocketHighlight[] = useMemo(() => {
+    return pockets.map((p) => ({
+      rank: p.rank,
+      residues: p.residues,
+      selected: selectedPocket === p.rank,
+    }));
+  }, [pockets, selectedPocket]);
+
+  // Focus point for selected pocket
+  const focusPoint = useMemo(() => {
+    if (selectedPocket == null) return undefined;
+    const pocket = pockets.find((p) => p.rank === selectedPocket);
+    if (!pocket) return undefined;
+    return { x: pocket.center_x, y: pocket.center_y, z: pocket.center_z };
+  }, [pockets, selectedPocket]);
 
   if (loading) {
     return (
@@ -68,7 +103,7 @@ export default function TargetPage() {
 
   return (
     <main className="min-h-screen p-6">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         {/* Target Header */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
@@ -101,14 +136,55 @@ export default function TargetPage() {
           </div>
         </div>
 
-        {/* 3D Viewer */}
-        {structureUrl ? (
-          <StructureViewer structureUrl={structureUrl} height="500px" />
-        ) : (
-          <div className="flex h-[500px] items-center justify-center rounded-lg border border-border bg-surface">
-            <p className="text-muted">No structure available for this target</p>
+        {/* Two-column layout: viewer + pocket panel */}
+        <div className="flex gap-6">
+          {/* 3D Viewer (70%) */}
+          <div className="w-[70%] flex-shrink-0">
+            {structureUrl ? (
+              <StructureViewer
+                structureUrl={structureUrl}
+                height="600px"
+                pocketHighlights={pocketHighlights}
+                focusPoint={focusPoint}
+              />
+            ) : (
+              <div className="flex h-[600px] items-center justify-center rounded-lg border border-border bg-surface">
+                <p className="text-muted">No structure available for this target</p>
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Pocket Panel sidebar (30%) */}
+          <div className="w-[30%] flex-shrink-0">
+            {pocketsLoading ? (
+              <div className="flex flex-col gap-2">
+                <h2 className="text-lg font-semibold text-foreground mb-2">
+                  Binding Pockets
+                </h2>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
+                    className="h-20 animate-pulse rounded-lg border border-border bg-surface"
+                  />
+                ))}
+                <p className="mt-2 text-center text-xs text-muted">
+                  Running P2Rank prediction…
+                </p>
+              </div>
+            ) : pockets.length > 0 ? (
+              <PocketPanel
+                pockets={pockets}
+                selectedPocket={selectedPocket}
+                onSelectPocket={setSelectedPocket}
+                uniprotId={target.uniprot_id}
+              />
+            ) : (
+              <div className="flex h-40 items-center justify-center rounded-lg border border-border bg-surface">
+                <p className="text-sm text-muted">No pockets detected</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </main>
   );

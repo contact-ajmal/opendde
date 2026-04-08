@@ -9,6 +9,7 @@ import PredictionWorkflow from '@/components/PredictionWorkflow';
 import AnimatedLayout from '@/components/AnimatedLayout';
 import CustomLigandSection from '@/components/CustomLigandSection';
 import PocketMap from '@/components/PocketMap';
+import SuggestionsPanel from '@/components/SuggestionsPanel';
 import { useAssistant } from '@/components/AssistantContext';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse, KnownLigand, LigandsResponse } from '@/lib/types';
@@ -294,6 +295,21 @@ export default function PocketDetailPage() {
         {ligands.length > 0 && (
           <div className="mb-8">
             <LigandTable ligands={ligands} onPredictComplex={handlePredictComplex} />
+          </div>
+        )}
+
+        {/* AI-suggested modifications */}
+        {ligands.length > 0 && (
+          <div className="mb-8">
+            <SuggestionsPanel
+              uniprotId={params.uniprotId}
+              pocket={pocket}
+              ligands={ligands}
+              onTestMolecule={(smiles, name) => {
+                setSelectedLigand({ smiles, name });
+                setWorkflowOpen(true);
+              }}
+            />
           </div>
         )}
 

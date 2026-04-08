@@ -38,6 +38,14 @@ class PocketSummaryRequest(BaseModel):
     regenerate: bool = False
 
 
+class SuggestLigandsRequest(BaseModel):
+    uniprot_id: str
+    pocket_rank: int
+    pocket_residues: list[dict] = []
+    known_ligands: list[dict] = []
+    regenerate: bool = False
+
+
 @router.post("/assistant/chat")
 async def chat(request: ChatRequest):
     if not settings.CLAUDE_API_KEY:
@@ -163,3 +171,116 @@ async def pocket_summary(request: PocketSummaryRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Failed to generate summary: {str(e)}")
+
+
+LIGAND_SUGGESTION_PROMPT = """You are an expert medicinal chemist. Given a binding pocket and known active ligands, suggest exactly 3 molecular modifications that could improve binding affinity or selectivity.
+
+For each suggestion you MUST return valid JSON in this exact format:
+[
+  {
+    "name": "Short descriptive name",
+    "rationale": "2-3 sentence scientific rationale based on pocket chemistry",
+    "base_ligand": "Name of the known ligand being modified",
+    "proposed_smiles": "Valid SMILES string for the proposed molecule",
+    "expected_effect": "Brief expected effect on binding"
+  }
+]
+
+Rules:
+- Base modifications on actual medicinal chemistry principles
+- Reference specific pocket residues and their properties
+- The proposed_smiles MUST be chemically valid
+- Return ONLY the JSON array, no other text"""
+
+
+@router.post("/assistant/suggest-ligands")
+async def suggest_ligands(request: SuggestLigandsRequest):
+    from services.database import get_cached_ai_summary, cache_ai_summary
+
+    if not settings.CLAUDE_API_KEY:
+        raise HTTPException(status_code=503, detail="Claude API key not configured")
+
+    cache_key = f"{request.uniprot_id}_pocket{request.pocket_rank}"
+
+    # Check cache
+    if not request.regenerate:
+        cached = get_cached_ai_summary(cache_key, "ligand_suggestions")
+        if cached:
+            try:
+                return {"suggestions": json.loads(cached), "cached": True}
+            except json.JSONDecodeError:
+                pass
+
+    # Build residue description
+    residue_lines = []
+    for r in request.pocket_residues[:30]:
+        residue_lines.append(f"  {r.get('name', '?')} ({r.get('type', 'unknown')})")
+    residue_str = "\n".join(residue_lines) if residue_lines else "No residue data available."
+
+    # Build ligand description
+    ligand_lines = []
+    for lig in request.known_ligands[:5]:
+        name = lig.get("name", "Unknown")
+        smiles = lig.get("smiles", "")
+        ic50 = lig.get("activity_value_nm")
+        act_type = lig.get("activity_type", "IC50")
+        ligand_lines.append(f"  {name}: {smiles} ({act_type}={ic50} nM)" if ic50 else f"  {name}: {smiles}")
+    ligand_str = "\n".join(ligand_lines) if ligand_lines else "No known ligands."
+
+    user_msg = (
+        f"Target: {request.uniprot_id}, Pocket #{request.pocket_rank}\n\n"
+        f"Pocket residues:\n{residue_str}\n\n"
+        f"Top known ligands:\n{ligand_str}\n\n"
+        f"Suggest 3 modifications. Return ONLY the JSON array."
+    )
+
+    try:
+        async with httpx.AsyncClient(timeout=45.0) as client:
+            resp = await client.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "x-api-key": settings.CLAUDE_API_KEY,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                },
+                json={
+                    "model": CLAUDE_MODEL,
+                    "max_tokens": 1500,
+                    "system": LIGAND_SUGGESTION_PROMPT,
+                    "messages": [{"role": "user", "content": user_msg}],
+                },
+            )
+            if resp.status_code != 200:
+                raise HTTPException(status_code=502, detail="Claude API request failed")
+
+            data = resp.json()
+            text_blocks = [b["text"] for b in data.get("content", []) if b.get("type") == "text"]
+            raw_text = " ".join(text_blocks).strip()
+
+            # Extract JSON from response (handle potential markdown wrapping)
+            json_text = raw_text
+            if "```" in json_text:
+                # Extract content between code fences
+                parts = json_text.split("```")
+                for part in parts:
+                    stripped = part.strip()
+                    if stripped.startswith("json"):
+                        stripped = stripped[4:].strip()
+                    if stripped.startswith("["):
+                        json_text = stripped
+                        break
+
+            suggestions = json.loads(json_text)
+            if not isinstance(suggestions, list):
+                raise ValueError("Expected a JSON array")
+
+            # Cache the result
+            cache_ai_summary(cache_key, json.dumps(suggestions), "ligand_suggestions")
+
+            return {"suggestions": suggestions, "cached": False}
+    except (json.JSONDecodeError, ValueError):
+        raise HTTPException(status_code=502, detail="Failed to parse suggestions from Claude response")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to generate suggestions: {str(e)}")

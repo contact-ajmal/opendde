@@ -10,6 +10,7 @@ import AnimatedLayout from '@/components/AnimatedLayout';
 import SimilarTargets from '@/components/SimilarTargets';
 import SafetyProfile from '@/components/SafetyProfile';
 import PocketSummaryCard from '@/components/PocketSummaryCard';
+import PocketRadar from '@/components/PocketRadar';
 import { useAssistant } from '@/components/AssistantContext';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse } from '@/lib/types';
@@ -228,6 +229,13 @@ export default function TargetPage() {
             )}
           </div>
         </div>
+
+        {/* Pocket comparison radar */}
+        {!pocketsLoading && pockets.length >= 2 && (
+          <div className="mt-6">
+            <PocketRadar uniprotId={target.uniprot_id} />
+          </div>
+        )}
 
         {/* Safety & tractability profile */}
         <SafetyProfile uniprotId={target.uniprot_id} />

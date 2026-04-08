@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Crosshair, FlaskConical, Box, Beaker, Sparkles, BarChart3 } from 'lucide-react';
+import { Crosshair, FlaskConical, Box, Beaker, Sparkles, BarChart3, Search, TrendingUp } from 'lucide-react';
 
 // ── Scroll-triggered count-up ───────────────────────────────
 function useScrollCountUp(target: number, duration = 1200): [number, React.RefObject<HTMLDivElement | null>] {
@@ -296,8 +296,257 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Section 1: The Drug Discovery Challenge ────────── */}
+      <section id="learn-drug-discovery" className="px-4 py-24">
+        <div className="mx-auto max-w-5xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">The Challenge</p>
+            <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
+              Developing a new drug takes <span className="text-[var(--accent)]">10&ndash;15 years</span> and costs <span className="text-[var(--accent)]">$2.6 billion</span>
+            </h2>
+          </motion.div>
+
+          {/* Timeline visualization */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.15 }}
+            className="mt-12"
+          >
+            <div className="relative overflow-x-auto pb-4">
+              <div className="mx-auto flex min-w-[700px] max-w-4xl gap-1">
+                {[
+                  { label: 'Target ID', duration: '2-3 yrs', color: 'bg-emerald-500', textColor: 'text-emerald-100', flex: 2.5, opendde: true },
+                  { label: 'Hit Finding', duration: '1-2 yrs', color: 'bg-emerald-500', textColor: 'text-emerald-100', flex: 1.5, opendde: true },
+                  { label: 'Lead Optimization', duration: '1-2 yrs', color: 'bg-emerald-500/70', textColor: 'text-emerald-100', flex: 1.5, opendde: true },
+                  { label: 'Preclinical', duration: '1 yr', color: 'bg-slate-600', textColor: 'text-slate-200', flex: 1, opendde: false },
+                  { label: 'Phase I', duration: '1-2 yrs', color: 'bg-blue-600/70', textColor: 'text-blue-100', flex: 1.5, opendde: false },
+                  { label: 'Phase II', duration: '2-3 yrs', color: 'bg-blue-600', textColor: 'text-blue-100', flex: 2.5, opendde: false },
+                  { label: 'Phase III', duration: '3-4 yrs', color: 'bg-blue-700', textColor: 'text-blue-100', flex: 3.5, opendde: false },
+                  { label: 'Approval', duration: '1-2 yrs', color: 'bg-slate-700', textColor: 'text-slate-200', flex: 1.5, opendde: false },
+                ].map((phase, i) => (
+                  <div key={phase.label} style={{ flex: phase.flex }} className="min-w-0">
+                    <div className={`rounded-md ${phase.color} px-2 py-3 ${phase.opendde ? 'ring-2 ring-emerald-400/40' : ''}`}>
+                      <div className={`truncate text-xs font-semibold ${phase.textColor}`}>{phase.label}</div>
+                      <div className={`text-[10px] ${phase.textColor} opacity-70`}>{phase.duration}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* OpenDDE bracket */}
+              <div className="mx-auto max-w-4xl mt-2 min-w-[700px]">
+                <div className="flex">
+                  <div style={{ flex: 5.5 }} className="border-b-2 border-l-2 border-r-2 border-emerald-400/50 rounded-b-lg h-4 relative">
+                    <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-xs font-semibold text-emerald-400">
+                      OpenDDE accelerates these stages
+                    </div>
+                  </div>
+                  <div style={{ flex: 10 }} />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="mt-16 mx-auto max-w-2xl text-center"
+          >
+            <p className="text-lg text-muted leading-relaxed">
+              Only <span className="font-semibold text-foreground">12% of drugs</span> that enter clinical trials are eventually approved.
+            </p>
+            <p className="mt-4 text-muted leading-relaxed">
+              OpenDDE accelerates the earliest stages &mdash; target validation, pocket discovery, and hit identification &mdash; where computational tools can save years of experimental work.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── Section 2: How Drug Discovery Works ──────────────── */}
+      <section className="border-y border-[var(--border)] bg-[var(--surface)] px-4 py-24">
+        <div className="mx-auto max-w-4xl">
+          <div className="text-center mb-16">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">Drug Discovery 101</p>
+            <h2 className="text-3xl font-bold text-foreground sm:text-4xl">How drug discovery works</h2>
+            <p className="mx-auto mt-4 max-w-xl text-muted">
+              Understanding the journey from disease biology to approved medicine.
+            </p>
+          </div>
+
+          {/* Timeline steps */}
+          <div className="relative">
+            {/* Vertical connecting line */}
+            <div className="absolute left-6 top-0 bottom-0 w-px bg-[var(--border)] sm:left-1/2 sm:-translate-x-px" />
+
+            {[
+              {
+                step: 1,
+                title: 'Identify the target',
+                description: 'Every disease is caused by specific proteins malfunctioning in the body. The first step is identifying which protein to target \u2014 like finding which broken part of an engine to fix.',
+                icon: Crosshair,
+                badge: null,
+                side: 'right' as const,
+              },
+              {
+                step: 2,
+                title: 'Find the binding pocket',
+                description: 'Proteins have specific pockets on their surface where small molecules can bind, like a key fitting into a lock. Finding these pockets is critical \u2014 you need to know WHERE on the protein a drug can attach.',
+                icon: Search,
+                badge: 'OpenDDE: P2Rank pocket prediction',
+                side: 'left' as const,
+              },
+              {
+                step: 3,
+                title: 'Discover candidate molecules',
+                description: 'Researchers search databases of known compounds to find molecules that might fit the pocket. They look at what\u2019s already been tested, analyze structure-activity relationships, and identify promising starting points.',
+                icon: FlaskConical,
+                badge: 'OpenDDE: ChEMBL ligand intelligence',
+                side: 'right' as const,
+              },
+              {
+                step: 4,
+                title: 'Predict how drugs bind',
+                description: 'Before testing in a lab, computational tools predict how a drug molecule will sit inside the pocket \u2014 its orientation, molecular contacts, and binding stability.',
+                icon: Box,
+                badge: 'OpenDDE: AlphaFold 3 complex prediction',
+                side: 'left' as const,
+              },
+              {
+                step: 5,
+                title: 'Optimize and test',
+                description: 'The best candidates are refined \u2014 modified to bind more tightly, be more selective, and have fewer side effects. Then they enter lab testing and eventually clinical trials.',
+                icon: TrendingUp,
+                badge: 'OpenDDE: AI suggestions + druglikeness scoring',
+                side: 'right' as const,
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, x: item.side === 'right' ? -30 : 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className={`relative mb-12 last:mb-0 pl-16 sm:pl-0 ${
+                  item.side === 'right'
+                    ? 'sm:pr-[calc(50%+2rem)] sm:text-right'
+                    : 'sm:pl-[calc(50%+2rem)]'
+                }`}
+              >
+                {/* Step number on the line */}
+                <div className={`absolute top-0 z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 ${
+                  item.badge
+                    ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
+                    : 'border-[var(--border)] bg-[var(--surface-alt)] text-muted'
+                } text-lg font-bold left-0 sm:left-1/2 sm:-translate-x-1/2`}>
+                  {item.step}
+                </div>
+
+                {/* Card */}
+                <div className={`rounded-xl border p-5 transition-colors ${
+                  item.badge
+                    ? 'border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/30'
+                    : 'border-[var(--border)] bg-[var(--bg)] hover:border-[var(--border-hover)]'
+                }`}>
+                  <div className={`mb-3 flex items-center gap-3 ${item.side === 'right' ? 'sm:flex-row-reverse' : ''}`}>
+                    <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${
+                      item.badge ? 'bg-emerald-500/15' : 'bg-[var(--surface-alt)]'
+                    }`}>
+                      <item.icon className={`h-4.5 w-4.5 ${item.badge ? 'text-emerald-400' : 'text-muted'}`} />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
+                  </div>
+                  <p className="text-sm leading-relaxed text-muted">{item.description}</p>
+                  {item.badge && (
+                    <div className={`mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-400 ${
+                      item.side === 'right' ? 'sm:float-right' : ''
+                    }`}>
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                      {item.badge}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section 3: Why Computational Drug Design ─────────── */}
+      <section className="px-4 py-24">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center mb-14">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">The Impact</p>
+            <h2 className="text-3xl font-bold text-foreground sm:text-4xl">Why computational drug design?</h2>
+          </div>
+
+          {/* Value cards */}
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 mb-16">
+            {[
+              {
+                number: '1000x',
+                label: 'faster',
+                description: 'AI predicts binding in seconds vs weeks of wet-lab experiments',
+              },
+              {
+                number: 'Weeks',
+                label: 'not years',
+                description: 'Virtual screening replaces months of manual compound testing',
+              },
+              {
+                number: 'Novel',
+                label: 'targets',
+                description: 'Discover pockets on previously "undruggable" proteins',
+              },
+            ].map((card, i) => (
+              <motion.div
+                key={card.number}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 text-center"
+              >
+                <div className="text-3xl font-bold text-[var(--accent)] sm:text-4xl">{card.number}</div>
+                <div className="text-sm font-medium text-foreground">{card.label}</div>
+                <p className="mt-3 text-sm text-muted leading-relaxed">{card.description}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Quote */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="mx-auto max-w-3xl"
+          >
+            <blockquote className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
+              <p className="text-lg italic leading-relaxed text-foreground">
+                &ldquo;[IsoDDE] more than doubles the accuracy of the best existing method, AlphaFold 3, in predicting binding poses for drug-like molecules.&rdquo;
+              </p>
+              <footer className="mt-4 text-sm text-muted">
+                &mdash; Isomorphic Labs, February 2025
+              </footer>
+            </blockquote>
+
+            <p className="mt-8 text-center text-muted leading-relaxed">
+              OpenDDE brings these capabilities to every researcher, for free, using open-source tools.
+              No cloud GPU required. No vendor lock-in. Just science.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ── Features Grid ────────────────────────────────────── */}
-      <section id="how-it-works" className="px-4 py-20">
+      <section id="how-it-works" className="border-t border-[var(--border)] bg-[var(--surface)] px-4 py-20">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold text-foreground sm:text-4xl">Everything you need for drug design</h2>
@@ -326,41 +575,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── How It Works ─────────────────────────────────────── */}
-      <section className="border-t border-[var(--border)] bg-[var(--surface)] px-4 py-20">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="mb-12 text-center text-3xl font-bold text-foreground">How it works</h2>
-          <div className="space-y-8">
-            {[
-              { step: '1', title: 'Search for a target', description: 'Enter a UniProt ID, PDB code, or gene name. OpenDDE resolves the protein and fetches its 3D structure from AlphaFold DB.' },
-              { step: '2', title: 'Discover druggable pockets', description: 'P2Rank analyzes the protein structure using machine learning to identify binding sites. Each pocket gets a druggability score and residue-level detail.' },
-              { step: '3', title: 'Explore known compounds', description: 'ChEMBL data reveals known drugs and bioactive molecules with IC50 activity data, clinical trial status, and structure-activity relationships.' },
-              { step: '4', title: 'Predict and optimize', description: 'Generate AlphaFold 3 predictions for protein-ligand complexes. Use the AI assistant for drug design insights and ligand modification suggestions.' },
-            ].map((item, i) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="flex gap-6"
-              >
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-lg font-bold text-emerald-400">
-                  {item.step}
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">{item.title}</h3>
-                  <p className="mt-1 text-muted leading-relaxed">{item.description}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-          <div className="mt-12 text-center">
+      {/* ── CTA Section ─────────────────────────────────────── */}
+      <section className="px-4 py-20">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-3xl font-bold text-foreground sm:text-4xl">Ready to explore?</h2>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-muted">
+            Search any protein target and discover its druggable pockets, known compounds, and binding predictions in minutes.
+          </p>
+          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               href="/app/dashboard"
-              className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-6 py-3 text-base font-medium text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 active:scale-[0.97] transition-all"
+              className="flex items-center gap-2 rounded-lg bg-emerald-500 px-6 py-3 text-base font-medium text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 active:scale-[0.97] transition-all"
             >
-              Get started
+              Get started for free
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M3 8h10M10 5l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>

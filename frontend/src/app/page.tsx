@@ -925,6 +925,210 @@ export default function HomePage() {
       {/* ── Section 6: Use Cases ─────────────────────────────── */}
       <UseCases />
 
+      {/* ── Section 7: Tech Stack ────────────────────────────── */}
+      <section className="border-t border-[var(--border)] px-4 py-20">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-12 text-center">
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="mb-3 text-sm font-medium uppercase tracking-wider text-emerald-400"
+            >
+              Built on giants
+            </motion.p>
+            <motion.h2
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl font-bold text-foreground sm:text-4xl"
+            >
+              Powered by the best open-source tools
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="mx-auto mt-4 max-w-2xl text-lg text-muted"
+            >
+              OpenDDE integrates world-class computational biology tools into a single, cohesive platform.
+            </motion.p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {[
+              { name: 'AlphaFold 3', provides: 'Structure prediction', org: 'Google DeepMind', href: 'https://alphafold.ebi.ac.uk/' },
+              { name: 'P2Rank', provides: 'Pocket detection', org: 'Czech Technical University', href: 'https://github.com/rdk/p2rank' },
+              { name: 'ChEMBL', provides: 'Bioactivity data', org: 'EMBL-EBI', href: 'https://www.ebi.ac.uk/chembl/' },
+              { name: 'RDKit', provides: 'Cheminformatics', org: 'Open-source community', href: 'https://www.rdkit.org/' },
+              { name: 'ImmuneBuilder', provides: 'Antibody modeling', org: 'Oxford Protein Informatics', href: 'https://github.com/oxpig/ImmuneBuilder' },
+              { name: 'UniProt', provides: 'Protein knowledge base', org: 'UniProt Consortium', href: 'https://www.uniprot.org/' },
+              { name: 'PubChem', provides: 'Chemical data', org: 'NCBI / NIH', href: 'https://pubchem.ncbi.nlm.nih.gov/' },
+              { name: 'Claude AI', provides: 'Scientific reasoning', org: 'Anthropic', href: 'https://www.anthropic.com/' },
+            ].map((tool, i) => (
+              <motion.a
+                key={tool.name}
+                href={tool.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                className="group rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 hover:border-[var(--border-hover)] hover:-translate-y-1 transition-all"
+              >
+                <h3 className="text-base font-semibold text-foreground group-hover:text-emerald-400 transition-colors">{tool.name}</h3>
+                <p className="mt-1 text-sm text-muted">{tool.provides}</p>
+                <p className="mt-2 text-xs text-muted-2">{tool.org}</p>
+              </motion.a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section 8: Open Source Mission ────────────────────── */}
+      <section className="border-t border-[var(--border)] bg-[var(--surface)] px-4 py-20">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-12 text-center">
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="mb-3 text-sm font-medium uppercase tracking-wider text-emerald-400"
+            >
+              Our mission
+            </motion.p>
+            <motion.h2
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl font-bold text-foreground sm:text-4xl"
+            >
+              Open source and free forever
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="mx-auto mt-4 max-w-2xl text-lg text-muted"
+            >
+              We believe computational drug design should be accessible to every researcher,
+              not locked behind expensive licenses or proprietary platforms.
+            </motion.p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-3">
+            {[
+              {
+                title: 'MIT Licensed',
+                description: 'Use, modify, and distribute freely. No strings attached, no usage limits, no hidden fees.',
+                icon: '📜',
+              },
+              {
+                title: 'Docker Ready',
+                description: 'One command to run everything. Six containers, fully orchestrated, with health checks and auto-restart.',
+                icon: '🐳',
+              },
+              {
+                title: 'Community Driven',
+                description: 'Built in the open. Every feature request, bug report, and pull request makes the platform better for everyone.',
+                icon: '🤝',
+              },
+            ].map((card, i) => (
+              <motion.div
+                key={card.title}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="rounded-xl border border-[var(--border)] bg-[var(--bg)] p-6 text-center"
+              >
+                <div className="mb-3 text-3xl">{card.icon}</div>
+                <h3 className="text-lg font-semibold text-foreground">{card.title}</h3>
+                <p className="mt-2 text-sm text-muted leading-relaxed">{card.description}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+            <a
+              href="https://github.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-5 py-2.5 text-sm font-medium text-foreground hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-colors"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              Star on GitHub
+            </a>
+            <Link
+              href="/app/dashboard"
+              className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-5 py-2.5 text-sm font-medium text-foreground hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-colors"
+            >
+              Read the docs
+            </Link>
+            <a
+              href="https://github.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-lg border border-[var(--border)] px-5 py-2.5 text-sm font-medium text-foreground hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-colors"
+            >
+              Contribute
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section 9: IsoDDE Attribution ─────────────────────── */}
+      <section className="border-t border-[var(--border)] px-4 py-20">
+        <div className="mx-auto max-w-3xl text-center">
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="mb-3 text-sm font-medium uppercase tracking-wider text-emerald-400"
+          >
+            Standing on shoulders
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-3xl font-bold text-foreground sm:text-4xl"
+          >
+            Inspired by the frontier
+          </motion.h2>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="mt-8 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-8"
+          >
+            <p className="text-muted leading-relaxed">
+              OpenDDE draws deep inspiration from{' '}
+              <a
+                href="https://www.isomorphiclabs.com/articles/isodde-a-new-era-for-drug-design"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-emerald-400 underline underline-offset-2 hover:text-emerald-300 transition-colors"
+              >
+                Isomorphic Labs&apos; IsoDDE
+              </a>
+              , which demonstrated that AI-first drug design can more than double the accuracy of existing
+              methods in predicting binding poses. While IsoDDE remains a proprietary, frontier system,
+              OpenDDE aims to bring similar workflows to the open-source community by composing the best
+              freely available tools into a cohesive, Docker-native platform.
+            </p>
+            <p className="mt-4 text-sm text-muted-2">
+              OpenDDE is an independent, community-built project and is not affiliated with Isomorphic Labs or Google DeepMind.
+              Its modular architecture allows each component to be swapped as better open-source alternatives emerge.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ── Features Grid ────────────────────────────────────── */}
       <section id="how-it-works" className="border-t border-[var(--border)] bg-[var(--surface)] px-4 py-20">
         <div className="mx-auto max-w-6xl">
@@ -976,31 +1180,79 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Footer ───────────────────────────────────────────── */}
-      <footer className="border-t border-[var(--border)] px-4 py-12">
+      {/* ── Professional Footer ────────────────────────────────── */}
+      <footer className="border-t border-[var(--border)] bg-[var(--surface)] px-4 pt-16 pb-8">
         <div className="mx-auto max-w-6xl">
-          <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-[var(--accent)]">OpenDDE</span>
-              <span className="text-sm text-muted">Open Drug Design Engine</span>
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Brand column */}
+            <div className="lg:col-span-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-bold text-emerald-400">OpenDDE</span>
+              </div>
+              <p className="mt-3 text-sm text-muted leading-relaxed">
+                Open-source computational drug design engine. From target to lead, in one platform.
+              </p>
             </div>
-            <div className="flex items-center gap-6 text-sm text-muted">
-              <Link href="/app/dashboard" className="hover:text-foreground transition-colors">
-                Launch app
-              </Link>
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-foreground transition-colors"
-              >
-                GitHub
-              </a>
+
+            {/* Platform column */}
+            <div>
+              <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">Platform</h4>
+              <ul className="space-y-2.5 text-sm text-muted">
+                <li><Link href="/app/dashboard" className="hover:text-foreground transition-colors">Dashboard</Link></li>
+                <li><Link href="/app/target/P00533" className="hover:text-foreground transition-colors">Target Explorer</Link></li>
+                <li><Link href="/app/antibody" className="hover:text-foreground transition-colors">Antibody Prediction</Link></li>
+                <li><Link href="/app/analytics" className="hover:text-foreground transition-colors">Analytics</Link></li>
+              </ul>
+            </div>
+
+            {/* Learn column */}
+            <div>
+              <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">Learn</h4>
+              <ul className="space-y-2.5 text-sm text-muted">
+                <li><a href="#drug-discovery" className="hover:text-foreground transition-colors">What is Drug Discovery?</a></li>
+                <li><a href="#how-it-works" className="hover:text-foreground transition-colors">How It Works</a></li>
+                <li><a href="#walkthrough" className="hover:text-foreground transition-colors">Platform Walkthrough</a></li>
+              </ul>
+            </div>
+
+            {/* Resources column */}
+            <div>
+              <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">Resources</h4>
+              <ul className="space-y-2.5 text-sm text-muted">
+                <li>
+                  <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    GitHub Repository
+                  </a>
+                </li>
+                <li>
+                  <a href="https://www.isomorphiclabs.com/articles/isodde-a-new-era-for-drug-design" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    IsoDDE Paper
+                  </a>
+                </li>
+                <li>
+                  <a href="https://alphafold.ebi.ac.uk/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    AlphaFold Database
+                  </a>
+                </li>
+                <li>
+                  <a href="https://www.ebi.ac.uk/chembl/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    ChEMBL Database
+                  </a>
+                </li>
+              </ul>
             </div>
           </div>
-          <div className="mt-6 text-center text-xs text-muted-2">
-            Built with AlphaFold 3, P2Rank, ImmuneBuilder, and Claude.
-            Inspired by Isomorphic Labs&apos; IsoDDE.
+
+          {/* Bottom bar */}
+          <div className="mt-12 flex flex-col items-center gap-3 border-t border-[var(--border)] pt-6 sm:flex-row sm:justify-between">
+            <p className="text-xs text-muted-2">
+              Built with ❤️ by Ajmal &middot; &copy; 2026 OpenDDE &mdash; MIT License
+            </p>
+            <div className="flex items-center gap-4 text-xs text-muted-2">
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              </a>
+            </div>
           </div>
         </div>
       </footer>

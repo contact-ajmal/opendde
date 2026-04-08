@@ -9,6 +9,7 @@ import PredictionWorkflow from '@/components/PredictionWorkflow';
 import AnimatedLayout from '@/components/AnimatedLayout';
 import CustomLigandSection from '@/components/CustomLigandSection';
 import PocketMap from '@/components/PocketMap';
+import { useAssistant } from '@/components/AssistantContext';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse, KnownLigand, LigandsResponse } from '@/lib/types';
 
@@ -29,6 +30,36 @@ export default function PocketDetailPage() {
   const [selectedLigand, setSelectedLigand] = useState<{ smiles: string; name: string } | null>(null);
 
   const [exportOpen, setExportOpen] = useState(false);
+  const { setContext } = useAssistant();
+
+  // Update assistant context when data loads
+  useEffect(() => {
+    if (!target || !pocket) return;
+    const approved = ligands.filter(l => l.clinical_phase >= 4).length;
+    const ic50vals = ligands.map(l => l.activity_value_nm).filter(Boolean);
+    setContext({
+      page: 'pocket_detail',
+      target: {
+        name: target.name,
+        uniprot_id: target.uniprot_id,
+        organism: target.organism,
+        length: target.length,
+        gene_name: target.gene_name,
+        plddt_mean: target.plddt_mean,
+      },
+      current_pocket: {
+        rank: pocket.rank,
+        score: pocket.score,
+        druggability: pocket.druggability,
+        residue_count: pocket.residue_count,
+      },
+      known_ligands_summary: {
+        total: ligands.length,
+        approved,
+        best_ic50: ic50vals.length > 0 ? Math.min(...ic50vals) : null,
+      },
+    });
+  }, [target, pocket, ligands, setContext]);
 
   useEffect(() => {
     async function fetchAll() {

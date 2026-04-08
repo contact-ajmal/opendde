@@ -9,6 +9,7 @@ import { StructureViewerSkeleton, PocketPanelSkeleton } from '@/components/Skele
 import AnimatedLayout from '@/components/AnimatedLayout';
 import SimilarTargets from '@/components/SimilarTargets';
 import SafetyProfile from '@/components/SafetyProfile';
+import { useAssistant } from '@/components/AssistantContext';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse } from '@/lib/types';
 
@@ -22,6 +23,29 @@ export default function TargetPage() {
   const [pocketsLoading, setPocketsLoading] = useState(false);
   const [selectedPocket, setSelectedPocket] = useState<number | null>(null);
   const [hasPredictions, setHasPredictions] = useState(false);
+  const { setContext } = useAssistant();
+
+  // Update assistant context when data loads
+  useEffect(() => {
+    if (!target) return;
+    setContext({
+      page: 'target',
+      target: {
+        name: target.name,
+        uniprot_id: target.uniprot_id,
+        organism: target.organism,
+        length: target.length,
+        gene_name: target.gene_name,
+        plddt_mean: target.plddt_mean,
+      },
+      pockets: pockets.map(p => ({
+        rank: p.rank,
+        score: p.score,
+        druggability: p.druggability,
+        residue_count: p.residue_count,
+      })),
+    });
+  }, [target, pockets, setContext]);
 
   // Resolve target
   useEffect(() => {

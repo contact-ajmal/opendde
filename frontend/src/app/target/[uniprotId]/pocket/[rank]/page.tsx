@@ -10,6 +10,7 @@ import AnimatedLayout from '@/components/AnimatedLayout';
 import CustomLigandSection from '@/components/CustomLigandSection';
 import PocketMap from '@/components/PocketMap';
 import SuggestionsPanel from '@/components/SuggestionsPanel';
+import SARPlot from '@/components/SARPlot';
 import { useAssistant } from '@/components/AssistantContext';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse, KnownLigand, LigandsResponse } from '@/lib/types';
@@ -290,6 +291,11 @@ export default function PocketDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* SAR scatter plot */}
+        {ligands.length >= 2 && (
+          <SARPlot ligands={ligands} />
+        )}
 
         {/* Ligand table */}
         {ligands.length > 0 && (

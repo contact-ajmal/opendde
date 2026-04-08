@@ -188,6 +188,377 @@ const trustItems = [
   'AlphaFold 3', 'P2Rank', 'ChEMBL', 'ImmuneBuilder', 'RDKit', 'OpenTargets',
 ];
 
+// ── Section 4: Visual walkthrough (tabbed showcase) ─────────
+const walkthroughTabs = [
+  {
+    id: 'pockets',
+    label: 'Pocket discovery',
+    title: 'Pocket discovery',
+    description: 'Enter any protein target and instantly see predicted binding pockets ranked by druggability. P2Rank\u2019s ML algorithm identifies sites that traditional methods might miss \u2014 including allosteric and cryptic pockets.',
+    checks: ['Druggability scoring', '3D visualization', 'Residue mapping'],
+    href: '/app/dashboard',
+    cta: 'Try it now',
+    gradient: 'from-emerald-900/40 to-emerald-950/60',
+    accent: '#10b981',
+    mockupLabel: 'EGFR (P00533) \u2014 3 druggable pockets detected',
+  },
+  {
+    id: 'ligands',
+    label: 'Ligand intelligence',
+    title: 'Ligand intelligence',
+    description: 'Explore known drugs and bioactive compounds for any target. IC50, Ki, and Kd activity data, clinical trial phases, structure-activity relationships, and druglikeness scoring \u2014 all in one view.',
+    checks: ['ChEMBL integration', 'SAR analysis', 'Activity cliffs'],
+    href: '/app/dashboard',
+    cta: 'Try it now',
+    gradient: 'from-blue-900/40 to-blue-950/60',
+    accent: '#3b82f6',
+    mockupLabel: '50 known compounds \u2014 4 approved drugs for EGFR',
+  },
+  {
+    id: 'prediction',
+    label: 'Complex prediction',
+    title: 'Complex prediction',
+    description: 'Generate AlphaFold 3-compatible input for protein-ligand binding predictions. Semi-automated workflow: prepare input, submit to AF3 Server, upload results, and visualize the predicted complex in 3D.',
+    checks: ['AF3 input generation', 'Confidence metrics', '3D comparison'],
+    href: '/app/dashboard',
+    cta: 'Try it now',
+    gradient: 'from-purple-900/40 to-purple-950/60',
+    accent: '#a78bfa',
+    mockupLabel: 'Erlotinib\u2013EGFR complex \u2014 ipTM 0.87, pLDDT 82.3',
+  },
+  {
+    id: 'antibody',
+    label: 'Antibody modeling',
+    title: 'Antibody modeling',
+    description: 'Predict antibody 3D structures from VH/VL sequences using ABodyBuilder2. Identifies and visualizes all six CDR loops with Chothia numbering \u2014 essential for therapeutic antibody engineering.',
+    checks: ['CDR identification', '3D structure', 'Sequence input'],
+    href: '/app/antibody',
+    cta: 'Try it now',
+    gradient: 'from-amber-900/40 to-amber-950/60',
+    accent: '#f59e0b',
+    mockupLabel: 'Trastuzumab \u2014 6 CDR loops identified',
+  },
+];
+
+function VisualWalkthrough() {
+  const [activeTab, setActiveTab] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  // Auto-advance every 5s
+  useEffect(() => {
+    if (paused) return;
+    const timer = setInterval(() => {
+      setActiveTab((i) => (i + 1) % walkthroughTabs.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [paused]);
+
+  const tab = walkthroughTabs[activeTab];
+
+  return (
+    <section className="border-y border-[var(--border)] bg-[var(--surface)] px-4 py-24">
+      <div className="mx-auto max-w-6xl">
+        <div className="text-center mb-12">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">Platform</p>
+          <h2 className="text-3xl font-bold text-foreground sm:text-4xl">See OpenDDE in action</h2>
+        </div>
+
+        {/* Tabs */}
+        <div className="mb-8 flex flex-wrap justify-center gap-2">
+          {walkthroughTabs.map((t, i) => (
+            <button
+              key={t.id}
+              onClick={() => { setActiveTab(i); setPaused(true); }}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                i === activeTab
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-[var(--surface-alt)] text-muted hover:text-foreground'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+        >
+          <motion.div
+            key={tab.id}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Screenshot mockup */}
+            <div className="overflow-hidden rounded-2xl border border-[var(--border)] shadow-xl">
+              <div className="flex items-center gap-2 border-b border-[var(--border)] bg-[var(--bg)] px-4 py-2">
+                <div className="flex gap-1.5">
+                  <div className="h-3 w-3 rounded-full bg-red-500/60" />
+                  <div className="h-3 w-3 rounded-full bg-amber-500/60" />
+                  <div className="h-3 w-3 rounded-full bg-emerald-500/60" />
+                </div>
+                <div className="flex-1 text-center text-xs text-muted">OpenDDE</div>
+              </div>
+              <div className={`relative flex h-[280px] sm:h-[360px] items-center justify-center bg-gradient-to-br ${tab.gradient}`}>
+                <div className="text-center px-8">
+                  <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 backdrop-blur">
+                    <span className="text-3xl" style={{ color: tab.accent }}>
+                      {tab.id === 'pockets' ? '🎯' : tab.id === 'ligands' ? '💊' : tab.id === 'prediction' ? '🔬' : '🧬'}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium text-white/80">{tab.mockupLabel}</p>
+                  <p className="mt-2 text-xs text-white/40">Screenshot placeholder — swap with actual screenshot at public/screenshots/{tab.id}.png</p>
+                </div>
+                {/* Progress bar */}
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
+                  <motion.div
+                    key={`progress-${activeTab}-${paused}`}
+                    className="h-full"
+                    style={{ backgroundColor: tab.accent }}
+                    initial={{ width: '0%' }}
+                    animate={{ width: paused ? undefined : '100%' }}
+                    transition={{ duration: 5, ease: 'linear' }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Description below */}
+            <div className="mt-8 mx-auto max-w-2xl text-center">
+              <h3 className="text-2xl font-bold text-foreground">{tab.title}</h3>
+              <p className="mt-3 text-muted leading-relaxed">{tab.description}</p>
+              <div className="mt-4 flex flex-wrap justify-center gap-4">
+                {tab.checks.map((c) => (
+                  <span key={c} className="flex items-center gap-1.5 text-sm text-foreground">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M4 8l3 3 5-6" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {c}
+                  </span>
+                ))}
+              </div>
+              <Link
+                href={tab.href}
+                className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
+              >
+                {tab.cta}
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Section 5: Video demo ───────────────────────────────────
+const tutorials = [
+  { title: 'Getting started', duration: '2:00' },
+  { title: 'Understanding pocket predictions', duration: '3:15' },
+  { title: 'Reading ligand activity data', duration: '2:45' },
+  { title: 'Using the AI assistant', duration: '1:30' },
+];
+
+function VideoSection() {
+  const [modalOpen, setModalOpen] = useState(false);
+
+  return (
+    <section className="px-4 py-24">
+      <div className="mx-auto max-w-5xl">
+        <div className="text-center mb-12">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">Demo</p>
+          <h2 className="text-3xl font-bold text-foreground sm:text-4xl">Watch the demo</h2>
+          <p className="mx-auto mt-4 max-w-xl text-muted">
+            See how OpenDDE takes you from a protein target to druggable insights in under 5 minutes.
+          </p>
+        </div>
+
+        {/* Main video placeholder */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <button
+            onClick={() => setModalOpen(true)}
+            className="group relative w-full overflow-hidden rounded-2xl border border-[var(--border)] shadow-xl"
+          >
+            <div className="relative flex aspect-video items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
+              {/* Play button */}
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/90 shadow-lg shadow-emerald-500/30 transition-transform group-hover:scale-110">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="white">
+                  <path d="M12 8v16l12-8z" />
+                </svg>
+              </div>
+              {/* Overlay info */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-left">
+                    <div className="text-sm font-medium text-white">OpenDDE Platform Demo</div>
+                    <div className="text-xs text-white/60">From target search to druggability report</div>
+                  </div>
+                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/80 backdrop-blur">4:30</span>
+                </div>
+              </div>
+              {/* Decorative elements */}
+              <div className="pointer-events-none absolute inset-0 opacity-10">
+                <div className="absolute top-[20%] left-[15%] h-24 w-24 rounded-full bg-emerald-400 blur-3xl" />
+                <div className="absolute bottom-[25%] right-[20%] h-32 w-32 rounded-full bg-blue-400 blur-3xl" />
+              </div>
+            </div>
+          </button>
+        </motion.div>
+
+        {/* Tutorial cards */}
+        <div className="mt-10">
+          <h3 className="mb-4 text-sm font-semibold text-foreground">More tutorials</h3>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {tutorials.map((t, i) => (
+              <motion.button
+                key={t.title}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                onClick={() => setModalOpen(true)}
+                className="group rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-left transition-colors hover:border-[var(--border-hover)]"
+              >
+                <div className="mb-3 flex aspect-video items-center justify-center rounded-lg bg-[var(--surface-alt)]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-transform group-hover:scale-110">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--text-secondary)">
+                      <path d="M6 4v8l6-4z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="text-sm font-medium text-foreground">{t.title}</div>
+                <div className="text-xs text-muted">{t.duration}</div>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Video modal */}
+      {modalOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          onClick={() => setModalOpen(false)}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative w-full max-w-3xl rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setModalOpen(false)}
+              aria-label="Close video"
+              className="absolute right-4 top-4 rounded p-1 text-muted hover:text-foreground transition-colors"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 6l8 8M14 6l-8 8" />
+              </svg>
+            </button>
+            <div className="flex aspect-video items-center justify-center rounded-xl bg-[var(--surface-alt)]">
+              <div className="text-center">
+                <div className="mb-3 text-4xl">🎬</div>
+                <p className="text-foreground font-medium">Demo video coming soon</p>
+                <p className="mt-1 text-sm text-muted">Try the platform directly instead!</p>
+                <Link
+                  href="/app/dashboard"
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 transition-colors"
+                  onClick={() => setModalOpen(false)}
+                >
+                  Launch platform
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ── Section 6: Use cases ────────────────────────────────────
+const useCases = [
+  {
+    icon: '🔬',
+    persona: 'Academic researchers',
+    description: 'Explore new drug targets for your research. Identify druggable pockets, find known compounds, and generate publication-ready druggability reports \u2014 all without commercial software licenses.',
+    cta: 'Explore targets',
+    href: '/app/dashboard',
+  },
+  {
+    icon: '💊',
+    persona: 'Pharma scientists',
+    description: 'Rapidly screen targets and validate druggability before committing lab resources. Compare pockets, analyze structure-activity relationships, and prioritize compounds computationally.',
+    cta: 'Start screening',
+    href: '/app/dashboard',
+  },
+  {
+    icon: '🎓',
+    persona: 'Students',
+    description: 'Learn drug design concepts hands-on. Understand how binding pockets, ligand activity, and molecular predictions work in practice with real protein targets and compounds.',
+    cta: 'Start learning',
+    href: '/app/dashboard',
+  },
+  {
+    icon: '🧬',
+    persona: 'Biotech startups',
+    description: 'Professional-grade target assessment without expensive commercial software. Generate investor-ready druggability reports with pocket analysis, ligand landscape, and AI-powered insights.',
+    cta: 'Assess targets',
+    href: '/app/dashboard',
+  },
+];
+
+function UseCases() {
+  return (
+    <section id="use-cases" className="border-y border-[var(--border)] bg-[var(--surface)] px-4 py-24">
+      <div className="mx-auto max-w-5xl">
+        <div className="text-center mb-14">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">Use Cases</p>
+          <h2 className="text-3xl font-bold text-foreground sm:text-4xl">Who is OpenDDE for?</h2>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {useCases.map((uc, i) => (
+            <motion.div
+              key={uc.persona}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className="rounded-xl border border-[var(--border)] bg-[var(--bg)] p-6 hover:border-[var(--border-hover)] transition-colors"
+            >
+              <div className="mb-3 text-3xl">{uc.icon}</div>
+              <h3 className="mb-2 text-lg font-semibold text-foreground">{uc.persona}</h3>
+              <p className="mb-4 text-sm leading-relaxed text-muted">{uc.description}</p>
+              <Link
+                href={uc.href}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
+              >
+                {uc.cta}
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── Main page ───────────────────────────────────────────────
 export default function HomePage() {
   const [stat1, ref1] = useScrollCountUp(200);
@@ -544,6 +915,15 @@ export default function HomePage() {
           </motion.div>
         </div>
       </section>
+
+      {/* ── Section 4: Visual Walkthrough ────────────────────── */}
+      <VisualWalkthrough />
+
+      {/* ── Section 5: Video Demo ────────────────────────────── */}
+      <VideoSection />
+
+      {/* ── Section 6: Use Cases ─────────────────────────────── */}
+      <UseCases />
 
       {/* ── Features Grid ────────────────────────────────────── */}
       <section id="how-it-works" className="border-t border-[var(--border)] bg-[var(--surface)] px-4 py-20">

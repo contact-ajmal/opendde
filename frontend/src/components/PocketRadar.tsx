@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer, Legend, Tooltip,
@@ -25,7 +25,7 @@ interface PocketRadarProps {
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#f87171'];
 const MAX_POCKETS = 4;
 
-export default function PocketRadar({ uniprotId }: PocketRadarProps) {
+function PocketRadar({ uniprotId }: PocketRadarProps) {
   const [pockets, setPockets] = useState<PocketComp[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -119,3 +119,5 @@ export default function PocketRadar({ uniprotId }: PocketRadarProps) {
     </div>
   );
 }
+
+export default memo(PocketRadar);

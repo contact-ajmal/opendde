@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
 import ViewerToolbar from './ViewerToolbar';
 
@@ -62,7 +62,7 @@ function getPocketColor(rank: number): string {
   return POCKET_COLORS[Math.min(rank - 1, POCKET_COLORS.length - 1)];
 }
 
-export default function StructureViewer({
+function StructureViewer({
   structureUrl,
   height = '500px',
   pocketHighlights,
@@ -255,3 +255,5 @@ export default function StructureViewer({
     </motion.div>
   );
 }
+
+export default memo(StructureViewer);

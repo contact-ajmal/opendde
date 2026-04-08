@@ -3,18 +3,32 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import StructureViewer, { type PocketHighlight } from '@/components/StructureViewer';
+import dynamic from 'next/dynamic';
+import type { PocketHighlight } from '@/components/StructureViewer';
 import LigandTable from '@/components/LigandTable';
 import PredictionWorkflow from '@/components/PredictionWorkflow';
 import AnimatedLayout from '@/components/AnimatedLayout';
 import CustomLigandSection from '@/components/CustomLigandSection';
 import PocketMap from '@/components/PocketMap';
 import SuggestionsPanel from '@/components/SuggestionsPanel';
-import SARPlot from '@/components/SARPlot';
 import ActivityCliffs from '@/components/ActivityCliffs';
 import { useAssistant } from '@/components/AssistantContext';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse, KnownLigand, LigandsResponse } from '@/lib/types';
+
+const StructureViewer = dynamic(() => import('@/components/StructureViewer'), {
+  ssr: false,
+  loading: () => <div className="shimmer h-[500px] w-full rounded-lg" />,
+});
+
+const SARPlot = dynamic(() => import('@/components/SARPlot'), {
+  loading: () => <div className="shimmer h-[350px] w-full rounded-lg mb-8" />,
+});
+
+const MoleculeEditor = dynamic(() => import('@/components/MoleculeEditor'), {
+  ssr: false,
+  loading: () => <div className="shimmer h-[380px] w-full rounded-lg" />,
+});
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -34,6 +48,13 @@ export default function PocketDetailPage() {
 
   const [exportOpen, setExportOpen] = useState(false);
   const { setContext } = useAssistant();
+
+  // Update page title
+  useEffect(() => {
+    if (target) {
+      document.title = `${target.gene_name || target.name} Pocket ${rankNum} — OpenDDE`;
+    }
+  }, [target, rankNum]);
 
   // Update assistant context when data loads
   useEffect(() => {
@@ -165,6 +186,8 @@ export default function PocketDetailPage() {
             <div className="relative ml-auto">
               <button
                 onClick={() => setExportOpen(!exportOpen)}
+                aria-label="Export data"
+                aria-expanded={exportOpen}
                 className="rounded-lg border border-border bg-surface px-4 py-1.5 text-sm font-medium text-foreground hover:bg-[var(--surface-hover)] transition-colors"
               >
                 Export ▾

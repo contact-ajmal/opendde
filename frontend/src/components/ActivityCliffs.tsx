@@ -101,6 +101,7 @@ export default function ActivityCliffs({ uniprotId }: ActivityCliffsProps) {
                     <img
                       src={cliff.ligand_a.image_url}
                       alt={cliff.ligand_a.name}
+                      loading="lazy"
                       className="mb-2 h-24 w-auto rounded bg-white p-1"
                     />
                   )}
@@ -148,6 +149,7 @@ export default function ActivityCliffs({ uniprotId }: ActivityCliffsProps) {
                     <img
                       src={cliff.ligand_b.image_url}
                       alt={cliff.ligand_b.name}
+                      loading="lazy"
                       className="mb-2 h-24 w-auto rounded bg-white p-1"
                     />
                   )}

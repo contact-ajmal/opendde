@@ -3,13 +3,12 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: production
     ports:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
-    volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
+      - NODE_ENV=production
     depends_on:
       backend:
         condition: service_healthy
@@ -18,7 +17,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    command: npm run dev
+    restart: unless-stopped
 
   backend:
     build:
@@ -36,7 +35,6 @@ services:
       - RDKIT_SERVICE_URL=http://rdkit:8003
       - CLAUDE_API_KEY=${CLAUDE_API_KEY}
     volumes:
-      - ./backend:/app
       - structure-cache:/data/structures
       - antibody-data:/data/antibodies
     depends_on:
@@ -51,14 +49,13 @@ services:
       interval: 15s
       timeout: 5s
       retries: 3
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    command: gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 
   p2rank:
     build:
       context: ./services/p2rank
       dockerfile: Dockerfile
-    ports:
-      - "8001:8001"
     volumes:
       - structure-cache:/data/structures
     healthcheck:
@@ -66,13 +63,12 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    restart: unless-stopped
 
   immunebuilder:
     build:
       context: ./services/immunebuilder
       dockerfile: Dockerfile
-    ports:
-      - "8002:8002"
     volumes:
       - antibody-data:/data/antibodies
     healthcheck:
@@ -80,23 +76,21 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    restart: unless-stopped
 
   rdkit:
     build:
       context: ./services/rdkit
       dockerfile: Dockerfile
-    ports:
-      - "8003:8003"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
       interval: 30s
       timeout: 5s
       retries: 3
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
     volumes:
       - redis-data:/data
     healthcheck:
@@ -104,6 +98,7 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
+    restart: unless-stopped
 
 volumes:
   structure-cache:

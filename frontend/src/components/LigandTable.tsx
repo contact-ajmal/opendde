@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import type { KnownLigand } from '@/lib/types';
 import DruglikenessCard from './DruglikenessCard';
@@ -46,7 +46,7 @@ function activityBadge(type: string) {
   );
 }
 
-export default function LigandTable({ ligands, onPredictComplex }: LigandTableProps) {
+function LigandTable({ ligands, onPredictComplex }: LigandTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('activity_value_nm');
   const [sortAsc, setSortAsc] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -87,6 +87,8 @@ export default function LigandTable({ ligands, onPredictComplex }: LigandTablePr
               <th
                 className="cursor-pointer px-4 py-3 text-left text-xs font-medium text-muted hover:text-foreground"
                 onClick={() => handleSort('name')}
+                role="button"
+                aria-label="Sort by name"
               >
                 Name{sortIcon('name')}
               </th>
@@ -94,12 +96,16 @@ export default function LigandTable({ ligands, onPredictComplex }: LigandTablePr
               <th
                 className="cursor-pointer px-4 py-3 text-left text-xs font-medium text-muted hover:text-foreground"
                 onClick={() => handleSort('activity_value_nm')}
+                role="button"
+                aria-label="Sort by activity value"
               >
                 Value{sortIcon('activity_value_nm')}
               </th>
               <th
                 className="cursor-pointer px-4 py-3 text-left text-xs font-medium text-muted hover:text-foreground"
                 onClick={() => handleSort('clinical_phase')}
+                role="button"
+                aria-label="Sort by clinical phase"
               >
                 Phase{sortIcon('clinical_phase')}
               </th>
@@ -184,3 +190,5 @@ export default function LigandTable({ ligands, onPredictComplex }: LigandTablePr
     </div>
   );
 }
+
+export default memo(LigandTable);

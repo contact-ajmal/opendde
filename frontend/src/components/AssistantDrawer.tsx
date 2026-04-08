@@ -211,6 +211,7 @@ export default function AssistantDrawer() {
                 )}
                 <button
                   onClick={closeDrawer}
+                  aria-label="Close assistant drawer"
                   className="rounded p-1 text-muted hover:text-foreground transition-colors"
                 >
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
@@ -300,6 +301,7 @@ export default function AssistantDrawer() {
                 <button
                   onClick={() => sendMessage(input)}
                   disabled={!input.trim() || streaming}
+                  aria-label="Send message"
                   className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 active:scale-[0.97] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Send

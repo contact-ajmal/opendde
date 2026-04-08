@@ -3,17 +3,26 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import StructureViewer, { type PocketHighlight } from '@/components/StructureViewer';
+import dynamic from 'next/dynamic';
+import type { PocketHighlight } from '@/components/StructureViewer';
 import PocketPanel from '@/components/PocketPanel';
 import { StructureViewerSkeleton, PocketPanelSkeleton } from '@/components/Skeletons';
 import AnimatedLayout from '@/components/AnimatedLayout';
 import SimilarTargets from '@/components/SimilarTargets';
 import SafetyProfile from '@/components/SafetyProfile';
 import PocketSummaryCard from '@/components/PocketSummaryCard';
-import PocketRadar from '@/components/PocketRadar';
 import { useAssistant } from '@/components/AssistantContext';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse } from '@/lib/types';
+
+const StructureViewer = dynamic(() => import('@/components/StructureViewer'), {
+  ssr: false,
+  loading: () => <StructureViewerSkeleton />,
+});
+
+const PocketRadar = dynamic(() => import('@/components/PocketRadar'), {
+  loading: () => <div className="shimmer h-[320px] w-full rounded-lg" />,
+});
 
 export default function TargetPage() {
   const params = useParams<{ uniprotId: string }>();
@@ -26,6 +35,13 @@ export default function TargetPage() {
   const [selectedPocket, setSelectedPocket] = useState<number | null>(null);
   const [hasPredictions, setHasPredictions] = useState(false);
   const { setContext } = useAssistant();
+
+  // Update page title when target loads
+  useEffect(() => {
+    if (target) {
+      document.title = `${target.gene_name || target.name} — OpenDDE Drug Design`;
+    }
+  }, [target]);
 
   // Update assistant context when data loads
   useEffect(() => {

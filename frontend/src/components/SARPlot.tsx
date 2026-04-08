@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, memo } from 'react';
 import {
   ScatterChart, Scatter, XAxis, YAxis, Tooltip, ResponsiveContainer,
   ReferenceLine, Cell, Legend,
@@ -70,7 +70,7 @@ function formatActivity(value: number): string {
   return `${value.toFixed(1)} nM`;
 }
 
-export default function SARPlot({ ligands, onSelectLigand }: SARPlotProps) {
+function SARPlot({ ligands, onSelectLigand }: SARPlotProps) {
   const [data, setData] = useState<SARPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(true);
@@ -253,3 +253,5 @@ export default function SARPlot({ ligands, onSelectLigand }: SARPlotProps) {
     </div>
   );
 }
+
+export default memo(SARPlot);

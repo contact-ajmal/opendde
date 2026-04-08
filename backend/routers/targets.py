@@ -56,4 +56,9 @@ async def serve_structure(filename: str):
     filepath = os.path.join(STRUCTURE_DIR, filename)
     if not os.path.isfile(filepath):
         raise HTTPException(status_code=404, detail="Structure file not found")
-    return FileResponse(filepath, media_type="chemical/x-cif", filename=filename)
+    return FileResponse(
+        filepath,
+        media_type="chemical/x-cif",
+        filename=filename,
+        headers={"Cache-Control": "public, max-age=86400"},
+    )

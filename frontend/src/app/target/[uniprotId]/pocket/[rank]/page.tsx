@@ -11,6 +11,7 @@ import CustomLigandSection from '@/components/CustomLigandSection';
 import PocketMap from '@/components/PocketMap';
 import SuggestionsPanel from '@/components/SuggestionsPanel';
 import SARPlot from '@/components/SARPlot';
+import ActivityCliffs from '@/components/ActivityCliffs';
 import { useAssistant } from '@/components/AssistantContext';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse, KnownLigand, LigandsResponse } from '@/lib/types';
@@ -295,6 +296,11 @@ export default function PocketDetailPage() {
         {/* SAR scatter plot */}
         {ligands.length >= 2 && (
           <SARPlot ligands={ligands} />
+        )}
+
+        {/* Activity cliffs */}
+        {ligands.length >= 2 && (
+          <ActivityCliffs uniprotId={params.uniprotId} />
         )}
 
         {/* Ligand table */}

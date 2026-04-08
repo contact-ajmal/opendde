@@ -79,7 +79,7 @@ export default function SimilarTargets({ uniprotId }: SimilarTargetsProps) {
                   transition={{ delay: i * 0.06 }}
                 >
                   <Link
-                    href={`/target/${t.uniprot_id}`}
+                    href={`/app/target/${t.uniprot_id}`}
                     className="group block rounded-lg border border-border bg-surface p-4 hover:border-border-hover hover:bg-surface-hover transition-colors"
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">

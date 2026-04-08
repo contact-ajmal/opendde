@@ -136,7 +136,7 @@ export default function ReportPage() {
         <div className="text-center">
           <h2 className="text-xl font-bold text-foreground mb-2">Report unavailable</h2>
           <p className="text-muted mb-4">{error || 'Could not generate report.'}</p>
-          <Link href={`/target/${params.uniprotId}`} className="text-emerald-400 hover:underline">
+          <Link href={`/app/target/${params.uniprotId}`} className="text-emerald-400 hover:underline">
             Back to target
           </Link>
         </div>
@@ -175,7 +175,7 @@ export default function ReportPage() {
           {/* Action bar */}
           <div className="mb-6 flex items-center gap-3">
             <Link
-              href={`/target/${params.uniprotId}`}
+              href={`/app/target/${params.uniprotId}`}
               className="rounded-lg border border-border px-4 py-2 text-sm text-muted hover:text-foreground hover:border-border-hover transition-colors"
             >
               &larr; Back to target

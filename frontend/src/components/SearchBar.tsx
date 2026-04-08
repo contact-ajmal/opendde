@@ -20,7 +20,7 @@ export default function SearchBar() {
 
     try {
       const result = await apiPost('/target/resolve', { query: trimmed });
-      router.push(`/target/${result.uniprot_id}`);
+      router.push(`/app/target/${result.uniprot_id}`);
     } catch (err: any) {
       setError(err.message || 'Failed to resolve target');
       setLoading(false);

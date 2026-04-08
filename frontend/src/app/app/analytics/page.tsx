@@ -99,7 +99,7 @@ export default function AnalyticsPage() {
           <div className="text-center">
             <h2 className="text-2xl font-bold text-foreground mb-2">No data yet</h2>
             <p className="text-muted mb-4">Explore some targets to see analytics here.</p>
-            <Link href="/" className="text-emerald-400 hover:underline">Go explore targets</Link>
+            <Link href="/app/dashboard" className="text-emerald-400 hover:underline">Go explore targets</Link>
           </div>
         </main>
       </AnimatedLayout>
@@ -244,7 +244,7 @@ export default function AnalyticsPage() {
                         <td className="px-4 py-3 text-right text-foreground">{t.ligand_count}</td>
                         <td className="px-4 py-3 text-right">
                           <Link
-                            href={`/target/${t.uniprot_id}`}
+                            href={`/app/target/${t.uniprot_id}`}
                             className="text-xs text-emerald-400 hover:underline"
                           >
                             View &rarr;

@@ -143,7 +143,7 @@ export default function TargetPage() {
       <main className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <p className="text-red-400">{error || 'Target not found'}</p>
-          <Link href="/" className="text-primary hover:underline">
+          <Link href="/app/dashboard" className="text-primary hover:underline">
             ← Back to home
           </Link>
         </div>
@@ -169,14 +169,14 @@ export default function TargetPage() {
             )}
             <div className="ml-auto flex gap-2">
               <Link
-                href={`/target/${target.uniprot_id}/report`}
+                href={`/app/target/${target.uniprot_id}/report`}
                 className="rounded-lg bg-emerald-500/20 px-4 py-1.5 text-sm font-medium text-emerald-400 hover:bg-emerald-500/30 transition-colors"
               >
                 Druggability report
               </Link>
               {hasPredictions && (
                 <Link
-                  href={`/target/${target.uniprot_id}/compare`}
+                  href={`/app/target/${target.uniprot_id}/compare`}
                   className="rounded-lg bg-blue-500/20 px-4 py-1.5 text-sm font-medium text-blue-400 hover:bg-blue-500/30 transition-colors"
                 >
                   Compare ligands

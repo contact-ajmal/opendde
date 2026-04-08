@@ -62,7 +62,7 @@ export default function ComparePage() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-6">
           <Link
-            href={`/target/${params.uniprotId}`}
+            href={`/app/target/${params.uniprotId}`}
             className="text-sm text-primary hover:underline"
           >
             ← Back to target
@@ -79,7 +79,7 @@ export default function ComparePage() {
               Go to a pocket detail page to start predicting.
             </p>
             <Link
-              href={`/target/${params.uniprotId}`}
+              href={`/app/target/${params.uniprotId}`}
               className="mt-4 rounded-lg bg-emerald-500 px-6 py-2 font-medium text-white hover:bg-emerald-600"
             >
               View pockets

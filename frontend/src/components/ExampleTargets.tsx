@@ -18,7 +18,7 @@ export default function ExampleTargets() {
       {examples.map((t) => (
         <button
           key={t.uniprot}
-          onClick={() => router.push(`/target/${t.uniprot}`)}
+          onClick={() => router.push(`/app/target/${t.uniprot}`)}
           className="rounded-full border border-border bg-surface px-4 py-2 text-sm text-foreground hover:border-primary hover:text-primary transition-colors"
         >
           <span className="font-medium">{t.gene}</span>

@@ -145,7 +145,7 @@ export default function PocketDetailPage() {
       <main className="flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <p className="text-red-400">{error || 'Not found'}</p>
-          <Link href={`/target/${params.uniprotId}`} className="text-primary hover:underline">
+          <Link href={`/app/target/${params.uniprotId}`} className="text-primary hover:underline">
             ← Back to all pockets
           </Link>
         </div>
@@ -171,7 +171,7 @@ export default function PocketDetailPage() {
         {/* Header */}
         <div className="mb-6">
           <Link
-            href={`/target/${params.uniprotId}`}
+            href={`/app/target/${params.uniprotId}`}
             className="text-sm text-primary hover:underline"
           >
             ← Back to all pockets

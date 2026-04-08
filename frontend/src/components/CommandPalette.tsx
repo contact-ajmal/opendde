@@ -100,24 +100,24 @@ export default function CommandPalette() {
         sublabel: t.uniprot_id,
         category: 'Recent targets',
         icon: '🎯',
-        action: () => { router.push(`/target/${t.uniprot_id}`); setOpen(false); },
+        action: () => { router.push(`/app/target/${t.uniprot_id}`); setOpen(false); },
       });
     }
     results.push({
       id: 'action-antibody',
       label: 'Go to Antibody prediction',
-      sublabel: '/antibody',
+      sublabel: '/app/antibody',
       category: 'Quick actions',
       icon: '🧬',
-      action: () => { router.push('/antibody'); setOpen(false); },
+      action: () => { router.push('/app/antibody'); setOpen(false); },
     });
     results.push({
       id: 'action-home',
       label: 'Go to Home',
-      sublabel: '/',
+      sublabel: '/app/dashboard',
       category: 'Quick actions',
       icon: '🏠',
-      action: () => { router.push('/'); setOpen(false); },
+      action: () => { router.push('/app/dashboard'); setOpen(false); },
     });
   } else {
     for (const t of searchTargets) {
@@ -127,7 +127,7 @@ export default function CommandPalette() {
         sublabel: `${t.uniprot_id} · ${t.organism}`,
         category: 'Targets',
         icon: '🎯',
-        action: () => { router.push(`/target/${t.uniprot_id}`); setOpen(false); },
+        action: () => { router.push(`/app/target/${t.uniprot_id}`); setOpen(false); },
       });
     }
     for (const l of searchLigands) {
@@ -138,7 +138,7 @@ export default function CommandPalette() {
         sublabel: `${l.target_id}${actStr ? ` · ${actStr}` : ''}`,
         category: 'Ligands',
         icon: '💊',
-        action: () => { router.push(`/target/${l.target_id}`); setOpen(false); },
+        action: () => { router.push(`/app/target/${l.target_id}`); setOpen(false); },
       });
     }
     results.push({
@@ -147,7 +147,7 @@ export default function CommandPalette() {
       sublabel: 'Resolve via UniProt →',
       category: 'Search',
       icon: '🔍',
-      action: () => { router.push(`/target/${encodeURIComponent(q)}`); setOpen(false); },
+      action: () => { router.push(`/app/target/${encodeURIComponent(q)}`); setOpen(false); },
     });
   }
 

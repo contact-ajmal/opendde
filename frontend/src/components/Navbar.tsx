@@ -61,6 +61,16 @@ export default function Navbar() {
             <kbd className="rounded border border-[var(--kbd-border)] bg-[var(--kbd-bg)] px-1 py-0.5 text-[10px] text-muted-2">⌘K</kbd>
           </button>
           <Link
+            href="/analytics"
+            className={`text-sm transition-colors ${
+              pathname === '/analytics'
+                ? 'text-foreground font-medium'
+                : 'text-muted hover:text-foreground'
+            }`}
+          >
+            Analytics
+          </Link>
+          <Link
             href="/antibody"
             className={`text-sm transition-colors ${
               pathname === '/antibody'

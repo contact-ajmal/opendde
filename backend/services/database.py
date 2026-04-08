@@ -218,6 +218,53 @@ def get_prediction(prediction_id: str) -> dict | None:
     return None
 
 
+AI_SUMMARY_TTL_DAYS = 30
+
+
+def get_cached_ai_summary(target_id: str, summary_type: str = "pocket_analysis") -> str | None:
+    sb = _get_client()
+    if not sb:
+        return None
+    try:
+        resp = (
+            sb.table("ai_summaries")
+            .select("summary, generated_at")
+            .eq("target_id", target_id)
+            .eq("summary_type", summary_type)
+            .execute()
+        )
+        if resp.data:
+            row = resp.data[0]
+            ts = row.get("generated_at")
+            if ts:
+                try:
+                    generated = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                    if datetime.now(timezone.utc) - generated > timedelta(days=AI_SUMMARY_TTL_DAYS):
+                        return None
+                except Exception:
+                    pass
+            return row.get("summary")
+    except Exception:
+        pass
+    return None
+
+
+def cache_ai_summary(target_id: str, summary: str, summary_type: str = "pocket_analysis") -> None:
+    sb = _get_client()
+    if not sb:
+        return
+    try:
+        row = {
+            "target_id": target_id,
+            "summary_type": summary_type,
+            "summary": summary,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+        }
+        sb.table("ai_summaries").upsert(row, on_conflict="target_id,summary_type").execute()
+    except Exception:
+        pass
+
+
 def get_predictions_for_target(uniprot_id: str) -> list[dict]:
     sb = _get_client()
     if not sb:

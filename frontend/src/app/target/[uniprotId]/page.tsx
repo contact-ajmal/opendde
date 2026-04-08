@@ -9,6 +9,7 @@ import { StructureViewerSkeleton, PocketPanelSkeleton } from '@/components/Skele
 import AnimatedLayout from '@/components/AnimatedLayout';
 import SimilarTargets from '@/components/SimilarTargets';
 import SafetyProfile from '@/components/SafetyProfile';
+import PocketSummaryCard from '@/components/PocketSummaryCard';
 import { useAssistant } from '@/components/AssistantContext';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse } from '@/lib/types';
@@ -208,6 +209,9 @@ export default function TargetPage() {
 
           {/* Pocket Panel sidebar (30%) */}
           <div className="w-full md:w-[30%] md:flex-shrink-0">
+            {!pocketsLoading && pockets.length > 0 && target && (
+              <PocketSummaryCard target={target} pockets={pockets} />
+            )}
             {pocketsLoading ? (
               <PocketPanelSkeleton />
             ) : pockets.length > 0 ? (

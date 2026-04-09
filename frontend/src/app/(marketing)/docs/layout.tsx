@@ -162,13 +162,9 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Close drawer on route change
   const pathname = usePathname();
-  useEffect(() => {
-    setDrawerOpen(false);
-  }, [pathname]);
+  useEffect(() => { setDrawerOpen(false); }, [pathname]);
 
-  // Lock body scroll when drawer open
   useEffect(() => {
     if (drawerOpen) {
       document.body.style.overflow = 'hidden';
@@ -180,34 +176,26 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
-      {/* Top bar for docs */}
-      <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-4 px-4">
+      {/* Thin docs sub-header */}
+      <div className="sticky top-14 z-30 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-10 max-w-[1400px] items-center gap-3 px-4">
           <button
             onClick={() => setDrawerOpen(true)}
-            className="rounded-md p-1.5 text-muted hover:text-foreground lg:hidden"
+            className="rounded-md p-1 text-muted hover:text-foreground lg:hidden"
             aria-label="Open docs menu"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-4 w-4" />
           </button>
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-lg font-bold text-emerald-400">OpenDDE</span>
-            <span className="rounded-md bg-[var(--surface-alt)] px-2 py-0.5 text-xs font-medium text-muted">Docs</span>
-          </Link>
-          <div className="flex-1" />
-          <Link
-            href="/app/dashboard"
-            className="rounded-lg bg-emerald-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-600 transition-colors"
-          >
-            Launch app
-          </Link>
+          <span className="rounded-md bg-[var(--surface-alt)] px-2 py-0.5 text-xs font-medium text-muted">
+            Documentation
+          </span>
         </div>
-      </header>
+      </div>
 
       <div className="mx-auto flex max-w-[1400px]">
         {/* Desktop sidebar */}
         <aside className="hidden lg:block w-[260px] shrink-0 border-r border-[var(--border)]">
-          <div className="sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
+          <div className="sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
             <Sidebar />
           </div>
         </aside>

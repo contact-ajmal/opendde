@@ -6,8 +6,8 @@ import { motion } from 'framer-motion';
 import { Crosshair, FlaskConical, Box, Beaker, Sparkles, BarChart3, Search, TrendingUp } from 'lucide-react';
 
 // ── Scroll-triggered count-up ───────────────────────────────
-function useScrollCountUp(target: number, duration = 1200): [number, React.RefObject<HTMLDivElement | null>] {
-  const ref = useRef<HTMLDivElement>(null);
+function useScrollCountUp(target: number, duration = 1200): [number, React.RefObject<HTMLDivElement>] {
+  const ref = useRef<HTMLDivElement>(null!) as React.RefObject<HTMLDivElement>;
   const [value, setValue] = useState(0);
   const [triggered, setTriggered] = useState(false);
 

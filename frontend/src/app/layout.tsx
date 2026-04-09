@@ -1,11 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import ThemeProvider from '@/components/ThemeProvider';
-import Navbar from '@/components/Navbar';
 import CommandPalette from '@/components/CommandPalette';
-import AssistantProvider from '@/components/AssistantContext';
-import AssistantDrawer from '@/components/AssistantDrawer';
-import AssistantTrigger from '@/components/AssistantTrigger';
 
 export const metadata: Metadata = {
   title: {
@@ -92,22 +88,10 @@ export default function RootLayout({
           Skip to main content
         </a>
         <ThemeProvider>
-          <AssistantProvider>
-            <Navbar />
-            <CommandPalette />
-            <AssistantDrawer />
-            <AssistantTrigger />
-            <div id="main-content" className="pt-14">
-              {/* Mobile notice */}
-              <div
-                role="status"
-                className="block px-4 py-2 text-center text-xs text-amber-400 bg-amber-500/10 border-b border-amber-500/20 md:hidden"
-              >
-                Desktop recommended for best experience
-              </div>
-              {children}
-            </div>
-          </AssistantProvider>
+          <CommandPalette />
+          <div id="main-content">
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>

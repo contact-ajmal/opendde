@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { ChevronDown, Link2, Check } from 'lucide-react';
 
 // ── Article metadata registry ───────────────────────────────
-export interface ArticleMeta {
+interface ArticleMeta {
   slug: string;
   title: string;
   description: string;
@@ -14,7 +14,7 @@ export interface ArticleMeta {
   icon: string;
 }
 
-export const articles: ArticleMeta[] = [
+const articles: ArticleMeta[] = [
   { slug: '/learn/drug-discovery-101', title: 'Drug discovery 101', description: 'The complete beginner\'s guide to how drugs are made', readTime: '10 min read', icon: '💊' },
   { slug: '/learn/how-opendde-works', title: 'How OpenDDE works', description: 'Technical overview of every feature', readTime: '8 min read', icon: '🔬' },
   { slug: '/learn/understanding-proteins', title: 'Understanding proteins', description: 'A visual guide to protein structure', readTime: '6 min read', icon: '🧬' },
@@ -37,7 +37,7 @@ function ReadingProgress() {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-[var(--border)]">
+    <div className="fixed top-0 left-0 right-0 z-[60] h-1 bg-[var(--border)]">
       <div
         className="h-full bg-emerald-500 transition-[width] duration-100"
         style={{ width: `${progress}%` }}
@@ -174,9 +174,9 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-[var(--bg)]">
       <ReadingProgress />
 
-      {/* Header */}
-      <header className="border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-xl sticky top-0 z-40">
-        <div className="mx-auto flex h-14 max-w-[1200px] items-center gap-4 px-4">
+      {/* Sub-header — sits below the marketing navbar (56px) */}
+      <header className="border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-xl sticky top-14 z-30">
+        <div className="mx-auto flex h-10 max-w-[1200px] items-center gap-4 px-4">
           <Link href="/learn" className="text-sm text-muted hover:text-foreground transition-colors">
             &larr; All articles
           </Link>
@@ -218,7 +218,7 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
         {/* Desktop TOC sidebar */}
         {tocItems.length > 0 && (
           <aside className="hidden xl:block w-56 shrink-0 py-10">
-            <div className="sticky top-20">
+            <div className="sticky top-28">
               <TableOfContents items={tocItems} />
             </div>
           </aside>
@@ -227,7 +227,7 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
 
       {/* Mobile TOC */}
       {tocItems.length > 0 && (
-        <div className="xl:hidden sticky top-14 z-30 border-b border-[var(--border)] bg-[var(--bg)]/90 backdrop-blur-md px-4">
+        <div className="xl:hidden sticky top-24 z-20 border-b border-[var(--border)] bg-[var(--bg)]/90 backdrop-blur-md px-4">
           <button
             onClick={() => setTocOpen(!tocOpen)}
             className="flex w-full items-center gap-2 py-2.5 text-xs font-medium text-muted"

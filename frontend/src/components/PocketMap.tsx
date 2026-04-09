@@ -75,7 +75,7 @@ export default function PocketMap({ uniprotId, rank, druggability, onResidueClic
   const druggColor = druggability >= 0.7 ? '#10b981' : druggability >= 0.4 ? '#f59e0b' : '#ef4444';
 
   // Collect present types for legend
-  const presentTypes = [...new Set(residues.map(r => r.type))];
+  const presentTypes = Array.from(new Set(residues.map(r => r.type)));
 
   return (
     <div className="flex flex-col items-center gap-3">

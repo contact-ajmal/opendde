@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Introduction' };
+export const metadata = { title: 'Introduction', description: 'Welcome to OpenDDE — open-source computational drug design platform documentation.' };
 
 export default function DocsIntroduction() {
   return (

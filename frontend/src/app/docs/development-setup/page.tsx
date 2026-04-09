@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Development Setup' };
+export const metadata = { title: 'Development Setup', description: 'Set up OpenDDE for local development with hot reload.' };
 
 export default function DevelopmentSetupPage() {
   return (

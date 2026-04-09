@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Druggability Reports' };
+export const metadata = { title: 'Druggability Reports', description: 'Generate target assessment reports in JSON and PDF.' };
 
 export default function DruggabilityReportsPage() {
   return (

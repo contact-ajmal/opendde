@@ -1,6 +1,9 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Drug Discovery 101' };
+export const metadata = {
+  title: 'Drug Discovery 101',
+  description: 'The complete beginner\'s guide to how new medicines are found — from target identification to FDA approval.',
+};
 
 export default function DrugDiscovery101Page() {
   return (

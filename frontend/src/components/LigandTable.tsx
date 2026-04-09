@@ -83,7 +83,7 @@ function LigandTable({ ligands, onPredictComplex }: LigandTableProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-surface">
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted">Structure</th>
+              <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-medium text-muted">Structure</th>
               <th
                 className="cursor-pointer px-4 py-3 text-left text-xs font-medium text-muted hover:text-foreground"
                 onClick={() => handleSort('name')}
@@ -130,7 +130,7 @@ function LigandTable({ ligands, onPredictComplex }: LigandTableProps) {
                       }`}
                       onClick={() => setExpandedId(isExpanded ? null : lig.chembl_id)}
                     >
-                      <div className="w-[90px] px-4 py-2 flex-shrink-0">
+                      <div className="hidden sm:block w-[90px] px-4 py-2 flex-shrink-0">
                         {lig.image_url ? (
                           <img
                             src={lig.image_url}
@@ -158,6 +158,7 @@ function LigandTable({ ligands, onPredictComplex }: LigandTableProps) {
                         <button
                           onClick={(e) => { e.stopPropagation(); onPredictComplex?.(lig); }}
                           disabled={!onPredictComplex}
+                          aria-label={`Predict complex for ${lig.name}`}
                           className="rounded bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/30 active:scale-[0.97] transition-transform disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           Predict
@@ -165,7 +166,8 @@ function LigandTable({ ligands, onPredictComplex }: LigandTableProps) {
                         <button
                           onClick={(e) => { e.stopPropagation(); setExpandedId(isExpanded ? null : lig.chembl_id); }}
                           className="rounded px-2 py-1 text-xs text-muted hover:text-foreground transition-colors"
-                          title="Druglikeness properties"
+                          aria-label={`${isExpanded ? 'Hide' : 'Show'} properties for ${lig.name}`}
+                          aria-expanded={isExpanded}
                         >
                           {isExpanded ? '▲' : '▼'}
                         </button>

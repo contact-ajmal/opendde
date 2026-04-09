@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Engine Swap Layer' };
+export const metadata = { title: 'Engine Swap Layer', description: 'Modular engine adapter pattern for swapping tools.' };
 
 export default function EngineSwapPage() {
   return (

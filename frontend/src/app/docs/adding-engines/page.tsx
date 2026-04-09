@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Adding New Engines' };
+export const metadata = { title: 'Adding New Engines', description: 'How to integrate new computational tools into OpenDDE.' };
 
 export default function AddingEnginesPage() {
   return (

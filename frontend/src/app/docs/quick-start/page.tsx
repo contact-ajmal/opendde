@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Quick Start' };
+export const metadata = { title: 'Quick Start', description: 'Get OpenDDE running on your machine in under 5 minutes with Docker Compose.' };
 
 export default function QuickStartPage() {
   return (

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Druglikeness Scoring' };
+export const metadata = { title: 'Druglikeness Scoring', description: 'Lipinski rules and molecular property calculations.' };
 
 export default function DruglikenessScoringPage() {
   return (

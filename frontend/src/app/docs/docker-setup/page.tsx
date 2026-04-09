@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Docker Setup' };
+export const metadata = { title: 'Docker Setup', description: 'Advanced Docker configuration, production deployment, and troubleshooting.' };
 
 export default function DockerSetupPage() {
   return (

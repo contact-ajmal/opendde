@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Pocket Discovery' };
+export const metadata = { title: 'Pocket Discovery', description: 'How P2Rank predicts binding pockets and what druggability scores mean.' };
 
 export default function PocketDiscoveryPage() {
   return (

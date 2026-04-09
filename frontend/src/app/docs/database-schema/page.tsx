@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Database Schema' };
+export const metadata = { title: 'Database Schema', description: 'Supabase PostgreSQL tables for targets, pockets, and ligands.' };
 
 export default function DatabaseSchemaPage() {
   return (

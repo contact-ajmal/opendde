@@ -1,6 +1,9 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'How OpenDDE Works' };
+export const metadata = {
+  title: 'How OpenDDE Works',
+  description: 'Technical overview of OpenDDE features: pocket discovery, ligand intelligence, complex prediction, and AI assistant.',
+};
 
 export default function HowOpenDDEWorksPage() {
   return (

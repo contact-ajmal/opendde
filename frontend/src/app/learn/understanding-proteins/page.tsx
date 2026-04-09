@@ -1,6 +1,9 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Understanding Proteins' };
+export const metadata = {
+  title: 'Understanding Proteins',
+  description: 'A visual guide to protein structure — from amino acid sequence to 3D fold. Learn what AlphaFold pLDDT scores mean.',
+};
 
 export default function UnderstandingProteinsPage() {
   return (

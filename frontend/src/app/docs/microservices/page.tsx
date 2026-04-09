@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Microservices' };
+export const metadata = { title: 'Microservices', description: 'P2Rank, RDKit, and ImmuneBuilder service details.' };
 
 export default function MicroservicesPage() {
   return (

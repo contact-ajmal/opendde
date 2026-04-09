@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'System Requirements' };
+export const metadata = { title: 'System Requirements', description: 'Hardware, software, and network requirements for running OpenDDE.' };
 
 export default function SystemRequirementsPage() {
   return (

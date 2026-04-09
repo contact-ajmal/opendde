@@ -211,14 +211,16 @@ export default function TargetPage() {
           {/* 3D Viewer (70%) */}
           <div className="w-full md:w-[70%] md:flex-shrink-0">
             {structureUrl ? (
-              <StructureViewer
-                structureUrl={structureUrl}
-                height="600px"
-                pocketHighlights={pocketHighlights}
-                focusPoint={focusPoint}
-              />
+              <div className="h-[400px] md:h-[600px]">
+                <StructureViewer
+                  structureUrl={structureUrl}
+                  height="100%"
+                  pocketHighlights={pocketHighlights}
+                  focusPoint={focusPoint}
+                />
+              </div>
             ) : (
-              <div className="flex h-[600px] items-center justify-center rounded-lg border border-border bg-surface">
+              <div className="flex h-[400px] md:h-[600px] items-center justify-center rounded-lg border border-border bg-surface">
                 <p className="text-muted">No structure available for this target</p>
               </div>
             )}

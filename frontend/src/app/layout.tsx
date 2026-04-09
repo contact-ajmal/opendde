@@ -50,8 +50,38 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
+          rel="preload"
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&display=swap"
+          as="style"
+        />
+        <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap"
           rel="stylesheet"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'SoftwareApplication',
+              name: 'OpenDDE',
+              alternateName: 'Open Drug Design Engine',
+              description:
+                'Open-source computational drug design platform for pocket discovery, ligand intelligence, complex prediction, and antibody modeling.',
+              applicationCategory: 'ScientificApplication',
+              operatingSystem: 'Docker (Linux, macOS, Windows)',
+              license: 'https://opensource.org/licenses/MIT',
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'USD',
+              },
+              author: {
+                '@type': 'Person',
+                name: 'Ajmal',
+              },
+            }),
+          }}
         />
       </head>
       <body>

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Ligand Intelligence' };
+export const metadata = { title: 'Ligand Intelligence', description: 'Understanding bioactivity data, clinical phases, and drug-likeness from ChEMBL.' };
 
 export default function LigandIntelligencePage() {
   return (

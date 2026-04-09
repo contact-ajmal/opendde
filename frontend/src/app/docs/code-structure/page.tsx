@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Code Structure' };
+export const metadata = { title: 'Code Structure', description: 'Repository layout for frontend, backend, and services.' };
 
 export default function CodeStructurePage() {
   return (

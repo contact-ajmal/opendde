@@ -1,6 +1,9 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Learn Drug Design' };
+export const metadata = {
+  title: 'Learn Drug Design',
+  description: 'Educational guides on drug discovery, protein structure, computational drug design, and how to use OpenDDE.',
+};
 
 const articleCards = [
   {

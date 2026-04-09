@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Complex Prediction' };
+export const metadata = { title: 'Complex Prediction', description: 'How AlphaFold 3 predicts protein-ligand binding poses and confidence metrics.' };
 
 export default function ComplexPredictionPage() {
   return (

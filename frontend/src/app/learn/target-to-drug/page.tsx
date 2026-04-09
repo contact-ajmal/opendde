@@ -1,6 +1,9 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'From Target to Drug' };
+export const metadata = {
+  title: 'From Target to Drug',
+  description: 'Step-by-step EGFR walkthrough: search, pocket discovery, ligand analysis, complex prediction, and AI interpretation in OpenDDE.',
+};
 
 export default function TargetToDrugPage() {
   return (

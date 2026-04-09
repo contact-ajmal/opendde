@@ -269,7 +269,7 @@ function VisualWalkthrough() {
             <button
               key={t.id}
               onClick={() => { setActiveTab(i); setPaused(true); }}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-full px-3 py-1.5 text-xs sm:px-4 sm:py-2 sm:text-sm font-medium transition-colors ${
                 i === activeTab
                   ? 'bg-emerald-500 text-white'
                   : 'bg-[var(--surface-alt)] text-muted hover:text-foreground'

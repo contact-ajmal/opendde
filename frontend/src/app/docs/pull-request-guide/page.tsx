@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'Pull Request Guide' };
+export const metadata = { title: 'Pull Request Guide', description: 'Contributing guidelines and PR process for OpenDDE.' };
 
 export default function PullRequestGuidePage() {
   return (

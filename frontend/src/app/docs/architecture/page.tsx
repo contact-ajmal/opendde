@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'System Architecture' };
+export const metadata = { title: 'System Architecture', description: 'Docker Compose microservices architecture and data flow.' };
 
 export default function ArchitecturePage() {
   return (

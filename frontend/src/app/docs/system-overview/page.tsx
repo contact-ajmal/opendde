@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'System Overview' };
+export const metadata = { title: 'System Overview', description: 'Request lifecycle and external dependencies.' };
 
 export default function SystemOverviewPage() {
   return (

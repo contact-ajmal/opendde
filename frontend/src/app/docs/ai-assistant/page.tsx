@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'AI Assistant' };
+export const metadata = { title: 'AI Assistant', description: 'Claude-powered scientific assistant for drug design.' };
 
 export default function AiAssistantPage() {
   return (

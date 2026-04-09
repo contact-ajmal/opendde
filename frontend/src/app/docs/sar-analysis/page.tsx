@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export const metadata = { title: 'SAR Analysis' };
+export const metadata = { title: 'SAR Analysis', description: 'Structure-activity relationships and activity cliff detection.' };
 
 export default function SarAnalysisPage() {
   return (

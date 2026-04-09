@@ -230,14 +230,16 @@ export default function PocketDetailPage() {
         <div className="mb-8 flex flex-col gap-6 md:flex-row">
           <div className="w-full md:w-[55%] md:flex-shrink-0">
             {structureUrl ? (
-              <StructureViewer
-                structureUrl={structureUrl}
-                height="500px"
-                pocketHighlights={pocketHighlights}
-                focusPoint={focusPoint}
-              />
+              <div className="h-[400px] md:h-[500px]">
+                <StructureViewer
+                  structureUrl={structureUrl}
+                  height="100%"
+                  pocketHighlights={pocketHighlights}
+                  focusPoint={focusPoint}
+                />
+              </div>
             ) : (
-              <div className="flex h-[500px] items-center justify-center rounded-lg border border-border bg-surface">
+              <div className="flex h-[400px] md:h-[500px] items-center justify-center rounded-lg border border-border bg-surface">
                 <p className="text-muted">No structure available</p>
               </div>
             )}

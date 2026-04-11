@@ -37,7 +37,7 @@ function ReadingProgress() {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[60] h-1 bg-[var(--border)]">
+    <div className="fixed top-0 left-0 right-0 z-[60] h-[3px] bg-transparent">
       <div
         className="h-full bg-emerald-500 transition-[width] duration-100"
         style={{ width: `${progress}%` }}
@@ -154,9 +154,10 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
     return () => clearTimeout(timeout);
   }, [pathname, isHub]);
 
-  // Find current + next article
+  // Find current + prev/next article
   const currentIndex = articles.findIndex((a) => a.slug === pathname);
   const currentArticle = currentIndex >= 0 ? articles[currentIndex] : null;
+  const prevArticle = currentIndex > 0 ? articles[currentIndex - 1] : null;
   const nextArticle = currentIndex >= 0 && currentIndex < articles.length - 1 ? articles[currentIndex + 1] : null;
 
   // Hub page gets a simple layout
@@ -194,22 +195,35 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
           <div ref={contentRef} className="learn-content mx-auto max-w-[680px]">
             {children}
 
-            {/* Next article */}
-            {nextArticle && (
-              <div className="mt-16 border-t border-[var(--border)] pt-8">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-2">Next article</p>
-                <Link
-                  href={nextArticle.slug}
-                  className="group flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 hover:border-[var(--border-hover)] transition-colors"
-                >
-                  <span className="text-2xl">{nextArticle.icon}</span>
-                  <div>
-                    <div className="font-semibold text-foreground group-hover:text-emerald-400 transition-colors">
-                      {nextArticle.title} &rarr;
-                    </div>
-                    <div className="text-sm text-muted">{nextArticle.description}</div>
-                  </div>
-                </Link>
+            {/* Prev / Next navigation */}
+            {(prevArticle || nextArticle) && (
+              <div className="mt-12 grid gap-3 border-t border-[var(--border)] pt-6 sm:grid-cols-2">
+                {prevArticle ? (
+                  <Link
+                    href={prevArticle.slug}
+                    className="group flex flex-col rounded-md border border-[var(--border)] bg-[var(--surface)] p-3 transition-colors hover:border-emerald-500/40"
+                  >
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-2">
+                      ← Previous
+                    </span>
+                    <span className="mt-1 text-sm font-medium text-foreground group-hover:text-emerald-400 transition-colors">
+                      {prevArticle.title}
+                    </span>
+                  </Link>
+                ) : <div />}
+                {nextArticle ? (
+                  <Link
+                    href={nextArticle.slug}
+                    className="group flex flex-col items-end rounded-md border border-[var(--border)] bg-[var(--surface)] p-3 text-right transition-colors hover:border-emerald-500/40"
+                  >
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-2">
+                      Next →
+                    </span>
+                    <span className="mt-1 text-sm font-medium text-foreground group-hover:text-emerald-400 transition-colors">
+                      {nextArticle.title}
+                    </span>
+                  </Link>
+                ) : <div />}
               </div>
             )}
           </div>

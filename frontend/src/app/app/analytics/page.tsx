@@ -60,7 +60,7 @@ function Stat({ label, value }: { label: string; value: number }) {
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="flex min-h-0 flex-col rounded-md border border-[var(--border)] bg-[var(--surface)]">
+    <div className="flex h-full min-h-0 flex-col rounded-md border border-[var(--border)] bg-[var(--surface)]">
       <div className="flex h-7 shrink-0 items-center border-b border-[var(--border)] px-3">
         <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-2">
           {title}
@@ -153,30 +153,34 @@ export default function AnalyticsPage() {
 
           <div className="h-[260px]">
             <ChartCard title="Clinical phases">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={data.clinical_phase_distribution}
-                    cx="50%" cy="50%"
-                    innerRadius={45} outerRadius={75}
-                    dataKey="count" nameKey="phase"
-                    paddingAngle={2}
-                  >
-                    {data.clinical_phase_distribution.map((entry) => (
-                      <Cell key={entry.phase} fill={PHASE_COLORS[entry.phase] || '#6b7280'} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={tooltipStyle} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex flex-wrap justify-center gap-x-2 gap-y-0.5 pb-1">
-                {data.clinical_phase_distribution.map((p) => (
-                  <div key={p.phase} className="flex items-center gap-1 text-[9px]">
-                    <div className="h-2 w-2 rounded-sm" style={{ backgroundColor: PHASE_COLORS[p.phase] || '#6b7280' }} />
-                    <span className="text-muted">{p.phase}</span>
-                    <span className="tabular-nums text-muted-2">{p.count}</span>
-                  </div>
-                ))}
+              <div className="flex h-full flex-col">
+                <div className="min-h-0 flex-1">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={data.clinical_phase_distribution}
+                        cx="50%" cy="50%"
+                        innerRadius={40} outerRadius={70}
+                        dataKey="count" nameKey="phase"
+                        paddingAngle={2}
+                      >
+                        {data.clinical_phase_distribution.map((entry) => (
+                          <Cell key={entry.phase} fill={PHASE_COLORS[entry.phase] || '#6b7280'} />
+                        ))}
+                      </Pie>
+                      <Tooltip contentStyle={tooltipStyle} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex shrink-0 flex-wrap justify-center gap-x-2 gap-y-0.5 pb-1">
+                  {data.clinical_phase_distribution.map((p) => (
+                    <div key={p.phase} className="flex items-center gap-1 text-[9px]">
+                      <div className="h-2 w-2 rounded-sm" style={{ backgroundColor: PHASE_COLORS[p.phase] || '#6b7280' }} />
+                      <span className="text-muted">{p.phase}</span>
+                      <span className="tabular-nums text-muted-2">{p.count}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </ChartCard>
           </div>

@@ -451,11 +451,11 @@ select:focus-visible,
 .docs-content pre {
   background: var(--code-bg);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  padding: 12px;
   margin-bottom: 1rem;
   overflow-x: auto;
-  line-height: 1.6;
+  line-height: 1.55;
 }
 
 .docs-content pre code {
@@ -624,11 +624,11 @@ select:focus-visible,
 .learn-content pre {
   background: var(--code-bg);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  padding: 12px;
   margin-bottom: 1rem;
   overflow-x: auto;
-  line-height: 1.6;
+  line-height: 1.55;
 }
 
 .learn-content pre code {

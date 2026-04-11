@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronRight, Search, X, Menu } from 'lucide-react';
+import { ChevronRight, ChevronDown, Search, X, Menu } from 'lucide-react';
 
 // ── Sidebar navigation structure ────────────────────────────
 interface NavItem {
@@ -158,12 +158,67 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
+// ── Table of contents ───────────────────────────────────────
+interface TocItem {
+  id: string;
+  text: string;
+  level: number;
+}
+
+function TableOfContents({ items }: { items: TocItem[] }) {
+  const [activeId, setActiveId] = useState('');
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActiveId(entry.target.id);
+        }
+      },
+      { rootMargin: '-80px 0px -60% 0px', threshold: 0 },
+    );
+    for (const item of items) {
+      const el = document.getElementById(item.id);
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+  }, [items]);
+
+  if (items.length === 0) return null;
+
+  return (
+    <nav className="space-y-0.5">
+      <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
+        On this page
+      </div>
+      {items.map((item) => (
+        <a
+          key={item.id}
+          href={`#${item.id}`}
+          className={`block rounded-md py-1 text-[12px] leading-snug transition-colors ${
+            item.level === 3 ? 'pl-4' : 'pl-0'
+          } ${
+            activeId === item.id
+              ? 'font-medium text-emerald-400'
+              : 'text-muted hover:text-foreground'
+          }`}
+        >
+          {item.text}
+        </a>
+      ))}
+    </nav>
+  );
+}
+
 // ── Docs layout ─────────────────────────────────────────────
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [tocItems, setTocItems] = useState<TocItem[]>([]);
+  const [tocOpen, setTocOpen] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const pathname = usePathname();
-  useEffect(() => { setDrawerOpen(false); }, [pathname]);
+  useEffect(() => { setDrawerOpen(false); setTocOpen(false); }, [pathname]);
 
   useEffect(() => {
     if (drawerOpen) {
@@ -174,11 +229,30 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
     return () => { document.body.style.overflow = ''; };
   }, [drawerOpen]);
 
+  // Extract TOC headings from rendered content
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const el = contentRef.current;
+      if (!el) return;
+      const headings = el.querySelectorAll('h2[id], h3[id]');
+      const items: TocItem[] = [];
+      headings.forEach((h) => {
+        items.push({
+          id: h.id,
+          text: h.textContent || '',
+          level: h.tagName === 'H3' ? 3 : 2,
+        });
+      });
+      setTocItems(items);
+    }, 100);
+    return () => clearTimeout(t);
+  }, [pathname]);
+
   return (
     <div className="min-h-screen bg-[var(--bg)]">
       {/* Thin docs sub-header */}
       <div className="sticky top-14 z-30 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-10 max-w-[1400px] items-center gap-3 px-4">
+        <div className="mx-auto flex h-9 max-w-[1400px] items-center gap-3 px-4">
           <button
             onClick={() => setDrawerOpen(true)}
             className="rounded-md p-1 text-muted hover:text-foreground lg:hidden"
@@ -186,16 +260,16 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
           >
             <Menu className="h-4 w-4" />
           </button>
-          <span className="rounded-md bg-[var(--surface-alt)] px-2 py-0.5 text-xs font-medium text-muted">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-2">
             Documentation
           </span>
         </div>
       </div>
 
       <div className="mx-auto flex max-w-[1400px]">
-        {/* Desktop sidebar */}
-        <aside className="hidden lg:block w-[260px] shrink-0 border-r border-[var(--border)]">
-          <div className="sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
+        {/* Desktop sidebar — 220px */}
+        <aside className="hidden lg:block w-[220px] shrink-0 border-r border-[var(--border)]">
+          <div className="sticky top-[5.75rem] h-[calc(100vh-5.75rem)] overflow-y-auto">
             <Sidebar />
           </div>
         </aside>
@@ -207,8 +281,8 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
               className="fixed inset-0 z-50 bg-black/50 lg:hidden"
               onClick={() => setDrawerOpen(false)}
             />
-            <aside className="fixed inset-y-0 left-0 z-50 w-[280px] bg-[var(--bg)] shadow-xl lg:hidden">
-              <div className="flex h-14 items-center justify-between border-b border-[var(--border)] px-4">
+            <aside className="fixed inset-y-0 left-0 z-50 w-[260px] bg-[var(--bg)] shadow-xl lg:hidden">
+              <div className="flex h-12 items-center justify-between border-b border-[var(--border)] px-4">
                 <span className="text-sm font-semibold text-foreground">Documentation</span>
                 <button
                   onClick={() => setDrawerOpen(false)}
@@ -218,7 +292,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <div className="h-[calc(100vh-3.5rem)] overflow-y-auto">
+              <div className="h-[calc(100vh-3rem)] overflow-y-auto">
                 <Sidebar onNavigate={() => setDrawerOpen(false)} />
               </div>
             </aside>
@@ -226,11 +300,36 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
         )}
 
         {/* Content */}
-        <main className="min-w-0 flex-1 px-4 py-10 sm:px-8 lg:px-12">
-          <div className="docs-content mx-auto max-w-[720px]">
+        <main className="min-w-0 flex-1 px-6 py-8 lg:px-10">
+          {/* Mobile/tablet collapsible TOC */}
+          {tocItems.length > 0 && (
+            <div className="mb-6 rounded-md border border-[var(--border)] bg-[var(--surface)] xl:hidden">
+              <button
+                onClick={() => setTocOpen(!tocOpen)}
+                className="flex w-full items-center gap-2 px-3 py-2 text-[11px] font-semibold uppercase tracking-widest text-muted-2 hover:text-foreground"
+              >
+                <ChevronDown className={`h-3 w-3 transition-transform ${tocOpen ? 'rotate-180' : ''}`} />
+                On this page
+                <span className="ml-auto text-muted-2 normal-case tracking-normal">{tocItems.length}</span>
+              </button>
+              {tocOpen && (
+                <div className="border-t border-[var(--border)] px-3 py-2" onClick={() => setTocOpen(false)}>
+                  <TableOfContents items={tocItems} />
+                </div>
+              )}
+            </div>
+          )}
+          <div ref={contentRef} className="docs-content max-w-[720px]">
             {children}
           </div>
         </main>
+
+        {/* Right TOC — only on xl+ screens (>=1280px) */}
+        <aside className="hidden xl:block w-[200px] shrink-0 border-l border-[var(--border)]">
+          <div className="sticky top-[5.75rem] max-h-[calc(100vh-5.75rem)] overflow-y-auto px-4 py-8">
+            <TableOfContents items={tocItems} />
+          </div>
+        </aside>
       </div>
     </div>
   );

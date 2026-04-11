@@ -65,7 +65,11 @@ async def cache_get_responses(request: Request, call_next):
             oldest = min(_response_cache, key=lambda k: _response_cache[k][0])
             del _response_cache[oldest]
 
-        cached_headers = {"content-type": "application/json", "x-cache": "HIT"}
+        # Preserve ALL response headers (including CORS) so cache hits don't
+        # strip Access-Control-Allow-Origin and break the browser fetch.
+        cached_headers = dict(response.headers)
+        cached_headers.pop("content-length", None)  # recomputed by Response
+        cached_headers["x-cache"] = "HIT"
         _response_cache[cache_key] = (now, 200, cached_headers, body)
         return Response(content=body, status_code=200, headers={**dict(response.headers), "x-cache": "MISS"})
 

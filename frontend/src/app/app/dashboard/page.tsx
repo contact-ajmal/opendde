@@ -223,7 +223,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Centered welcome content fills remaining space */}
-        <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Welcome to OpenDDE</h1>
             <p className="mt-1 text-sm text-muted">Start by searching a protein target above.</p>

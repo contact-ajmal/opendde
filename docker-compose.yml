@@ -7,6 +7,8 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - WATCHPACK_POLLING=false
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
@@ -18,7 +20,15 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    command: npm run dev
+    command: npm run dev -- --turbo
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 1G
 
   backend:
     build:
@@ -52,6 +62,14 @@ services:
       timeout: 5s
       retries: 3
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 3G
+        reservations:
+          cpus: '1'
+          memory: 512M
 
   p2rank:
     build:
@@ -59,6 +77,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8001:8001"
+    environment:
+      - JAVA_OPTS=-Xmx3g -Xms512m
     volumes:
       - structure-cache:/data/structures
     healthcheck:
@@ -66,6 +86,14 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 1G
 
   immunebuilder:
     build:
@@ -73,6 +101,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8002:8002"
+    environment:
+      - OMP_NUM_THREADS=4
+      - MKL_NUM_THREADS=4
     volumes:
       - antibody-data:/data/antibodies
     healthcheck:
@@ -80,6 +111,14 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '6'
+          memory: 6G
+        reservations:
+          cpus: '2'
+          memory: 2G
 
   rdkit:
     build:
@@ -92,11 +131,20 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
     volumes:
       - redis-data:/data
     healthcheck:
@@ -104,6 +152,14 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 768M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
 
 volumes:
   structure-cache:

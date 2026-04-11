@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Crosshair, FlaskConical, Box, Beaker, Sparkles, BarChart3, Search, TrendingUp } from 'lucide-react';
+import { Crosshair, FlaskConical, Box, Beaker, Sparkles, BarChart3, Search, TrendingUp, Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // ── Scroll-triggered count-up ───────────────────────────────
 function useScrollCountUp(target: number, duration = 1200): [number, React.RefObject<HTMLDivElement>] {
@@ -291,28 +292,30 @@ function VisualWalkthrough() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Screenshot mockup */}
-            <div className="overflow-hidden rounded-2xl border border-[var(--border)] shadow-xl">
+            {/* Browser-chrome screenshot frame */}
+            <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl shadow-black/40">
               <div className="flex items-center gap-2 border-b border-[var(--border)] bg-[var(--bg)] px-4 py-2">
                 <div className="flex gap-1.5">
                   <div className="h-3 w-3 rounded-full bg-red-500/60" />
                   <div className="h-3 w-3 rounded-full bg-amber-500/60" />
                   <div className="h-3 w-3 rounded-full bg-emerald-500/60" />
                 </div>
-                <div className="flex-1 text-center text-xs text-muted">OpenDDE</div>
-              </div>
-              <div className={`relative flex h-[280px] sm:h-[360px] items-center justify-center bg-gradient-to-br ${tab.gradient}`}>
-                <div className="text-center px-8">
-                  <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 backdrop-blur">
-                    <span className="text-3xl" style={{ color: tab.accent }}>
-                      {tab.id === 'pockets' ? '🎯' : tab.id === 'ligands' ? '💊' : tab.id === 'prediction' ? '🔬' : '🧬'}
-                    </span>
-                  </div>
-                  <p className="text-sm font-medium text-white/80">{tab.mockupLabel}</p>
-                  <p className="mt-2 text-xs text-white/40">Screenshot placeholder — swap with actual screenshot at public/screenshots/{tab.id}.png</p>
+                <div className="flex-1 text-center text-[11px] font-mono text-muted">
+                  opendde.org{tab.id === 'pockets' ? '/app/target/P00533' : tab.id === 'ligands' ? '/app/target/P00533/pocket/1' : tab.id === 'prediction' ? '/app/target/P00533/compare' : '/app/antibody'}
                 </div>
+                <span className="text-[10px] font-medium text-emerald-400">{tab.mockupLabel}</span>
+              </div>
+              <div className="relative aspect-[16/10] bg-[var(--bg)]">
+                <Image
+                  src={`/screenshots/${tab.id}.png`}
+                  alt={tab.title}
+                  fill
+                  priority={activeTab === 0}
+                  sizes="(max-width: 768px) 100vw, 1100px"
+                  className="object-cover object-top"
+                />
                 {/* Progress bar */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10">
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/40">
                   <motion.div
                     key={`progress-${activeTab}-${paused}`}
                     className="h-full"
@@ -356,134 +359,208 @@ function VisualWalkthrough() {
   );
 }
 
-// ── Section 5: Video demo ───────────────────────────────────
-const tutorials = [
-  { title: 'Getting started', duration: '2:00' },
-  { title: 'Understanding pocket predictions', duration: '3:15' },
-  { title: 'Reading ligand activity data', duration: '2:45' },
-  { title: 'Using the AI assistant', duration: '1:30' },
+// ── Section 5: Interactive slideshow demo ───────────────────
+const demoSteps = [
+  {
+    id: 'dashboard',
+    title: '1. Search a protein target',
+    caption: 'Start from the dashboard and jump to any UniProt ID — EGFR, BRAF, ACE2, or your own.',
+    src: '/screenshots/dashboard.png',
+    url: '/app/dashboard',
+  },
+  {
+    id: 'pockets',
+    title: '2. Discover druggable pockets',
+    caption: 'P2Rank ranks binding sites by druggability and maps residues in a live 3D viewer.',
+    src: '/screenshots/pockets.png',
+    url: '/app/target/P00533',
+  },
+  {
+    id: 'ligands',
+    title: '3. Explore known ligands',
+    caption: 'Browse ChEMBL-linked compounds with IC50, clinical phase, and Lipinski druglikeness.',
+    src: '/screenshots/ligands.png',
+    url: '/app/target/P00533/pocket/1',
+  },
+  {
+    id: 'prediction',
+    title: '4. Compare predictions',
+    caption: 'Side-by-side evaluation of AlphaFold 3 complex predictions for each candidate.',
+    src: '/screenshots/prediction.png',
+    url: '/app/target/P00533/compare',
+  },
+  {
+    id: 'antibody',
+    title: '5. Model antibodies',
+    caption: 'Predict VH/VL structures and CDR loops from sequence via ImmuneBuilder.',
+    src: '/screenshots/antibody.png',
+    url: '/app/antibody',
+  },
+  {
+    id: 'analytics',
+    title: '6. Platform analytics',
+    caption: 'Druggability distribution, clinical phases, and exploration timeline at a glance.',
+    src: '/screenshots/analytics.png',
+    url: '/app/analytics',
+  },
 ];
 
+const DEMO_INTERVAL_MS = 3500;
+
 function VideoSection() {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [index, setIndex] = useState(0);
+  const [playing, setPlaying] = useState(true);
+
+  // Auto-advance
+  useEffect(() => {
+    if (!playing) return;
+    const timer = setInterval(() => {
+      setIndex((i) => (i + 1) % demoSteps.length);
+    }, DEMO_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [playing]);
+
+  const step = demoSteps[index];
+
+  function goto(i: number) {
+    setIndex(((i % demoSteps.length) + demoSteps.length) % demoSteps.length);
+  }
 
   return (
     <section className="px-4 py-24">
       <div className="mx-auto max-w-5xl">
-        <div className="text-center mb-12">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">Demo</p>
-          <h2 className="text-3xl font-bold text-foreground sm:text-4xl">Watch the demo</h2>
+        <div className="mb-12 text-center">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
+            Demo
+          </p>
+          <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
+            See it end to end
+          </h2>
           <p className="mx-auto mt-4 max-w-xl text-muted">
-            See how OpenDDE takes you from a protein target to druggable insights in under 5 minutes.
+            A guided walkthrough of the full OpenDDE pipeline — from target search to druggable
+            insights — using real screenshots from the running app.
           </p>
         </div>
 
-        {/* Main video placeholder */}
+        {/* Slideshow frame */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
+          className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl shadow-black/40"
         >
-          <button
-            onClick={() => setModalOpen(true)}
-            className="group relative w-full overflow-hidden rounded-2xl border border-[var(--border)] shadow-xl"
-          >
-            <div className="relative flex aspect-video items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
-              {/* Play button */}
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/90 shadow-lg shadow-emerald-500/30 transition-transform group-hover:scale-110">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="white">
-                  <path d="M12 8v16l12-8z" />
-                </svg>
-              </div>
-              {/* Overlay info */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-left">
-                    <div className="text-sm font-medium text-white">OpenDDE Platform Demo</div>
-                    <div className="text-xs text-white/60">From target search to druggability report</div>
-                  </div>
-                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/80 backdrop-blur">4:30</span>
+          {/* Chrome */}
+          <div className="flex items-center gap-2 border-b border-[var(--border)] bg-[var(--bg)] px-4 py-2">
+            <div className="flex gap-1.5">
+              <div className="h-3 w-3 rounded-full bg-red-500/60" />
+              <div className="h-3 w-3 rounded-full bg-amber-500/60" />
+              <div className="h-3 w-3 rounded-full bg-emerald-500/60" />
+            </div>
+            <div className="flex-1 text-center text-[11px] font-mono text-muted">
+              opendde.org{step.url}
+            </div>
+            <button
+              onClick={() => setPlaying((p) => !p)}
+              className="flex h-6 items-center gap-1 rounded border border-[var(--border)] bg-[var(--surface)] px-2 text-[10px] font-medium text-muted hover:text-foreground transition-colors"
+              aria-label={playing ? 'Pause demo' : 'Play demo'}
+            >
+              {playing ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+              {playing ? 'Pause' : 'Play'}
+            </button>
+          </div>
+
+          {/* Slide */}
+          <div className="relative aspect-[16/10] bg-[var(--bg)]">
+            <motion.div
+              key={step.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="absolute inset-0"
+            >
+              <Image
+                src={step.src}
+                alt={step.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 1100px"
+                className="object-cover object-top"
+                priority={index === 0}
+              />
+            </motion.div>
+
+            {/* Prev / Next arrows */}
+            <button
+              onClick={() => { setPlaying(false); goto(index - 1); }}
+              className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white opacity-0 backdrop-blur transition-opacity hover:bg-black/80 group-hover:opacity-100"
+              aria-label="Previous slide"
+              style={{ opacity: 1 }}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => { setPlaying(false); goto(index + 1); }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur transition-opacity hover:bg-black/80"
+              aria-label="Next slide"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+
+            {/* Caption overlay */}
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent px-6 py-4">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <div className="text-sm font-semibold text-white">{step.title}</div>
+                  <div className="mt-0.5 text-xs text-white/70">{step.caption}</div>
                 </div>
-              </div>
-              {/* Decorative elements */}
-              <div className="pointer-events-none absolute inset-0 opacity-10">
-                <div className="absolute top-[20%] left-[15%] h-24 w-24 rounded-full bg-emerald-400 blur-3xl" />
-                <div className="absolute bottom-[25%] right-[20%] h-32 w-32 rounded-full bg-blue-400 blur-3xl" />
+                <span className="shrink-0 rounded-full bg-white/10 px-3 py-1 text-[10px] font-mono text-white/80 backdrop-blur">
+                  {index + 1} / {demoSteps.length}
+                </span>
               </div>
             </div>
-          </button>
+
+            {/* Progress bar */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/40">
+              <motion.div
+                key={`progress-${index}-${playing}`}
+                className="h-full bg-emerald-500"
+                initial={{ width: '0%' }}
+                animate={{ width: playing ? '100%' : undefined }}
+                transition={{ duration: DEMO_INTERVAL_MS / 1000, ease: 'linear' }}
+              />
+            </div>
+          </div>
         </motion.div>
 
-        {/* Tutorial cards */}
-        <div className="mt-10">
-          <h3 className="mb-4 text-sm font-semibold text-foreground">More tutorials</h3>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {tutorials.map((t, i) => (
-              <motion.button
-                key={t.title}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                onClick={() => setModalOpen(true)}
-                className="group rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-left transition-colors hover:border-[var(--border-hover)]"
-              >
-                <div className="mb-3 flex aspect-video items-center justify-center rounded-lg bg-[var(--surface-alt)]">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition-transform group-hover:scale-110">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--text-secondary)">
-                      <path d="M6 4v8l6-4z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="text-sm font-medium text-foreground">{t.title}</div>
-                <div className="text-xs text-muted">{t.duration}</div>
-              </motion.button>
-            ))}
-          </div>
+        {/* Step pills */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+          {demoSteps.map((s, i) => (
+            <button
+              key={s.id}
+              onClick={() => { setPlaying(false); goto(i); }}
+              className={`rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors ${
+                i === index
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-[var(--surface-alt)] text-muted hover:text-foreground'
+              }`}
+            >
+              {s.title.replace(/^\d+\.\s*/, '')}
+            </button>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div className="mt-8 text-center">
+          <Link
+            href="/app/dashboard"
+            className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors"
+          >
+            Try it yourself
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </Link>
         </div>
       </div>
-
-      {/* Video modal */}
-      {modalOpen && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm"
-          onClick={() => setModalOpen(false)}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="relative w-full max-w-3xl rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setModalOpen(false)}
-              aria-label="Close video"
-              className="absolute right-4 top-4 rounded p-1 text-muted hover:text-foreground transition-colors"
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M6 6l8 8M14 6l-8 8" />
-              </svg>
-            </button>
-            <div className="flex aspect-video items-center justify-center rounded-xl bg-[var(--surface-alt)]">
-              <div className="text-center">
-                <div className="mb-3 text-4xl">🎬</div>
-                <p className="text-foreground font-medium">Demo video coming soon</p>
-                <p className="mt-1 text-sm text-muted">Try the platform directly instead!</p>
-                <Link
-                  href="/app/dashboard"
-                  className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 transition-colors"
-                  onClick={() => setModalOpen(false)}
-                >
-                  Launch platform
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </Link>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
     </section>
   );
 }

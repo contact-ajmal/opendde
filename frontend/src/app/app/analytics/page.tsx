@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
-  PieChart, Pie, Legend,
+  PieChart, Pie,
   AreaChart, Area,
 } from 'recharts';
-import AnimatedLayout from '@/components/AnimatedLayout';
+import { ArrowRight, BarChart3 } from 'lucide-react';
 import { apiGet } from '@/lib/api';
 
 interface Analytics {
@@ -38,227 +38,244 @@ const PHASE_COLORS: Record<string, string> = {
   'Phase I': '#a78bfa',
   Preclinical: '#6b7280',
 };
-
 const DRUGG_COLORS = ['#6b7280', '#f59e0b', '#eab308', '#22c55e', '#10b981'];
 
-function MetricCard({ label, value }: { label: string; value: number }) {
+const tooltipStyle = {
+  background: 'var(--surface)',
+  border: '1px solid var(--border)',
+  borderRadius: 6,
+  color: 'var(--text)',
+  fontSize: 11,
+  padding: '6px 10px',
+};
+
+function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="glass-panel rounded-lg p-5">
-      <div className="text-3xl font-bold text-foreground">{value.toLocaleString()}</div>
-      <div className="mt-1 text-sm text-muted">{label}</div>
+    <div className="flex h-16 flex-col justify-center rounded-md border border-[var(--border)] bg-[var(--surface)] px-3">
+      <div className="text-xl font-bold tabular-nums text-foreground">{value.toLocaleString()}</div>
+      <div className="text-[10px] uppercase tracking-widest text-muted-2">{label}</div>
     </div>
   );
 }
 
-const chartTooltipStyle = {
-  background: 'var(--surface)',
-  border: '1px solid var(--border)',
-  borderRadius: 8,
-  color: 'var(--text)',
-  fontSize: 12,
-};
+function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-0 flex-col rounded-md border border-[var(--border)] bg-[var(--surface)]">
+      <div className="flex h-7 shrink-0 items-center border-b border-[var(--border)] px-3">
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-2">
+          {title}
+        </span>
+      </div>
+      <div className="flex-1 p-2">{children}</div>
+    </div>
+  );
+}
 
 export default function AnalyticsPage() {
   const [data, setData] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const result = await apiGet('/analytics');
-        setData(result);
-      } catch {
-        // will show empty state
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
+    apiGet('/analytics')
+      .then((r) => setData(r))
+      .catch(() => setData(null))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return (
-      <main className="min-h-screen p-6">
-        <div className="mx-auto max-w-7xl space-y-6">
-          <div className="shimmer h-10 w-48 rounded-lg" />
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {[...Array(4)].map((_, i) => <div key={i} className="shimmer h-24 rounded-lg" />)}
-          </div>
-          <div className="grid gap-6 md:grid-cols-2">
-            {[...Array(4)].map((_, i) => <div key={i} className="shimmer h-64 rounded-lg" />)}
-          </div>
+      <div className="flex h-full flex-col gap-3 p-4">
+        <div className="shimmer h-8 w-40 rounded" />
+        <div className="grid grid-cols-4 gap-2">
+          {[...Array(4)].map((_, i) => <div key={i} className="shimmer h-16 rounded" />)}
         </div>
-      </main>
+        <div className="grid flex-1 grid-cols-2 gap-3">
+          {[...Array(4)].map((_, i) => <div key={i} className="shimmer rounded" />)}
+        </div>
+      </div>
     );
   }
 
   if (!data || data.overview.targets_explored === 0) {
     return (
-      <AnimatedLayout>
-        <main className="flex min-h-screen items-center justify-center p-6">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground mb-2">No data yet</h2>
-            <p className="text-muted mb-4">Explore some targets to see analytics here.</p>
-            <Link href="/app/dashboard" className="text-emerald-400 hover:underline">Go explore targets</Link>
-          </div>
-        </main>
-      </AnimatedLayout>
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <BarChart3 className="mx-auto mb-3 h-8 w-8 text-muted-2" />
+          <h2 className="mb-1 text-sm font-semibold text-foreground">No data yet</h2>
+          <p className="mb-3 text-xs text-muted">Explore some targets to see analytics.</p>
+          <Link href="/app/dashboard" className="text-xs text-emerald-400 hover:underline">
+            Go explore targets →
+          </Link>
+        </div>
+      </div>
     );
   }
 
   const o = data.overview;
 
   return (
-    <AnimatedLayout>
-      <main className="min-h-screen p-6">
-        <div className="mx-auto max-w-7xl">
-          <h1 className="mb-6 text-2xl font-bold text-foreground">Analytics</h1>
+    <div className="flex h-full flex-col">
+      {/* Header */}
+      <header className="flex h-9 shrink-0 items-center gap-3 border-b border-[var(--border)] px-4">
+        <BarChart3 className="h-4 w-4 text-emerald-400" />
+        <h1 className="text-sm font-semibold text-foreground">Analytics</h1>
+        <span className="text-[11px] text-muted-2">Platform-wide statistics</span>
+      </header>
 
-          {/* Metric cards */}
-          <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-            <MetricCard label="Targets explored" value={o.targets_explored} />
-            <MetricCard label="Pockets found" value={o.total_pockets} />
-            <MetricCard label="Ligands catalogued" value={o.total_ligands} />
-            <MetricCard label="Predictions completed" value={o.predictions_completed} />
-          </div>
-
-          {/* Charts row 1 */}
-          <div className="mb-8 grid gap-6 md:grid-cols-2">
-            {/* Druggability distribution */}
-            {data.druggability_distribution.length > 0 && (
-              <div className="rounded-lg border border-border bg-surface p-5">
-                <h3 className="mb-4 text-sm font-semibold text-foreground">Druggability Distribution</h3>
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={data.druggability_distribution}>
-                    <XAxis dataKey="range" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} allowDecimals={false} />
-                    <Tooltip contentStyle={chartTooltipStyle} />
-                    <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                      {data.druggability_distribution.map((_, i) => (
-                        <Cell key={i} fill={DRUGG_COLORS[i] || '#10b981'} fillOpacity={0.8} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-
-            {/* Clinical phase distribution */}
-            {data.clinical_phase_distribution.length > 0 && (
-              <div className="rounded-lg border border-border bg-surface p-5">
-                <h3 className="mb-4 text-sm font-semibold text-foreground">Clinical Phase Distribution</h3>
-                <ResponsiveContainer width="100%" height={240}>
-                  <PieChart>
-                    <Pie
-                      data={data.clinical_phase_distribution}
-                      cx="50%" cy="50%"
-                      innerRadius={50} outerRadius={85}
-                      dataKey="count"
-                      nameKey="phase"
-                      paddingAngle={2}
-                      label={({ phase, count }) => `${phase}: ${count}`}
-                    >
-                      {data.clinical_phase_distribution.map((entry) => (
-                        <Cell key={entry.phase} fill={PHASE_COLORS[entry.phase] || '#6b7280'} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={chartTooltipStyle} />
-                    <Legend wrapperStyle={{ fontSize: 11, color: 'var(--text-secondary)' }} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </div>
-
-          {/* Charts row 2 */}
-          <div className="mb-8 grid gap-6 md:grid-cols-2">
-            {/* Activity distribution */}
-            {data.activity_distribution.length > 0 && (
-              <div className="rounded-lg border border-border bg-surface p-5">
-                <h3 className="mb-4 text-sm font-semibold text-foreground">Activity Distribution</h3>
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={data.activity_distribution}>
-                    <XAxis dataKey="range" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} />
-                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} allowDecimals={false} />
-                    <Tooltip contentStyle={chartTooltipStyle} />
-                    <Bar dataKey="count" fill="#3b82f6" fillOpacity={0.8} radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-
-            {/* Timeline */}
-            {data.timeline.length > 0 && (
-              <div className="rounded-lg border border-border bg-surface p-5">
-                <h3 className="mb-4 text-sm font-semibold text-foreground">Exploration Timeline</h3>
-                <ResponsiveContainer width="100%" height={240}>
-                  <AreaChart data={data.timeline}>
-                    <XAxis
-                      dataKey="date"
-                      tick={{ fill: 'var(--text-secondary)', fontSize: 10 }}
-                      tickFormatter={(d: string) => d.slice(5)}
-                    />
-                    <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} allowDecimals={false} />
-                    <Tooltip contentStyle={chartTooltipStyle} />
-                    <Area
-                      type="monotone" dataKey="targets" name="Total targets"
-                      stroke="#10b981" fill="#10b981" fillOpacity={0.15}
-                      strokeWidth={2}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </div>
-
-          {/* Top targets table */}
-          {data.top_targets.length > 0 && (
-            <div className="rounded-lg border border-border bg-surface p-5">
-              <h3 className="mb-4 text-sm font-semibold text-foreground">Most Explored Targets</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="px-4 py-3 text-left text-xs font-medium text-muted">Target</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-muted">Gene</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-muted">Pockets</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-muted">Ligands</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-muted"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.top_targets.map((t) => (
-                      <tr key={t.uniprot_id} className="border-b border-border last:border-0 hover:bg-[var(--hover-row)] transition-colors">
-                        <td className="px-4 py-3">
-                          <div className="font-medium text-foreground">{t.name}</div>
-                          <div className="text-xs text-muted">{t.uniprot_id}</div>
-                        </td>
-                        <td className="px-4 py-3">
-                          {t.gene_name && (
-                            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-400">
-                              {t.gene_name}
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-right text-foreground">{t.pocket_count}</td>
-                        <td className="px-4 py-3 text-right text-foreground">{t.ligand_count}</td>
-                        <td className="px-4 py-3 text-right">
-                          <Link
-                            href={`/app/target/${t.uniprot_id}`}
-                            className="text-xs text-emerald-400 hover:underline"
-                          >
-                            View &rarr;
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+      {/* Body */}
+      <div className="flex min-h-0 flex-1 flex-col gap-3 p-3">
+        {/* Stat row */}
+        <div className="grid shrink-0 grid-cols-2 gap-2 md:grid-cols-4">
+          <Stat label="Targets explored" value={o.targets_explored} />
+          <Stat label="Pockets found" value={o.total_pockets} />
+          <Stat label="Ligands catalogued" value={o.total_ligands} />
+          <Stat label="Predictions completed" value={o.predictions_completed} />
         </div>
-      </main>
-    </AnimatedLayout>
+
+        {/* 2×2 chart grid */}
+        <div className="grid min-h-0 shrink-0 grid-cols-1 gap-3 md:grid-cols-2">
+          <div className="h-[260px]">
+            <ChartCard title="Druggability distribution">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data.druggability_distribution} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                  <XAxis dataKey="range" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} axisLine={{ stroke: 'var(--border)' }} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} allowDecimals={false} axisLine={{ stroke: 'var(--border)' }} />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'var(--surface-hover)' }} />
+                  <Bar dataKey="count" radius={[3, 3, 0, 0]}>
+                    {data.druggability_distribution.map((_, i) => (
+                      <Cell key={i} fill={DRUGG_COLORS[i] || '#10b981'} fillOpacity={0.85} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartCard>
+          </div>
+
+          <div className="h-[260px]">
+            <ChartCard title="Clinical phases">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={data.clinical_phase_distribution}
+                    cx="50%" cy="50%"
+                    innerRadius={45} outerRadius={75}
+                    dataKey="count" nameKey="phase"
+                    paddingAngle={2}
+                  >
+                    {data.clinical_phase_distribution.map((entry) => (
+                      <Cell key={entry.phase} fill={PHASE_COLORS[entry.phase] || '#6b7280'} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={tooltipStyle} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-wrap justify-center gap-x-2 gap-y-0.5 pb-1">
+                {data.clinical_phase_distribution.map((p) => (
+                  <div key={p.phase} className="flex items-center gap-1 text-[9px]">
+                    <div className="h-2 w-2 rounded-sm" style={{ backgroundColor: PHASE_COLORS[p.phase] || '#6b7280' }} />
+                    <span className="text-muted">{p.phase}</span>
+                    <span className="tabular-nums text-muted-2">{p.count}</span>
+                  </div>
+                ))}
+              </div>
+            </ChartCard>
+          </div>
+
+          <div className="h-[260px]">
+            <ChartCard title="Activity distribution">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data.activity_distribution} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                  <XAxis dataKey="range" tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} axisLine={{ stroke: 'var(--border)' }} />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} allowDecimals={false} axisLine={{ stroke: 'var(--border)' }} />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'var(--surface-hover)' }} />
+                  <Bar dataKey="count" fill="#3b82f6" fillOpacity={0.85} radius={[3, 3, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartCard>
+          </div>
+
+          <div className="h-[260px]">
+            <ChartCard title="Exploration timeline">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data.timeline} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fill: 'var(--text-secondary)', fontSize: 10 }}
+                    tickFormatter={(d: string) => d.slice(5)}
+                    axisLine={{ stroke: 'var(--border)' }}
+                  />
+                  <YAxis tick={{ fill: 'var(--text-secondary)', fontSize: 10 }} allowDecimals={false} axisLine={{ stroke: 'var(--border)' }} />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Area
+                    type="monotone"
+                    dataKey="targets"
+                    stroke="#10b981"
+                    fill="#10b981"
+                    fillOpacity={0.15}
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ChartCard>
+          </div>
+        </div>
+
+        {/* Top targets table */}
+        {data.top_targets.length > 0 && (
+          <div className="flex min-h-0 flex-1 flex-col rounded-md border border-[var(--border)] bg-[var(--surface)]">
+            <div className="flex h-7 shrink-0 items-center border-b border-[var(--border)] px-3">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-2">
+                Most explored targets
+              </span>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <table className="w-full text-[11px]">
+                <thead className="sticky top-0 bg-[var(--surface)]">
+                  <tr className="border-b border-[var(--border)]">
+                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-2">Gene</th>
+                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-2">Target</th>
+                    <th className="px-3 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-2">UniProt</th>
+                    <th className="px-3 py-1.5 text-right text-[10px] font-semibold uppercase tracking-wider text-muted-2">Pockets</th>
+                    <th className="px-3 py-1.5 text-right text-[10px] font-semibold uppercase tracking-wider text-muted-2">Ligands</th>
+                    <th className="w-8" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.top_targets.map((t) => (
+                    <tr
+                      key={t.uniprot_id}
+                      className="group border-b border-[var(--border)] last:border-0 transition-colors hover:bg-[var(--surface-hover)]"
+                    >
+                      <td className="px-3 py-1.5">
+                        {t.gene_name ? (
+                          <span className="font-mono text-[11px] font-semibold text-emerald-400">
+                            {t.gene_name}
+                          </span>
+                        ) : (
+                          <span className="text-muted-2">—</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-1.5 text-foreground truncate max-w-[280px]">{t.name}</td>
+                      <td className="px-3 py-1.5 font-mono text-muted">{t.uniprot_id}</td>
+                      <td className="px-3 py-1.5 text-right tabular-nums text-foreground">{t.pocket_count}</td>
+                      <td className="px-3 py-1.5 text-right tabular-nums text-foreground">{t.ligand_count}</td>
+                      <td className="px-2 py-1.5 text-right">
+                        <Link
+                          href={`/app/target/${t.uniprot_id}`}
+                          className="inline-flex opacity-0 transition-opacity group-hover:opacity-100"
+                          aria-label={`View ${t.name}`}
+                        >
+                          <ArrowRight className="h-3 w-3 text-emerald-400" />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

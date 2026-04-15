@@ -41,25 +41,25 @@ const platformCols = [
   {
     heading: 'Discovery',
     items: [
-      { label: 'Pocket Discovery', description: 'Find druggable binding sites with P2Rank', icon: '🎯', href: '/app/dashboard' },
-      { label: 'Ligand Intelligence', description: 'Explore known drugs from ChEMBL', icon: '💊', href: '/app/dashboard' },
-      { label: 'SAR Analysis', description: 'Activity cliffs & structure-activity', icon: '📈', href: '/app/dashboard' },
+      { label: 'Pocket Discovery', description: 'Find druggable binding sites with P2Rank', icon: '🎯', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard` },
+      { label: 'Ligand Intelligence', description: 'Explore known drugs from ChEMBL', icon: '💊', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard` },
+      { label: 'SAR Analysis', description: 'Activity cliffs & structure-activity', icon: '📈', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard` },
     ],
   },
   {
     heading: 'Prediction',
     items: [
-      { label: 'Complex Prediction', description: 'Model binding with AlphaFold 3', icon: '🔬', href: '/app/dashboard' },
-      { label: 'Antibody Modeling', description: 'Predict structures with ImmuneBuilder', icon: '🧬', href: '/app/antibody' },
-      { label: 'Druglikeness Scoring', description: 'Lipinski & molecular properties', icon: '⚗️', href: '/app/dashboard' },
+      { label: 'Complex Prediction', description: 'Model binding with AlphaFold 3', icon: '🔬', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard` },
+      { label: 'Antibody Modeling', description: 'Predict structures with ImmuneBuilder', icon: '🧬', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/antibody` },
+      { label: 'Druglikeness Scoring', description: 'Lipinski & molecular properties', icon: '⚗️', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard` },
     ],
   },
   {
     heading: 'Intelligence',
     items: [
-      { label: 'AI Assistant', description: 'Claude-powered drug design insights', icon: '✨', href: '/app/dashboard' },
-      { label: 'Analytics', description: 'Platform-wide data insights', icon: '📊', href: '/app/analytics' },
-      { label: 'Druggability Reports', description: 'JSON & PDF target assessment', icon: '📋', href: '/app/dashboard' },
+      { label: 'AI Assistant', description: 'Claude-powered drug design insights', icon: '✨', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard` },
+      { label: 'Analytics', description: 'Platform-wide data insights', icon: '📊', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/analytics` },
+      { label: 'Druggability Reports', description: 'JSON & PDF target assessment', icon: '📋', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard` },
     ],
   },
 ];
@@ -252,7 +252,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           <div className="flex items-center gap-3">
             <ThemeToggle />
             <Link
-              href="/app/dashboard"
+              href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`}
               className="hidden sm:flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 active:scale-[0.97] transition-all"
             >
               Launch app
@@ -344,7 +344,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
 
                 <div className="pt-4">
                   <Link
-                    href="/app/dashboard"
+                    href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`}
                     onClick={() => setMobileOpen(false)}
                     className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-600 transition-colors"
                   >

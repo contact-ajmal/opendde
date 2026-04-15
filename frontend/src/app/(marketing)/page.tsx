@@ -115,31 +115,31 @@ const walkthroughTabs = [
     title: 'Pocket discovery',
     description: 'Enter any protein target and instantly see predicted binding pockets ranked by druggability. P2Rank\u2019s ML algorithm identifies sites that traditional methods might miss \u2014 including allosteric and cryptic pockets.',
     checks: ['Druggability scoring', '3D visualization', 'Residue mapping'],
-    href: '/app/dashboard',
+    href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`,
     cta: 'Try it now',
     gradient: 'from-emerald-900/40 to-emerald-950/60',
     accent: '#10b981',
-    mockupLabel: 'EGFR (P00533) \u2014 3 druggable pockets detected',
+    mockupLabel: 'EGFR (P00533) — 3 druggable pockets detected',
   },
   {
     id: 'ligands',
     label: 'Ligand intelligence',
     title: 'Ligand intelligence',
-    description: 'Explore known drugs and bioactive compounds for any target. IC50, Ki, and Kd activity data, clinical trial phases, structure-activity relationships, and druglikeness scoring \u2014 all in one view.',
+    description: 'Explore known drugs and bioactive compounds for any target. IC50, Ki, and Kd activity data, clinical trial phases, structure-activity relationships, and druglikeness scoring — all in one view.',
     checks: ['ChEMBL integration', 'SAR analysis', 'Activity cliffs'],
-    href: '/app/dashboard',
+    href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`,
     cta: 'Try it now',
     gradient: 'from-blue-900/40 to-blue-950/60',
     accent: '#3b82f6',
-    mockupLabel: '50 known compounds \u2014 4 approved drugs for EGFR',
+    mockupLabel: '50 known compounds — 4 approved drugs for EGFR',
   },
   {
     id: 'antibody',
     label: 'Antibody modeling',
     title: 'Antibody modeling',
-    description: 'Predict antibody 3D structures from VH/VL sequences using ABodyBuilder2. Identifies and visualizes all six CDR loops with Chothia numbering \u2014 essential for therapeutic antibody engineering.',
+    description: 'Predict antibody 3D structures from VH/VL sequences using ABodyBuilder2. Identifies and visualizes all six CDR loops with Chothia numbering — essential for therapeutic antibody engineering.',
     checks: ['CDR identification', '3D structure', 'Sequence input'],
-    href: '/app/antibody',
+    href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/antibody`,
     cta: 'Try it now',
     gradient: 'from-amber-900/40 to-amber-950/60',
     accent: '#f59e0b',
@@ -272,7 +272,7 @@ const demoSteps = [
     title: '1. Search a protein target',
     caption: 'Start from the dashboard and jump to any UniProt ID — EGFR, BRAF, ACE2, or your own.',
     src: '/screenshots/dashboard.png',
-    url: '/app/dashboard',
+    url: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`,
   },
   {
     id: 'pockets',
@@ -300,7 +300,7 @@ const demoSteps = [
     title: '5. Platform analytics',
     caption: 'Druggability distribution, clinical phases, and exploration timeline at a glance.',
     src: '/screenshots/analytics.png',
-    url: '/app/analytics',
+    url: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/analytics`,
   },
 ];
 
@@ -450,7 +450,7 @@ function VideoSection() {
         {/* CTA */}
         <div className="mt-8 text-center">
           <Link
-            href="/app/dashboard"
+            href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`}
             className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors"
           >
             Try it yourself
@@ -568,7 +568,7 @@ export default function HomePage() {
             </p>
             <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Link
-                href="/app/dashboard"
+                href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`}
                 className="flex items-center gap-2 rounded-lg bg-emerald-500 px-6 py-3 text-base font-medium text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 active:scale-[0.97] transition-all"
               >
                 Launch platform
@@ -1174,10 +1174,10 @@ export default function HomePage() {
             <div>
               <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">Platform</h4>
               <ul className="space-y-2.5 text-sm text-muted">
-                <li><Link href="/app/dashboard" className="hover:text-foreground transition-colors">Dashboard</Link></li>
-                <li><Link href="/app/target/P00533" className="hover:text-foreground transition-colors">Target Explorer</Link></li>
-                <li><Link href="/app/antibody" className="hover:text-foreground transition-colors">Antibody Prediction</Link></li>
-                <li><Link href="/app/analytics" className="hover:text-foreground transition-colors">Analytics</Link></li>
+                <li><Link href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`} className="hover:text-foreground transition-colors">Dashboard</Link></li>
+                <li><Link href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/target/P00533`} className="hover:text-foreground transition-colors">Target Explorer</Link></li>
+                <li><Link href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/antibody`} className="hover:text-foreground transition-colors">Antibody Prediction</Link></li>
+                <li><Link href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/analytics`} className="hover:text-foreground transition-colors">Analytics</Link></li>
               </ul>
             </div>
 

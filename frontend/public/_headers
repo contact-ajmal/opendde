@@ -1,0 +1,9 @@
+# Cache headers for static assets
+/og-image.png
+  Cache-Control: public, max-age=86400, immutable
+
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/screenshots/*
+  Cache-Control: public, max-age=86400

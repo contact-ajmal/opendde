@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { apiPost } from '@/lib/api';
 import type { TargetInfo, PrepareResponse, UploadResponse } from '@/lib/types';
 import dynamic from 'next/dynamic';
-import { Beaker, Cloud, Settings2, Download, CheckCircle2 } from 'lucide-react';
+import { Beaker, Cloud, Settings2, Download, CheckCircle2, Loader2 } from 'lucide-react';
 
 const StructureViewer = dynamic(() => import('@/components/MolstarViewer'), {
   ssr: false,

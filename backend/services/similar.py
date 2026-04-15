@@ -1,6 +1,6 @@
 import httpx
 
-from services.database import _get_client
+from services import database
 
 UNIPROT_BASE = "https://rest.uniprot.org"
 
@@ -68,13 +68,18 @@ async def _search_by_interpro(
 
 def _check_in_opendde(uniprot_ids: list[str]) -> set[str]:
     """Check which UniProt IDs have already been explored in OpenDDE."""
-    sb = _get_client()
-    if not sb:
+    if not database.pool or not uniprot_ids:
         return set()
     try:
-        resp = sb.table("targets").select("uniprot_id").in_("uniprot_id", uniprot_ids).execute()
-        return {row["uniprot_id"] for row in (resp.data or [])}
-    except Exception:
+        with database.pool.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT uniprot_id FROM targets WHERE uniprot_id = ANY(%s)",
+                    (uniprot_ids,)
+                )
+                return {row[0] for row in cur.fetchall()}
+    except Exception as e:
+        print(f"Error checking similar targets in db: {e}")
         return set()
 
 

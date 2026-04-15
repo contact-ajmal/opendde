@@ -7,7 +7,7 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
-      - NODE_OPTIONS=--max-old-space-size=4096
+      - NODE_OPTIONS=--max-old-space-size=8192
       - WATCHPACK_POLLING=false
     volumes:
       - ./frontend/src:/app/src
@@ -24,8 +24,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '4'
-          memory: 4G
+          cpus: '6'
+          memory: 8G
         reservations:
           cpus: '1'
           memory: 1G
@@ -37,19 +37,21 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_KEY=${SUPABASE_KEY}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://opendde:opendde@postgres:5432/opendde}
       - REDIS_URL=redis://redis:6379
       - STRUCTURE_CACHE=/data/structures
       - P2RANK_SERVICE_URL=http://p2rank:8001
       - IMMUNEBUILDER_SERVICE_URL=http://immunebuilder:8002
       - RDKIT_SERVICE_URL=http://rdkit:8003
+      - VINA_SERVICE_URL=http://vina:8004
       - CLAUDE_API_KEY=${CLAUDE_API_KEY}
     volumes:
       - ./backend:/app
       - structure-cache:/data/structures
       - antibody-data:/data/antibodies
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
       p2rank:
@@ -140,6 +142,26 @@ services:
           cpus: '0.5'
           memory: 512M
 
+  vina:
+    build:
+      context: ./services/vina
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8004"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
   redis:
     image: redis:7-alpine
     ports:
@@ -161,7 +183,33 @@ services:
           cpus: '0.25'
           memory: 128M
 
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=opendde
+      - POSTGRES_PASSWORD=opendde
+      - POSTGRES_DB=opendde
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U opendde -d opendde"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
 volumes:
   structure-cache:
   redis-data:
   antibody-data:
+  postgres-data:

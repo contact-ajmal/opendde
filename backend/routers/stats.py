@@ -1,14 +1,14 @@
 from fastapi import APIRouter
+from psycopg.rows import dict_row
 
-from services.database import _get_client
+from services import database
 
 router = APIRouter()
 
 
 @router.get("/stats")
 async def get_stats():
-    sb = _get_client()
-    if not sb:
+    if not database.pool:
         return {
             "targets_explored": 0,
             "total_pockets_found": 0,
@@ -26,70 +26,63 @@ async def get_stats():
     recent_predictions: list[dict] = []
 
     try:
-        resp = sb.table("targets").select("*", count="exact").execute()
-        targets_count = resp.count or 0
-    except Exception:
-        pass
+        with database.pool.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT COUNT(*) FROM targets")
+                row = cur.fetchone()
+                if row: targets_count = row[0]
+                
+                cur.execute("SELECT COUNT(*) FROM pockets")
+                row = cur.fetchone()
+                if row: pockets_count = row[0]
+                
+                cur.execute("SELECT COUNT(*) FROM known_ligands")
+                row = cur.fetchone()
+                if row: ligands_count = row[0]
+                
+                cur.execute("SELECT COUNT(*) FROM complex_predictions WHERE status = 'complete'")
+                row = cur.fetchone()
+                if row: predictions_count = row[0]
 
-    try:
-        resp = sb.table("pockets").select("*", count="exact").execute()
-        pockets_count = resp.count or 0
-    except Exception:
-        pass
+            with conn.cursor(row_factory=dict_row) as dict_cur:
+                dict_cur.execute("""
+                    SELECT uniprot_id, name, gene_name, organism, resolved_at 
+                    FROM targets 
+                    ORDER BY resolved_at DESC NULLS LAST LIMIT 5
+                """)
+                targets_rows = dict_cur.fetchall()
+                for row in targets_rows:
+                    t = dict(row)
+                    if t.get("resolved_at"):
+                        t["resolved_at"] = t["resolved_at"].isoformat()
+                    t["pocket_count"] = 0
+                    t["ligand_count"] = 0
+                    uid = t.get("uniprot_id")
+                    if uid:
+                        with conn.cursor() as c:
+                            c.execute("SELECT COUNT(*) FROM pockets WHERE target_id = %s", (uid,))
+                            c_row = c.fetchone()
+                            if c_row: t["pocket_count"] = c_row[0]
+                            
+                            c.execute("SELECT COUNT(*) FROM known_ligands WHERE target_id = %s", (uid,))
+                            c_row = c.fetchone()
+                            if c_row: t["ligand_count"] = c_row[0]
+                    recent_targets.append(t)
 
-    try:
-        resp = sb.table("known_ligands").select("*", count="exact").execute()
-        ligands_count = resp.count or 0
-    except Exception:
-        pass
-
-    try:
-        resp = sb.table("complex_predictions").select("*", count="exact").eq("status", "complete").execute()
-        predictions_count = resp.count or 0
-    except Exception:
-        pass
-
-    try:
-        resp = (
-            sb.table("targets")
-            .select("uniprot_id, name, gene_name, organism, resolved_at")
-            .order("resolved_at", desc=True)
-            .limit(5)
-            .execute()
-        )
-        recent_targets = resp.data or []
-    except Exception:
-        pass
-
-    # Enrich recent targets with pocket / ligand counts (cheap per-row count queries)
-    for t in recent_targets:
-        uid = t.get("uniprot_id")
-        t["pocket_count"] = 0
-        t["ligand_count"] = 0
-        if not uid:
-            continue
-        try:
-            r = sb.table("pockets").select("*", count="exact").eq("target_id", uid).execute()
-            t["pocket_count"] = r.count or 0
-        except Exception:
-            pass
-        try:
-            r = sb.table("known_ligands").select("*", count="exact").eq("target_id", uid).execute()
-            t["ligand_count"] = r.count or 0
-        except Exception:
-            pass
-
-    try:
-        resp = (
-            sb.table("complex_predictions")
-            .select("prediction_id, target_id, ligand_name, status, created_at")
-            .order("created_at", desc=True)
-            .limit(5)
-            .execute()
-        )
-        recent_predictions = resp.data or []
-    except Exception:
-        pass
+                dict_cur.execute("""
+                    SELECT prediction_id, target_id, ligand_name, status, created_at 
+                    FROM complex_predictions 
+                    ORDER BY created_at DESC NULLS LAST LIMIT 5
+                """)
+                preds_rows = dict_cur.fetchall()
+                for row in preds_rows:
+                    p = dict(row)
+                    if p.get("created_at"):
+                        p["created_at"] = p["created_at"].isoformat()
+                    recent_predictions.append(p)
+                    
+    except Exception as e:
+        print(f"Error fetching stats: {e}")
 
     return {
         "targets_explored": targets_count,

@@ -6,7 +6,7 @@ aiofiles
 pydantic
 pydantic-settings
 biopython
-supabase
+psycopg[binary,pool]
 redis
 python-multipart
 reportlab

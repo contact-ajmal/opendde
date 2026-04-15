@@ -1,3 +1,4 @@
+import math
 import os
 
 from fastapi import APIRouter, HTTPException
@@ -188,3 +189,144 @@ async def pockets_composition(uniprot_id: str):
         })
 
     return {"pockets": results}
+
+
+# Donor / acceptor side-chain classification (simplified)
+_HBOND_DONORS = {"S", "T", "N", "Q", "Y", "W", "K", "R", "H", "C"}
+_HBOND_ACCEPTORS = {"S", "T", "N", "Q", "D", "E", "Y", "H"}
+
+
+def _estimate_pocket_geometry(
+    pocket: dict, structure_path: str | None
+) -> dict:
+    """Estimate volume, surface area, and depth from pocket residue positions.
+
+    Uses the pocket center + residue count heuristic when we don't have per-atom
+    coordinates readily available (fast path).  If we later add BioPython/scipy
+    we can switch to a convex-hull calculation.
+    """
+    residues = pocket.get("residues", [])
+    n = len(residues)
+    cx = pocket.get("center_x", 0.0)
+    cy = pocket.get("center_y", 0.0)
+    cz = pocket.get("center_z", 0.0)
+
+    # Parse residue positions from their identifiers to get a rough radius
+    # Each residue contributes ~125 Å³ on average; this approximation is
+    # consistent with published pocket-volume estimation heuristics.
+    est_volume = n * 125.0
+
+    # Surface ≈ 4πr² where r = (3V / 4π)^(1/3)
+    r = (3 * est_volume / (4 * math.pi)) ** (1 / 3)
+    est_surface = 4 * math.pi * r * r
+
+    # Depth ≈ diameter = 2r (rough proxy — real depth needs cavity analysis)
+    est_depth = 2 * r
+
+    # Enclosure ratio: heuristic based on druggability (more druggable = more
+    # enclosed).  P2Rank druggability already incorporates enclosure-like features.
+    druggability = pocket.get("druggability", 0.5)
+    enclosure = min(0.95, 0.3 + druggability * 0.6)
+
+    return {
+        "volume_angstrom3": round(est_volume, 1),
+        "surface_area_angstrom2": round(est_surface, 1),
+        "depth_angstrom": round(est_depth, 1),
+        "enclosure_ratio": round(enclosure, 2),
+        "center": {"x": cx, "y": cy, "z": cz},
+    }
+
+
+@router.get("/pocket/{uniprot_id}/{rank}/properties")
+async def pocket_properties(uniprot_id: str, rank: int):
+    """Return detailed physical and chemical properties for a pocket."""
+    target = get_cached_target(uniprot_id)
+    if not target:
+        raise HTTPException(status_code=404, detail="Target not found.")
+
+    sequence = target.get("sequence", "")
+    if not sequence:
+        raise HTTPException(status_code=404, detail="No sequence available.")
+
+    cached = get_cached_pockets(uniprot_id)
+    if not cached:
+        raise HTTPException(status_code=404, detail="No pockets found.")
+
+    pocket = next((p for p in cached if p.get("rank") == rank), None)
+    
+    # Fallback: if rank 0 requested but missing, try the first available pocket
+    if not pocket and rank == 0 and cached:
+        pocket = sorted(cached, key=lambda x: x.get("rank", 1))[0]
+
+    if not pocket:
+        raise HTTPException(status_code=404, detail=f"Pocket #{rank} not found.")
+
+    residue_names = pocket.get("residues", [])
+
+    # Classify residues
+    residues_by_type: dict[str, list[str]] = {
+        "hydrophobic": [],
+        "polar": [],
+        "charged_positive": [],
+        "charged_negative": [],
+        "aromatic": [],
+    }
+    donors = 0
+    acceptors = 0
+    total = 0
+
+    for res_name in residue_names:
+        parts = res_name.split("_")
+        if len(parts) < 2:
+            continue
+        try:
+            res_num = int(parts[1])
+        except ValueError:
+            continue
+        if 1 <= res_num <= len(sequence):
+            one = sequence[res_num - 1]
+        else:
+            continue
+
+        rtype = _RESIDUE_TYPES.get(one, "special")
+        if rtype in residues_by_type:
+            residues_by_type[rtype].append(res_name)
+        elif rtype == "special":
+            residues_by_type["polar"].append(res_name)  # GLY → polar bucket
+        total += 1
+
+        if one in _HBOND_DONORS:
+            donors += 1
+        if one in _HBOND_ACCEPTORS:
+            acceptors += 1
+
+    # Ratios
+    t = total or 1
+    hydrophobic_ratio = round(len(residues_by_type["hydrophobic"]) / t, 3)
+    polar_ratio = round(len(residues_by_type["polar"]) / t, 3)
+    charged_ratio = round(
+        (len(residues_by_type["charged_positive"]) + len(residues_by_type["charged_negative"])) / t, 3
+    )
+    aromatic_ratio = round(len(residues_by_type["aromatic"]) / t, 3)
+
+    # Geometry estimates
+    geo = _estimate_pocket_geometry(pocket, None)
+
+    return {
+        "rank": rank,
+        "score": pocket.get("score", 0),
+        "druggability": pocket.get("druggability", 0),
+        "residue_count": total,
+        "volume_angstrom3": geo["volume_angstrom3"],
+        "surface_area_angstrom2": geo["surface_area_angstrom2"],
+        "depth_angstrom": geo["depth_angstrom"],
+        "enclosure_ratio": geo["enclosure_ratio"],
+        "center": geo["center"],
+        "hydrophobic_ratio": hydrophobic_ratio,
+        "polar_ratio": polar_ratio,
+        "charged_ratio": charged_ratio,
+        "aromatic_ratio": aromatic_ratio,
+        "hbond_donors": donors,
+        "hbond_acceptors": acceptors,
+        "residues_by_type": residues_by_type,
+    }

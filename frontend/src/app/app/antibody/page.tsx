@@ -3,7 +3,13 @@
 import { useState } from 'react';
 import { Dna, Sparkles, Star, Loader2, Download } from 'lucide-react';
 import { apiPost } from '@/lib/api';
-import StructureViewer, { type PocketHighlight } from '@/components/StructureViewer';
+import dynamic from 'next/dynamic';
+import type { PocketHighlight } from '@/components/MolstarViewer';
+
+const StructureViewer = dynamic(() => import('@/components/MolstarViewer'), {
+  ssr: false,
+  loading: () => <div className="shimmer h-full w-full" />,
+});
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 

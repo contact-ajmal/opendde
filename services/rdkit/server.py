@@ -30,6 +30,10 @@ class DepictInput(BaseModel):
     height: int = 200
 
 
+class Coords2DInput(BaseModel):
+    smiles: str
+
+
 def calculate_properties(smiles: str) -> dict:
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
@@ -117,6 +121,40 @@ async def depict(body: DepictInput):
     buf = BytesIO()
     img.save(buf, format="PNG")
     return Response(content=buf.getvalue(), media_type="image/png")
+
+
+@app.post("/coords2d")
+async def get_2d_coords(body: Coords2DInput):
+    """Generate 2D atom coordinates for a molecule."""
+    mol = Chem.MolFromSmiles(body.smiles)
+    if mol is None:
+        raise HTTPException(status_code=400, detail="Invalid SMILES")
+
+    AllChem.Compute2DCoords(mol)
+
+    atoms = []
+    conf = mol.GetConformer()
+    for i, atom in enumerate(mol.GetAtoms()):
+        pos = conf.GetAtomPosition(i)
+        atoms.append({
+            "index": i,
+            "symbol": atom.GetSymbol(),
+            "name": atom.GetSymbol() + str(i),
+            "x": round(pos.x, 3),
+            "y": round(pos.y, 3),
+            "is_aromatic": atom.GetIsAromatic(),
+        })
+
+    bonds = []
+    for bond in mol.GetBonds():
+        bonds.append({
+            "begin": bond.GetBeginAtomIdx(),
+            "end": bond.GetEndAtomIdx(),
+            "order": bond.GetBondTypeAsDouble(),
+            "is_aromatic": bond.GetIsAromatic(),
+        })
+
+    return {"atoms": atoms, "bonds": bonds}
 
 
 @app.post("/validate")

@@ -50,6 +50,21 @@ async def validate_smiles(body: SmilesRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@router.post("/properties/coords2d")
+async def coords2d(body: SmilesRequest):
+    """Get 2D atom coordinates for a ligand (for interaction diagrams)."""
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.post(
+                f"{settings.RDKIT_SERVICE_URL}/coords2d",
+                json={"smiles": body.smiles},
+            )
+            resp.raise_for_status()
+            return resp.json()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to compute 2D coords: {e}")
+
+
 @router.post("/depict")
 async def depict_smiles(body: SmilesRequest):
     try:

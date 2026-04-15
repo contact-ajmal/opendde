@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Query
+from psycopg.rows import dict_row
 
-from services.database import _get_client
+from services import database
 
 router = APIRouter()
 
@@ -18,61 +19,46 @@ async def search(q: str = Query("", min_length=0)):
 
 
 def _recent_targets(limit: int) -> list[dict]:
-    sb = _get_client()
-    if not sb:
+    if not database.pool:
         return []
     try:
-        resp = (
-            sb.table("targets")
-            .select("uniprot_id, name, gene_name, organism")
-            .order("resolved_at", desc=True)
-            .limit(limit)
-            .execute()
-        )
-        return resp.data or []
+        with database.pool.connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute("SELECT uniprot_id, name, gene_name, organism FROM targets ORDER BY resolved_at DESC NULLS LAST LIMIT %s", (limit,))
+                return [dict(r) for r in cur.fetchall()]
     except Exception:
         return []
 
 
 def _search_targets(q: str, limit: int) -> list[dict]:
-    sb = _get_client()
-    if not sb:
+    if not database.pool:
         return []
     try:
-        q_lower = q.lower()
-        # Search by uniprot_id (exact prefix) or name/gene_name (ilike)
-        resp = (
-            sb.table("targets")
-            .select("uniprot_id, name, gene_name, organism")
-            .or_(
-                f"uniprot_id.ilike.%{q_lower}%,"
-                f"name.ilike.%{q_lower}%,"
-                f"gene_name.ilike.%{q_lower}%"
-            )
-            .limit(limit)
-            .execute()
-        )
-        return resp.data or []
+        with database.pool.connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+                q_like = f"%{q.lower()}%"
+                cur.execute("""
+                    SELECT uniprot_id, name, gene_name, organism FROM targets 
+                    WHERE uniprot_id ILIKE %s OR name ILIKE %s OR gene_name ILIKE %s
+                    LIMIT %s
+                """, (q_like, q_like, q_like, limit))
+                return [dict(r) for r in cur.fetchall()]
     except Exception:
         return []
 
 
 def _search_ligands(q: str, limit: int) -> list[dict]:
-    sb = _get_client()
-    if not sb:
+    if not database.pool:
         return []
     try:
-        q_lower = q.lower()
-        resp = (
-            sb.table("known_ligands")
-            .select("chembl_id, name, target_id, activity_type, activity_value_nm")
-            .or_(
-                f"name.ilike.%{q_lower}%,"
-                f"chembl_id.ilike.%{q_lower}%"
-            )
-            .limit(limit)
-            .execute()
-        )
-        return resp.data or []
+        with database.pool.connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+                q_like = f"%{q.lower()}%"
+                cur.execute("""
+                    SELECT chembl_id, name, target_id, activity_type, activity_value_nm FROM known_ligands
+                    WHERE name ILIKE %s OR chembl_id ILIKE %s
+                    LIMIT %s
+                """, (q_like, q_like, limit))
+                return [dict(r) for r in cur.fetchall()]
     except Exception:
         return []

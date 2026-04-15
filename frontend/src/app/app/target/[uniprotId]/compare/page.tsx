@@ -18,7 +18,7 @@ interface Prediction {
   created_at: string;
 }
 
-const StructureViewer = dynamic(() => import('@/components/StructureViewer'), {
+const StructureViewer = dynamic(() => import('@/components/MolstarViewer'), {
   ssr: false,
   loading: () => <div className="shimmer h-full w-full" />,
 });

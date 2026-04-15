@@ -32,6 +32,7 @@ async def get_ligands(uniprot_id: str):
         )
 
     raw = await fetch_known_ligands(uniprot_id)
+    raw = [lig for lig in raw if lig.get("smiles")]
     ligands = [KnownLigand(**lig) for lig in raw]
 
     # Cache in Supabase

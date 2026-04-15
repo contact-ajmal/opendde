@@ -106,6 +106,86 @@ async def prepare_complex(req: PrepareRequest):
     }
 
 
+class DockVinaRequest(BaseModel):
+    uniprot_id: str
+    ligand_smiles: str
+    ligand_name: str | None = None
+    center_x: float
+    center_y: float
+    center_z: float
+    size_x: float = 20.0
+    size_y: float = 20.0
+    size_z: float = 20.0
+    exhaustiveness: int = 8
+
+@router.post("/complex/dock_vina")
+async def dock_vina(req: DockVinaRequest):
+    import httpx
+    
+    # 1. Ensure target CIF exists
+    os.makedirs(STRUCTURE_DIR, exist_ok=True)
+    target_cif_path = os.path.join(STRUCTURE_DIR, f"AF-{req.uniprot_id}-F1-model_v4.cif")
+    if not os.path.exists(target_cif_path):
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(f"https://alphafold.ebi.ac.uk/files/AF-{req.uniprot_id}-F1-model_v4.cif")
+            if resp.status_code == 200:
+                with open(target_cif_path, "wb") as f:
+                    f.write(resp.content)
+            else:
+                raise HTTPException(404, "Target structure CIF not found")
+
+    with open(target_cif_path, "r") as f:
+        receptor_cif = f.read()
+
+    # 2. Dispatch to Vina Service
+    vina_url = os.environ.get("VINA_SERVICE_URL", "http://vina:8004")
+    async with httpx.AsyncClient(timeout=300.0) as client:
+        resp = await client.post(
+            f"{vina_url}/dock",
+            json={
+                "receptor_cif": receptor_cif,
+                "ligand_smiles": req.ligand_smiles,
+                "center": [req.center_x, req.center_y, req.center_z],
+                "size": [req.size_x, req.size_y, req.size_z],
+                "exhaustiveness": req.exhaustiveness
+            }
+        )
+        if resp.status_code != 200:
+            raise HTTPException(500, f"Vina docking failed: {resp.text}")
+        result = resp.json()
+
+    docked_pdb = result.get("docked_pdb")
+    
+    # 3. Save resulting PDB as a complete prediction
+    prediction_id = str(uuid.uuid4())
+    os.makedirs(COMPLEXES_DIR, exist_ok=True)
+    pdb_path = os.path.join(COMPLEXES_DIR, f"{prediction_id}.pdb")
+    with open(pdb_path, "w") as f:
+        f.write(docked_pdb)
+
+    structure_url = f"/api/v1/structures/complexes/{prediction_id}.pdb"
+    
+    pred = {
+        "prediction_id": prediction_id,
+        "uniprot_id": req.uniprot_id,
+        "ligand_name": req.ligand_name,
+        "ligand_smiles": req.ligand_smiles,
+        "ligand_ccd": None,
+        "job_json": {"engine": "AutoDock Vina", "exhaustiveness": req.exhaustiveness},
+        "status": "complete",
+        "structure_url": structure_url,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    _store_prediction(pred)
+
+    return {
+        "prediction_id": prediction_id,
+        "structure_url": structure_url,
+        "status": "complete",
+        "poses": result.get("poses")
+    }
+
+
 @router.post("/complex/upload")
 async def upload_complex(
     file: UploadFile = File(...),

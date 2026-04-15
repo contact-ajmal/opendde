@@ -15,21 +15,22 @@ import {
   Info,
   GitBranch,
   ExternalLink,
+  ChevronRight,
 } from 'lucide-react';
-import type { PocketHighlight } from '@/components/StructureViewer';
+import type { PocketHighlight } from '@/components/MolstarViewer';
 import { StructureViewerSkeleton } from '@/components/Skeletons';
 import { useAssistant } from '@/components/AssistantContext';
 import { apiPost, apiGet } from '@/lib/api';
 import type { TargetInfo, PocketResult, PocketsResponse } from '@/lib/types';
 
-const StructureViewer = dynamic(() => import('@/components/StructureViewer'), {
+const StructureViewer = dynamic(() => import('@/components/MolstarViewer'), {
   ssr: false,
   loading: () => <StructureViewerSkeleton />,
 });
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-/* ── Types for side-data ───────────────────────────────── */
+/* ── Types ────────────────────────────────────────────── */
 interface SafetyData {
   ensembl_id: string;
   symbol: string;
@@ -48,7 +49,7 @@ interface SimilarTarget {
   in_opendde?: boolean;
 }
 
-/* ── Helpers ───────────────────────────────────────────── */
+/* ── Helpers ──────────────────────────────────────────── */
 function druggabilityColor(d: number): string {
   if (d >= 0.7) return 'bg-emerald-500';
   if (d >= 0.4) return 'bg-amber-500';
@@ -59,9 +60,14 @@ function druggabilityText(d: number): string {
   if (d >= 0.4) return 'text-amber-400';
   return 'text-red-400';
 }
+function druggabilityBadge(d: number): string {
+  if (d >= 0.7) return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+  if (d >= 0.4) return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+  return 'bg-red-500/10 text-red-400 border-red-500/20';
+}
 
-/* ── Compact pocket row ────────────────────────────────── */
-function PocketRow({
+/* ── Pocket card ─────────────────────────────────────── */
+function PocketCard({
   pocket,
   selected,
   onSelect,
@@ -76,70 +82,72 @@ function PocketRow({
   return (
     <div
       onClick={onSelect}
-      className={`group cursor-pointer border-l-2 px-3 py-2 transition-colors ${
+      className={`group relative cursor-pointer rounded-lg border p-3 transition-all ${
         selected
-          ? 'border-l-emerald-500 bg-emerald-500/5'
-          : 'border-l-transparent hover:bg-[var(--surface-hover)]'
+          ? 'border-emerald-500/40 bg-emerald-500/5 shadow-lg shadow-emerald-500/5'
+          : 'border-[var(--border)] bg-[var(--surface)] hover:border-[var(--border-hover)] hover:shadow-md'
       }`}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-2">
         <span
-          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded text-[10px] font-bold ${
+          className={`flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-bold ${
             selected ? 'bg-emerald-500 text-white' : 'bg-[var(--surface-alt)] text-foreground'
           }`}
         >
-          #{pocket.rank}
+          {pocket.rank}
         </span>
-        <div className="flex-1 min-w-0">
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--bar-track)]">
-            <div
-              className={`h-full rounded-full transition-all ${druggabilityColor(pocket.druggability)}`}
-              style={{ width: `${Math.max(pct, 2)}%` }}
-            />
-          </div>
-        </div>
-        <span className={`text-[11px] font-semibold tabular-nums ${druggabilityText(pocket.druggability)}`}>
+        <span className={`text-sm font-bold tabular-nums ${druggabilityText(pocket.druggability)}`}>
           {pct}%
         </span>
       </div>
-      <div className="mt-1 flex items-center justify-between pl-7">
-        <span className="text-[10px] text-muted-2">
-          Score <span className="tabular-nums text-muted">{pocket.score.toFixed(1)}</span>
-          {' · '}
-          <span className="tabular-nums text-muted">{pocket.residue_count}</span> residues
-        </span>
-        <Link
-          href={`/app/target/${uniprotId}/pocket/${pocket.rank}`}
-          onClick={(e) => e.stopPropagation()}
-          className="text-[10px] text-muted-2 opacity-0 transition-opacity hover:text-emerald-400 group-hover:opacity-100"
-        >
-          Details →
-        </Link>
+
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--bar-track)] mb-2">
+        <div
+          className={`h-full rounded-full transition-all duration-300 ${druggabilityColor(pocket.druggability)}`}
+          style={{ width: `${Math.max(pct, 2)}%` }}
+        />
       </div>
+
+      <div className="flex items-center justify-between text-[10px]">
+        <span className="text-muted-2">
+          Score <span className="tabular-nums text-muted">{pocket.score.toFixed(1)}</span>
+        </span>
+        <span className="text-muted-2">
+          <span className="tabular-nums text-muted">{pocket.residue_count}</span> res
+        </span>
+      </div>
+
+      <Link
+        href={`/app/target/${uniprotId}/pocket/${pocket.rank}`}
+        onClick={(e) => e.stopPropagation()}
+        className="mt-2 flex items-center justify-center gap-1 rounded-md border border-[var(--border)] bg-[var(--bg)] py-1 text-[10px] font-medium text-muted-2 opacity-0 transition-all group-hover:opacity-100 hover:text-emerald-400 hover:border-emerald-500/30"
+      >
+        View details <ChevronRight className="h-3 w-3" />
+      </Link>
     </div>
   );
 }
 
-/* ── Info panel tabs ──────────────────────────────────── */
+/* ── Info panel tabs ─────────────────────────────────── */
 type Tab = 'summary' | 'safety' | 'similar' | 'ai';
 
 function SummaryTab({ target, pockets }: { target: TargetInfo; pockets: PocketResult[] }) {
   const best = pockets[0];
   return (
-    <div className="space-y-3 p-3">
-      <div>
-        <div className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
-          Identifier
+    <div className="space-y-4 p-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <div className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
+            Identifier
+          </div>
+          <div className="font-mono text-xs text-foreground">{target.uniprot_id}</div>
         </div>
-        <div className="font-mono text-xs text-foreground">{target.uniprot_id}</div>
-      </div>
-      <div>
-        <div className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
-          Organism
+        <div>
+          <div className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
+            Organism
+          </div>
+          <div className="text-xs italic text-foreground">{target.organism}</div>
         </div>
-        <div className="text-xs italic text-foreground">{target.organism}</div>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
         <div>
           <div className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
             Length
@@ -165,23 +173,22 @@ function SummaryTab({ target, pockets }: { target: TargetInfo; pockets: PocketRe
           {target.structure_source === 'alphafold_db' ? 'AlphaFold DB' : target.structure_source || '—'}
         </div>
       </div>
-      <div className="border-t border-[var(--border)] pt-3">
-        <div className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
-          Pockets
-        </div>
-        <div className="flex items-baseline gap-2">
-          <span className="text-xl font-bold text-foreground tabular-nums">{pockets.length}</span>
-          <span className="text-[10px] text-muted-2">detected</span>
-        </div>
-        {best && (
-          <div className="mt-1 text-[11px] text-muted">
-            Best: <span className="font-semibold text-foreground">#{best.rank}</span> at{' '}
-            <span className={druggabilityText(best.druggability)}>
-              {Math.round(best.druggability * 100)}% druggability
+      {best && (
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3">
+          <div className="flex items-baseline justify-between mb-1">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-2">
+              Top pocket
             </span>
+            <span className="text-[10px] text-muted-2">#{best.rank}</span>
           </div>
-        )}
-      </div>
+          <div className="flex items-baseline gap-1">
+            <span className={`text-lg font-bold tabular-nums ${druggabilityText(best.druggability)}`}>
+              {Math.round(best.druggability * 100)}%
+            </span>
+            <span className="text-[10px] text-muted-2">druggability</span>
+          </div>
+        </div>
+      )}
       <a
         href={`https://www.uniprot.org/uniprotkb/${target.uniprot_id}`}
         target="_blank"
@@ -214,24 +221,24 @@ function SafetyTab({ uniprotId }: { uniprotId: string }) {
     );
   }
   if (!data) {
-    return <div className="p-3 text-xs text-muted-2">No safety data available.</div>;
+    return <div className="p-4 text-xs text-muted-2">No safety data available.</div>;
   }
 
   const tractKeys = Object.keys(data.tractability);
   return (
-    <div className="space-y-3 p-3">
+    <div className="space-y-4 p-4">
       <div>
-        <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
+        <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
           Tractability
         </div>
         {tractKeys.length > 0 ? (
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             {tractKeys.map((mod) => (
               <div key={mod} className="flex items-center justify-between text-[11px]">
                 <span className="text-muted">
                   {mod === 'small_molecule' ? 'Small molecule' : mod === 'antibody' ? 'Antibody' : mod}
                 </span>
-                <span className="rounded bg-[var(--surface-hover)] px-1.5 py-0.5 text-[10px] font-medium text-foreground">
+                <span className="rounded-md bg-[var(--surface-hover)] px-2 py-0.5 text-[10px] font-medium text-foreground">
                   {data.tractability[mod]}
                 </span>
               </div>
@@ -241,20 +248,20 @@ function SafetyTab({ uniprotId }: { uniprotId: string }) {
           <div className="text-[11px] text-muted-2">No tractability data</div>
         )}
       </div>
-      <div className="flex items-center justify-between border-t border-[var(--border)] pt-2.5 text-[11px]">
+      <div className="flex items-center justify-between text-[11px]">
         <span className="text-muted">Known drugs</span>
-        <span className="rounded bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-bold text-blue-400 tabular-nums">
+        <span className="rounded-md bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-400 tabular-nums">
           {data.known_drugs_count}
         </span>
       </div>
       <div>
-        <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
+        <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
           Safety signals
         </div>
         {data.safety_liabilities.length > 0 ? (
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             {data.safety_liabilities.slice(0, 6).map((sl, i) => (
-              <div key={i} className="flex items-start gap-1.5 text-[11px]">
+              <div key={i} className="flex items-start gap-2 text-[11px]">
                 <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
                 <span className="text-foreground">{sl.event}</span>
               </div>
@@ -292,7 +299,7 @@ function SimilarTab({ uniprotId }: { uniprotId: string }) {
     );
   }
   if (targets.length === 0) {
-    return <div className="p-3 text-xs text-muted-2">No similar targets found.</div>;
+    return <div className="p-4 text-xs text-muted-2">No similar targets found.</div>;
   }
   return (
     <div className="divide-y divide-[var(--border)]">
@@ -300,7 +307,7 @@ function SimilarTab({ uniprotId }: { uniprotId: string }) {
         <Link
           key={t.uniprot_id}
           href={`/app/target/${t.uniprot_id}`}
-          className="flex items-center justify-between gap-2 px-3 py-2 text-[11px] transition-colors hover:bg-[var(--surface-hover)]"
+          className="flex items-center justify-between gap-2 px-4 py-2.5 text-[11px] transition-colors hover:bg-[var(--surface-hover)]"
         >
           <div className="min-w-0">
             <div className="font-medium text-foreground truncate">
@@ -370,15 +377,15 @@ function AITab({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex-1 overflow-y-auto p-3">
-        <div className="mb-2 flex items-center gap-1.5">
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="mb-3 flex items-center gap-1.5">
           <Sparkles className="h-3 w-3 text-emerald-400" />
           <span className="text-[10px] font-semibold uppercase tracking-widest text-emerald-400">
             AI pocket analysis
           </span>
         </div>
         {loading ? (
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <div className="shimmer h-3 w-full rounded" />
             <div className="shimmer h-3 w-5/6 rounded" />
             <div className="shimmer h-3 w-4/6 rounded" />
@@ -389,7 +396,7 @@ function AITab({
           <p className="text-[12px] leading-relaxed text-foreground">{summary}</p>
         )}
       </div>
-      <div className="shrink-0 border-t border-[var(--border)] p-2">
+      <div className="shrink-0 border-t border-[var(--border)] p-3">
         <button
           onClick={onAskAI}
           className="flex h-8 w-full items-center justify-center gap-1.5 rounded-md bg-emerald-500/10 text-[11px] font-medium text-emerald-400 hover:bg-emerald-500/20 transition-colors"
@@ -402,7 +409,7 @@ function AITab({
   );
 }
 
-/* ── Main target page ──────────────────────────────────── */
+/* ── Main target page ────────────────────────────────── */
 export default function TargetPage() {
   const params = useParams<{ uniprotId: string }>();
   const [target, setTarget] = useState<TargetInfo | null>(null);
@@ -416,14 +423,12 @@ export default function TargetPage() {
   const [activeTab, setActiveTab] = useState<Tab>('summary');
   const { setContext, toggleDrawer } = useAssistant();
 
-  // Page title
   useEffect(() => {
     if (target) {
       document.title = `${target.gene_name || target.name} — OpenDDE`;
     }
   }, [target]);
 
-  // Assistant context
   useEffect(() => {
     if (!target) return;
     setContext({
@@ -445,7 +450,6 @@ export default function TargetPage() {
     });
   }, [target, pockets, setContext]);
 
-  // Resolve target
   useEffect(() => {
     async function resolve() {
       try {
@@ -460,7 +464,6 @@ export default function TargetPage() {
     resolve();
   }, [params.uniprotId]);
 
-  // Fetch pockets
   useEffect(() => {
     if (!target?.uniprot_id) return;
     async function fetchPockets() {
@@ -503,13 +506,12 @@ export default function TargetPage() {
     return { x: p.center_x, y: p.center_y, z: p.center_z };
   }, [pockets, selectedPocket]);
 
-  /* ── Loading / error ─────────────────────────────── */
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-6 w-6 animate-spin text-muted-2" />
-          <p className="text-xs text-muted">Resolving target…</p>
+          <p className="text-xs text-muted">Resolving target...</p>
         </div>
       </div>
     );
@@ -521,7 +523,7 @@ export default function TargetPage() {
         <div className="flex flex-col items-center gap-3">
           <p className="text-sm text-red-400">{error || 'Target not found'}</p>
           <Link href="/app/dashboard" className="text-xs text-emerald-400 hover:underline">
-            ← Back to dashboard
+            Back to dashboard
           </Link>
         </div>
       </div>
@@ -530,83 +532,108 @@ export default function TargetPage() {
 
   const structureUrl = target.structure_url ? `${API_BASE}${target.structure_url}` : null;
 
-  /* ── 3-panel layout ──────────────────────────────── */
   return (
-    <div className="flex h-full flex-col">
-      {/* ── Compact header (36px) ────────────────── */}
-      <header className="flex h-9 shrink-0 items-center gap-3 border-b border-[var(--border)] px-4">
-        <h1 className="text-sm font-semibold text-foreground truncate">
-          {target.gene_name && (
-            <span className="text-emerald-400">{target.gene_name} </span>
-          )}
-          — {target.name}
-        </h1>
-        <span className="text-[11px] italic text-muted-2 truncate hidden md:inline">
-          {target.organism}
-        </span>
-        <span className="text-[11px] text-muted-2 tabular-nums hidden sm:inline">
-          {target.length} aa
-        </span>
-        {target.structure_source && (
-          <span
-            className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
-              target.structure_source === 'alphafold_db'
-                ? 'bg-blue-500/10 text-blue-400'
-                : 'bg-purple-500/10 text-purple-400'
-            }`}
+    <div className="flex h-full flex-col overflow-hidden">
+      {/* ── Header ────────────────────────────────────── */}
+      <header className="flex shrink-0 items-center gap-4 border-b border-[var(--border)] bg-[var(--surface)] px-5 py-3">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-base font-semibold text-foreground truncate">
+            {target.gene_name && (
+              <span className="text-emerald-400">{target.gene_name}</span>
+            )}
+            {target.gene_name && ' — '}
+            {target.name}
+          </h1>
+          <div className="flex items-center gap-3 mt-0.5">
+            <span className="text-[11px] italic text-muted-2">{target.organism}</span>
+            <span className="text-[11px] text-muted-2 tabular-nums">{target.length} aa</span>
+            {target.structure_source && (
+              <span
+                className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium ${
+                  target.structure_source === 'alphafold_db'
+                    ? 'bg-blue-500/10 text-blue-400'
+                    : 'bg-purple-500/10 text-purple-400'
+                }`}
+              >
+                {target.structure_source === 'alphafold_db' ? 'AlphaFold' : 'PDB'}
+              </span>
+            )}
+            {target.plddt_mean != null && (
+              <span className="text-[11px] text-muted-2">
+                pLDDT <span className="tabular-nums text-muted">{target.plddt_mean.toFixed(1)}</span>
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/app/target/${target.uniprot_id}/report`}
+            className="flex h-8 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 text-[11px] font-medium text-foreground hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-colors"
           >
-            {target.structure_source === 'alphafold_db' ? 'AlphaFold' : 'PDB'}
-          </span>
-        )}
-        {target.plddt_mean != null && (
-          <span className="text-[11px] text-muted-2 hidden lg:inline">
-            pLDDT <span className="tabular-nums text-muted">{target.plddt_mean.toFixed(1)}</span>
-          </span>
-        )}
-        <div className="ml-auto font-mono text-[11px] text-muted-2">{target.uniprot_id}</div>
+            <FileText className="h-3.5 w-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Report</span>
+          </Link>
+          <button
+            onClick={toggleDrawer}
+            className="flex h-8 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 text-[11px] font-medium text-foreground hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-colors"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+            <span className="hidden sm:inline">Ask AI</span>
+          </button>
+          <a
+            href={`${API_BASE}/api/v1/target/${target.uniprot_id}/report?format=json`}
+            className="flex h-8 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 text-[11px] font-medium text-foreground hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-colors"
+          >
+            <Download className="h-3.5 w-3.5 text-purple-400" />
+            <span className="hidden sm:inline">Export</span>
+          </a>
+        </div>
       </header>
 
-      {/* ── 3-panel main area ─────────────────────── */}
-      <div className="flex min-h-0 flex-1">
-        {/* 3D viewer — flex 1 */}
-        <div className="relative flex min-w-0 flex-1 bg-black">
-          {structureUrl ? (
-            <StructureViewer
-              structureUrl={structureUrl}
-              height="100%"
-              pocketHighlights={pocketHighlights}
-              focusPoint={focusPoint}
-            />
-          ) : (
-            <div className="flex flex-1 items-center justify-center">
-              <p className="text-xs text-muted">No structure available</p>
+      {/* ── Main content ─────────────────────────────── */}
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        {/* Left: viewer + pockets */}
+        <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+          {/* 3D Viewer */}
+          <div className="relative shrink-0 bg-black" style={{ height: '55vh', minHeight: 360 }}>
+            {structureUrl ? (
+              <StructureViewer
+                structureUrl={structureUrl}
+                height="100%"
+                pocketHighlights={pocketHighlights}
+                focusPoint={focusPoint}
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center">
+                <p className="text-xs text-muted">No structure available</p>
+              </div>
+            )}
+            {/* Floating pocket count badge */}
+            <div className="absolute bottom-3 left-3 rounded-lg border border-white/10 bg-black/60 backdrop-blur-sm px-3 py-1.5">
+              <span className="text-[10px] text-white/60">
+                <span className="text-sm font-bold text-white tabular-nums">{pockets.length}</span> pockets detected
+              </span>
             </div>
-          )}
-        </div>
-
-        {/* Pocket panel — 260px */}
-        <aside className="hidden w-[260px] shrink-0 flex-col border-l border-[var(--border)] bg-[var(--surface)] md:flex">
-          <div className="flex h-8 shrink-0 items-center justify-between border-b border-[var(--border)] px-3">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-2">
-              Pockets
-            </span>
-            <span className="text-[10px] text-muted-2 tabular-nums">
-              {pockets.length} found
-            </span>
           </div>
-          <div className="flex-1 overflow-y-auto">
+
+          {/* Pockets grid */}
+          <div className="p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-foreground">Binding Pockets</h2>
+              <span className="text-[10px] text-muted-2">Click to highlight in 3D</span>
+            </div>
             {pocketsLoading ? (
-              <div className="flex h-40 items-center justify-center">
-                <Loader2 className="h-4 w-4 animate-spin text-muted-2" />
+              <div className="flex h-32 items-center justify-center">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-2" />
               </div>
             ) : pockets.length === 0 ? (
-              <div className="flex h-40 items-center justify-center text-xs text-muted-2">
-                No pockets detected
+              <div className="flex h-32 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+                <p className="text-xs text-muted-2">No pockets detected</p>
               </div>
             ) : (
-              <div className="divide-y divide-[var(--border)]">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                 {pockets.map((p) => (
-                  <PocketRow
+                  <PocketCard
                     key={p.rank}
                     pocket={p}
                     selected={selectedPocket === p.rank}
@@ -617,15 +644,11 @@ export default function TargetPage() {
               </div>
             )}
           </div>
-          <div className="shrink-0 border-t border-[var(--border)] px-3 py-1.5 text-center text-[9px] text-muted-2">
-            Powered by P2Rank
-          </div>
-        </aside>
+        </div>
 
-        {/* Info panel — 280px */}
-        <aside className="hidden w-[280px] shrink-0 flex-col border-l border-[var(--border)] bg-[var(--surface)] lg:flex">
-          {/* Tabs */}
-          <div className="flex h-8 shrink-0 border-b border-[var(--border)]">
+        {/* Right: info panel */}
+        <aside className="hidden lg:flex w-[320px] shrink-0 flex-col border-l border-[var(--border)] bg-[var(--surface)]">
+          <div className="flex shrink-0 border-b border-[var(--border)]">
             {([
               { id: 'summary', label: 'Summary', icon: Info },
               { id: 'safety', label: 'Safety', icon: Shield },
@@ -638,7 +661,7 @@ export default function TargetPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex flex-1 items-center justify-center gap-1 border-b-2 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
+                  className={`flex flex-1 items-center justify-center gap-1.5 py-2.5 border-b-2 text-[10px] font-semibold uppercase tracking-wider transition-colors ${
                     active
                       ? 'border-emerald-500 text-emerald-400'
                       : 'border-transparent text-muted-2 hover:text-foreground'
@@ -650,7 +673,6 @@ export default function TargetPage() {
               );
             })}
           </div>
-          {/* Tab content */}
           <div className="min-h-0 flex-1 overflow-y-auto">
             {activeTab === 'summary' && <SummaryTab target={target} pockets={pockets} />}
             {activeTab === 'safety' && <SafetyTab uniprotId={target.uniprot_id} />}
@@ -659,45 +681,29 @@ export default function TargetPage() {
               <AITab target={target} pockets={pockets} onAskAI={toggleDrawer} />
             )}
           </div>
+          {/* Quick links */}
+          <div className="shrink-0 border-t border-[var(--border)] p-3 space-y-1.5">
+            {hasPredictions && (
+              <Link
+                href={`/app/target/${target.uniprot_id}/compare`}
+                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-[11px] text-muted hover:bg-[var(--surface-hover)] hover:text-foreground transition-colors"
+              >
+                <BarChart3 className="h-3.5 w-3.5 text-blue-400" />
+                Compare ligands
+              </Link>
+            )}
+            <a
+              href={`https://www.uniprot.org/uniprotkb/${target.uniprot_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-[11px] text-muted hover:bg-[var(--surface-hover)] hover:text-foreground transition-colors"
+            >
+              <ExternalLink className="h-3.5 w-3.5 text-emerald-400" />
+              UniProt entry
+            </a>
+          </div>
         </aside>
       </div>
-
-      {/* ── Action bar (40px) ─────────────────────── */}
-      <footer className="flex h-10 shrink-0 items-center gap-2 border-t border-[var(--border)] bg-[var(--surface)] px-3">
-        <Link
-          href={`/app/target/${target.uniprot_id}/report`}
-          className="flex h-7 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--bg)] px-2.5 text-[11px] font-medium text-foreground hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-colors"
-        >
-          <FileText className="h-3 w-3 text-amber-400" />
-          Report
-        </Link>
-        {hasPredictions && (
-          <Link
-            href={`/app/target/${target.uniprot_id}/compare`}
-            className="flex h-7 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--bg)] px-2.5 text-[11px] font-medium text-foreground hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-colors"
-          >
-            <BarChart3 className="h-3 w-3 text-blue-400" />
-            Compare ligands
-          </Link>
-        )}
-        <button
-          onClick={toggleDrawer}
-          className="flex h-7 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--bg)] px-2.5 text-[11px] font-medium text-foreground hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-colors"
-        >
-          <Sparkles className="h-3 w-3 text-emerald-400" />
-          Ask AI
-        </button>
-        <a
-          href={`${API_BASE}/api/v1/target/${target.uniprot_id}/report?format=json`}
-          className="flex h-7 items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--bg)] px-2.5 text-[11px] font-medium text-foreground hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-colors"
-        >
-          <Download className="h-3 w-3 text-purple-400" />
-          Export
-        </a>
-        <div className="ml-auto text-[10px] text-muted-2 hidden sm:block">
-          Click a pocket to zoom · Switch tabs for details
-        </div>
-      </footer>
     </div>
   );
 }

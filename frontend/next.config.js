@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  transpilePackages: ['molstar'],
   headers: async () => [
     {
       source: '/og-image.png',

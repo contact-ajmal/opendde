@@ -1,3 +1,2 @@
-interface Window {
-  $3Dmol: any;
-}
+// Global type declarations
+export {};

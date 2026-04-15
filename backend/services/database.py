@@ -1,35 +1,46 @@
 import json
 from datetime import datetime, timedelta, timezone
 
+import psycopg
+from psycopg.rows import dict_row
+from psycopg_pool import ConnectionPool
+
 from config import settings
 
 CACHE_TTL_DAYS = 7
+AI_SUMMARY_TTL_DAYS = 30
 
-_client = None
+pool = None
 
 
-def _get_client():
-    global _client
-    if _client is not None:
-        return _client
-    if not settings.SUPABASE_URL or not settings.SUPABASE_KEY:
-        return None
-    if "your-project" in settings.SUPABASE_URL:
-        return None
+def init_db():
+    global pool
+    if not settings.DATABASE_URL:
+        return
     try:
-        from supabase import create_client
-        _client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
-        return _client
-    except Exception:
-        return None
+        pool = ConnectionPool(settings.DATABASE_URL, min_size=1, max_size=10)
+        # pool automatically opens
+    except Exception as e:
+        print(f"Failed to initialize database pool: {e}")
+        pool = None
 
 
-def _is_stale(timestamp_str: str | None) -> bool:
+def close_db():
+    global pool
+    if pool:
+        pool.close()
+        pool = None
+
+
+def _is_stale(timestamp_str: str | datetime | None, ttl_days: int) -> bool:
     if not timestamp_str:
         return True
     try:
-        ts = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
-        return datetime.now(timezone.utc) - ts > timedelta(days=CACHE_TTL_DAYS)
+        if isinstance(timestamp_str, str):
+            ts = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
+        else:
+            ts = timestamp_str
+        return datetime.now(timezone.utc) - ts > timedelta(days=ttl_days)
     except Exception:
         return True
 
@@ -37,246 +48,285 @@ def _is_stale(timestamp_str: str | None) -> bool:
 # ── Targets ──────────────────────────────────────────────────────────────
 
 def get_cached_target(uniprot_id: str) -> dict | None:
-    sb = _get_client()
-    if not sb:
+    if not pool:
         return None
     try:
-        resp = sb.table("targets").select("*").eq("uniprot_id", uniprot_id).execute()
-        if resp.data and not _is_stale(resp.data[0].get("resolved_at")):
-            return resp.data[0]
+        with pool.connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute("SELECT * FROM targets WHERE uniprot_id = %s", (uniprot_id,))
+                row = cur.fetchone()
+                if row and not _is_stale(row.get("resolved_at"), CACHE_TTL_DAYS):
+                    # Format datetime -> ISO string for compatibility
+                    if row.get("resolved_at"):
+                        row["resolved_at"] = row["resolved_at"].isoformat()
+                    return dict(row)
     except Exception:
         pass
     return None
 
 
 def cache_target(target: dict) -> None:
-    sb = _get_client()
-    if not sb:
+    if not pool:
         return
     try:
-        row = {
-            "uniprot_id": target["uniprot_id"],
-            "name": target["name"],
-            "gene_name": target.get("gene_name"),
-            "organism": target["organism"],
-            "sequence": target["sequence"],
-            "length": target["length"],
-            "structure_source": target.get("structure_source"),
-            "plddt_mean": target.get("plddt_mean"),
-            "resolved_at": datetime.now(timezone.utc).isoformat(),
-        }
-        sb.table("targets").upsert(row, on_conflict="uniprot_id").execute()
-    except Exception:
-        pass
+        resolved_at = datetime.now(timezone.utc)
+        query = """
+            INSERT INTO targets (uniprot_id, name, gene_name, organism, sequence, length, structure_source, plddt_mean, resolved_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (uniprot_id) DO UPDATE SET
+                name = EXCLUDED.name,
+                gene_name = EXCLUDED.gene_name,
+                organism = EXCLUDED.organism,
+                sequence = EXCLUDED.sequence,
+                length = EXCLUDED.length,
+                structure_source = EXCLUDED.structure_source,
+                plddt_mean = EXCLUDED.plddt_mean,
+                resolved_at = EXCLUDED.resolved_at
+        """
+        with pool.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (
+                    target["uniprot_id"],
+                    target["name"],
+                    target.get("gene_name"),
+                    target["organism"],
+                    target["sequence"],
+                    target["length"],
+                    target.get("structure_source"),
+                    target.get("plddt_mean"),
+                    resolved_at
+                ))
+    except Exception as e:
+        print(f"Error caching target: {e}")
 
 
 # ── Pockets ──────────────────────────────────────────────────────────────
 
 def get_cached_pockets(target_id: str) -> list[dict] | None:
-    sb = _get_client()
-    if not sb:
+    if not pool:
         return None
     try:
-        resp = (
-            sb.table("pockets")
-            .select("*")
-            .eq("target_id", target_id)
-            .order("rank")
-            .execute()
-        )
-        if resp.data and not _is_stale(resp.data[0].get("predicted_at")):
-            for row in resp.data:
-                if isinstance(row.get("residues"), str):
-                    row["residues"] = json.loads(row["residues"])
-            return resp.data
+        with pool.connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute("SELECT * FROM pockets WHERE target_id = %s ORDER BY rank", (target_id,))
+                rows = cur.fetchall()
+                if rows and not _is_stale(rows[0].get("predicted_at"), CACHE_TTL_DAYS):
+                    for row in rows:
+                        if isinstance(row.get("residues"), str):
+                            row["residues"] = json.loads(row["residues"])
+                        if row.get("predicted_at"):
+                            row["predicted_at"] = row["predicted_at"].isoformat()
+                    return [dict(r) for r in rows]
     except Exception:
         pass
     return None
 
 
 def cache_pockets(target_id: str, pockets: list[dict]) -> None:
-    sb = _get_client()
-    if not sb:
+    if not pool:
         return
     try:
-        # Delete old pockets for this target
-        sb.table("pockets").delete().eq("target_id", target_id).execute()
-        rows = []
-        for p in pockets:
-            rows.append({
-                "target_id": target_id,
-                "rank": p["rank"],
-                "score": p["score"],
-                "druggability": p["druggability"],
-                "center_x": p["center_x"],
-                "center_y": p["center_y"],
-                "center_z": p["center_z"],
-                "residues": json.dumps(p["residues"]),
-                "residue_count": p["residue_count"],
-                "predicted_at": datetime.now(timezone.utc).isoformat(),
-            })
-        if rows:
-            sb.table("pockets").insert(rows).execute()
-    except Exception:
-        pass
+        predicted_at = datetime.now(timezone.utc)
+        with pool.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM pockets WHERE target_id = %s", (target_id,))
+                if pockets:
+                    query = """
+                        INSERT INTO pockets (target_id, rank, score, druggability, center_x, center_y, center_z, residues, residue_count, predicted_at)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    data = []
+                    for p in pockets:
+                        data.append((
+                            target_id,
+                            p["rank"],
+                            p["score"],
+                            p["druggability"],
+                            p["center_x"],
+                            p["center_y"],
+                            p["center_z"],
+                            json.dumps(p["residues"]),
+                            p["residue_count"],
+                            predicted_at
+                        ))
+                    cur.executemany(query, data)
+    except Exception as e:
+        print(f"Error caching pockets: {e}")
 
 
 # ── Ligands ──────────────────────────────────────────────────────────────
 
 def get_cached_ligands(target_id: str) -> list[dict] | None:
-    sb = _get_client()
-    if not sb:
+    if not pool:
         return None
     try:
-        resp = (
-            sb.table("known_ligands")
-            .select("*")
-            .eq("target_id", target_id)
-            .order("activity_value_nm")
-            .execute()
-        )
-        if resp.data and not _is_stale(resp.data[0].get("fetched_at")):
-            return resp.data
+        with pool.connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute("SELECT * FROM known_ligands WHERE target_id = %s ORDER BY activity_value_nm", (target_id,))
+                rows = cur.fetchall()
+                if rows and not _is_stale(rows[0].get("fetched_at"), CACHE_TTL_DAYS):
+                    for row in rows:
+                        if row.get("fetched_at"):
+                            row["fetched_at"] = row["fetched_at"].isoformat()
+                    return [dict(r) for r in rows]
     except Exception:
         pass
     return None
 
 
 def cache_ligands(target_id: str, ligands: list[dict]) -> None:
-    sb = _get_client()
-    if not sb:
+    if not pool:
         return
     try:
-        sb.table("known_ligands").delete().eq("target_id", target_id).execute()
-        rows = []
-        for lig in ligands:
-            rows.append({
-                "target_id": target_id,
-                "chembl_id": lig.get("chembl_id"),
-                "name": lig.get("name"),
-                "smiles": lig.get("smiles", ""),
-                "activity_type": lig.get("activity_type"),
-                "activity_value_nm": lig.get("activity_value_nm"),
-                "clinical_phase": lig.get("clinical_phase", 0),
-                "clinical_phase_label": lig.get("clinical_phase_label", "Preclinical"),
-                "image_url": lig.get("image_url"),
-                "fetched_at": datetime.now(timezone.utc).isoformat(),
-            })
-        if rows:
-            sb.table("known_ligands").insert(rows).execute()
-    except Exception:
-        pass
+        fetched_at = datetime.now(timezone.utc)
+        with pool.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM known_ligands WHERE target_id = %s", (target_id,))
+                if ligands:
+                    query = """
+                        INSERT INTO known_ligands (target_id, chembl_id, name, smiles, activity_type, activity_value_nm, clinical_phase, clinical_phase_label, image_url, fetched_at)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    data = []
+                    for lig in ligands:
+                        data.append((
+                            target_id,
+                            lig.get("chembl_id"),
+                            lig.get("name"),
+                            lig.get("smiles", ""),
+                            lig.get("activity_type"),
+                            lig.get("activity_value_nm"),
+                            lig.get("clinical_phase", 0),
+                            lig.get("clinical_phase_label", "Preclinical"),
+                            lig.get("image_url"),
+                            fetched_at
+                        ))
+                    cur.executemany(query, data)
+    except Exception as e:
+        print(f"Error caching ligands: {e}")
 
 
 # ── Predictions ──────────────────────────────────────────────────────────
 
 def save_prediction(prediction: dict) -> None:
-    sb = _get_client()
-    if not sb:
+    if not pool:
         return
     try:
-        row = {
-            "prediction_id": prediction["prediction_id"],
-            "target_id": prediction.get("uniprot_id"),
-            "pocket_rank": prediction.get("pocket_rank"),
-            "ligand_name": prediction.get("ligand_name"),
-            "ligand_smiles": prediction.get("ligand_smiles"),
-            "ligand_ccd": prediction.get("ligand_ccd"),
-            "status": prediction.get("status", "prepared"),
-            "created_at": prediction.get("created_at", datetime.now(timezone.utc).isoformat()),
-        }
-        sb.table("complex_predictions").upsert(row, on_conflict="prediction_id").execute()
-    except Exception:
-        pass
+        query = """
+            INSERT INTO complex_predictions (prediction_id, target_id, pocket_rank, ligand_name, ligand_smiles, ligand_ccd, status, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (prediction_id) DO UPDATE SET
+                target_id = EXCLUDED.target_id,
+                pocket_rank = EXCLUDED.pocket_rank,
+                ligand_name = EXCLUDED.ligand_name,
+                ligand_smiles = EXCLUDED.ligand_smiles,
+                ligand_ccd = EXCLUDED.ligand_ccd,
+                status = EXCLUDED.status,
+                created_at = EXCLUDED.created_at
+        """
+        
+        created_at = prediction.get("created_at")
+        if isinstance(created_at, str):
+            created_at = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+        elif not created_at:
+            created_at = datetime.now(timezone.utc)
+            
+        with pool.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (
+                    prediction["prediction_id"],
+                    prediction.get("uniprot_id"),
+                    prediction.get("pocket_rank"),
+                    prediction.get("ligand_name"),
+                    prediction.get("ligand_smiles"),
+                    prediction.get("ligand_ccd"),
+                    prediction.get("status", "prepared"),
+                    created_at
+                ))
+    except Exception as e:
+        print(f"Error saving prediction: {e}")
 
 
 def update_prediction_status(prediction_id: str, status: str) -> None:
-    sb = _get_client()
-    if not sb:
+    if not pool:
         return
     try:
-        sb.table("complex_predictions").update({"status": status}).eq("prediction_id", prediction_id).execute()
-    except Exception:
-        pass
+        with pool.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE complex_predictions SET status = %s WHERE prediction_id = %s", (status, prediction_id))
+    except Exception as e:
+        print(f"Error updating prediction status: {e}")
 
 
 def get_prediction(prediction_id: str) -> dict | None:
-    sb = _get_client()
-    if not sb:
+    if not pool:
         return None
     try:
-        resp = (
-            sb.table("complex_predictions")
-            .select("*")
-            .eq("prediction_id", prediction_id)
-            .execute()
-        )
-        if resp.data:
-            return resp.data[0]
+        with pool.connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute("SELECT * FROM complex_predictions WHERE prediction_id = %s", (prediction_id,))
+                row = cur.fetchone()
+                if row:
+                    if row.get("created_at"):
+                        row["created_at"] = row["created_at"].isoformat()
+                    # Backwards compatibility key mapping
+                    out = dict(row)
+                    if "target_id" in out and out["target_id"]:
+                        out["uniprot_id"] = out["target_id"]
+                    return out
     except Exception:
         pass
     return None
 
 
-AI_SUMMARY_TTL_DAYS = 30
-
-
 def get_cached_ai_summary(target_id: str, summary_type: str = "pocket_analysis") -> str | None:
-    sb = _get_client()
-    if not sb:
+    if not pool:
         return None
     try:
-        resp = (
-            sb.table("ai_summaries")
-            .select("summary, generated_at")
-            .eq("target_id", target_id)
-            .eq("summary_type", summary_type)
-            .execute()
-        )
-        if resp.data:
-            row = resp.data[0]
-            ts = row.get("generated_at")
-            if ts:
-                try:
-                    generated = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-                    if datetime.now(timezone.utc) - generated > timedelta(days=AI_SUMMARY_TTL_DAYS):
-                        return None
-                except Exception:
-                    pass
-            return row.get("summary")
+        with pool.connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute("SELECT summary, generated_at FROM ai_summaries WHERE target_id = %s AND summary_type = %s", (target_id, summary_type))
+                row = cur.fetchone()
+                if row:
+                    if not _is_stale(row.get("generated_at"), AI_SUMMARY_TTL_DAYS):
+                        return row.get("summary")
     except Exception:
         pass
     return None
 
 
 def cache_ai_summary(target_id: str, summary: str, summary_type: str = "pocket_analysis") -> None:
-    sb = _get_client()
-    if not sb:
+    if not pool:
         return
     try:
-        row = {
-            "target_id": target_id,
-            "summary_type": summary_type,
-            "summary": summary,
-            "generated_at": datetime.now(timezone.utc).isoformat(),
-        }
-        sb.table("ai_summaries").upsert(row, on_conflict="target_id,summary_type").execute()
-    except Exception:
-        pass
+        generated_at = datetime.now(timezone.utc)
+        query = """
+            INSERT INTO ai_summaries (target_id, summary_type, summary, generated_at)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (target_id, summary_type) DO UPDATE SET
+                summary = EXCLUDED.summary,
+                generated_at = EXCLUDED.generated_at
+        """
+        with pool.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, (target_id, summary_type, summary, generated_at))
+    except Exception as e:
+        print(f"Error caching ai summary: {e}")
 
 
 def get_predictions_for_target(uniprot_id: str) -> list[dict]:
-    sb = _get_client()
-    if not sb:
+    if not pool:
         return []
     try:
-        resp = (
-            sb.table("complex_predictions")
-            .select("*")
-            .eq("target_id", uniprot_id)
-            .order("created_at", desc=True)
-            .execute()
-        )
-        return resp.data or []
+        with pool.connection() as conn:
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute("SELECT * FROM complex_predictions WHERE target_id = %s ORDER BY created_at DESC", (uniprot_id,))
+                rows = cur.fetchall()
+                for row in rows:
+                    if row.get("created_at"):
+                        row["created_at"] = row["created_at"].isoformat()
+                    if "target_id" in row and row["target_id"]:
+                        row["uniprot_id"] = row["target_id"]
+                return [dict(r) for r in rows]
     except Exception:
         return []

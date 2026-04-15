@@ -1,7 +1,7 @@
+@import "molstar/build/viewer/molstar.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 /* ── Font stacks ─────────────────────────────────────────────── */
 :root {
   --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;

@@ -57,3 +57,92 @@ export interface UploadResponse {
   structure_url: string;
   status: string;
 }
+
+export interface PocketProperties {
+  rank: number;
+  score: number;
+  druggability: number;
+  residue_count: number;
+  volume_angstrom3: number;
+  surface_area_angstrom2: number;
+  depth_angstrom: number;
+  enclosure_ratio: number;
+  center: { x: number; y: number; z: number };
+  hydrophobic_ratio: number;
+  polar_ratio: number;
+  charged_ratio: number;
+  aromatic_ratio: number;
+  hbond_donors: number;
+  hbond_acceptors: number;
+  residues_by_type: {
+    hydrophobic: string[];
+    polar: string[];
+    charged_positive: string[];
+    charged_negative: string[];
+    aromatic: string[];
+  };
+}
+
+export interface InteractionAtom {
+  name: string;
+  element: string;
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface HydrogenBond {
+  ligand_atom: string;
+  protein_atom: string;
+  distance: number;
+  angle?: number | null;
+}
+
+export interface HydrophobicContact {
+  ligand_atom: string;
+  protein_atom: string;
+  distance: number;
+}
+
+export interface PiStacking {
+  ligand_ring: string;
+  protein_ring: string;
+  distance: number;
+  type: string;
+}
+
+export interface SaltBridge {
+  ligand_atom: string;
+  protein_atom: string;
+  distance: number;
+}
+
+export interface CationPi {
+  ligand_atom?: string;
+  protein_atom?: string;
+  ligand_ring?: string;
+  protein_ring?: string;
+  distance: number;
+}
+
+export interface InteractionsResponse {
+  prediction_id: string;
+  ligand_atoms: InteractionAtom[];
+  hydrogen_bonds: HydrogenBond[];
+  hydrophobic_contacts: HydrophobicContact[];
+  pi_stacking: PiStacking[];
+  salt_bridges: SaltBridge[];
+  cation_pi: CationPi[];
+  contact_residues: string[];
+}
+
+export interface Prediction {
+  prediction_id: string;
+  uniprot_id: string;
+  ligand_name: string | null;
+  ligand_smiles: string | null;
+  ligand_ccd: string | null;
+  status: string;
+  structure_url: string | null;
+  created_at: string;
+}

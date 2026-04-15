@@ -16,7 +16,7 @@ const BASE = process.env.APP_URL || 'http://localhost:3000';
 const VIEWPORT = { width: 1440, height: 900 };
 const DEVICE_SCALE_FACTOR = 2; // retina
 
-const UNIPROT = 'P00533'; // EGFR — always populated
+const UNIPROT = 'A0A7I2V3N4'; // ACE2 — populated in current DB
 
 const pages = [
   {

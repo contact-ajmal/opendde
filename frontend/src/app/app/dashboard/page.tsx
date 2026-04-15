@@ -15,6 +15,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { apiGet, apiPost } from '@/lib/api';
+import TargetDirectory from '@/components/TargetDirectory';
 
 /* ── Types ─────────────────────────────────────────────── */
 interface RecentTarget {
@@ -157,38 +158,6 @@ function PredictionStatusBadge({ status }: { status: string }) {
   );
 }
 
-/* ── Popular target chips (first-run state) ───────────── */
-function PopularTargetChips() {
-  const router = useRouter();
-  const [loadingGene, setLoadingGene] = useState<string | null>(null);
-
-  async function go(gene: string) {
-    setLoadingGene(gene);
-    try {
-      const result = await apiPost('/target/resolve', { query: gene });
-      router.push(`/app/target/${result.uniprot_id}`);
-    } catch {
-      setLoadingGene(null);
-    }
-  }
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {POPULAR_TARGETS.map((t) => (
-        <button
-          key={t.gene}
-          onClick={() => go(t.gene)}
-          disabled={loadingGene !== null}
-          className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs transition-colors hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] disabled:opacity-50"
-        >
-          <span className="font-semibold text-foreground">{t.gene}</span>
-          <span className="text-muted-2">— {t.desc}</span>
-          {loadingGene === t.gene && <Loader2 className="h-3 w-3 animate-spin text-muted-2" />}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 /* ── Dashboard page ────────────────────────────────────── */
 export default function DashboardPage() {
@@ -229,11 +198,8 @@ export default function DashboardPage() {
             <p className="mt-1 text-sm text-muted">Start by searching a protein target above.</p>
           </div>
 
-          <div className="w-full max-w-2xl">
-            <div className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
-              Popular targets
-            </div>
-            <PopularTargetChips />
+          <div className="w-full max-w-5xl mt-6">
+            <TargetDirectory />
           </div>
 
           <div className="flex items-center gap-3 text-xs text-muted">
@@ -432,6 +398,14 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Full Target Directory Bottom Shelf */}
+      <div className="shrink-0 mt-4 pb-8">
+        <div className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-2 ml-1">
+          Explore Target Database
+        </div>
+        <TargetDirectory />
+      </div>
     </div>
   );
 }

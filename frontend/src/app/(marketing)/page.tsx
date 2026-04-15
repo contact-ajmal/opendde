@@ -60,12 +60,12 @@ function BackgroundGrid() {
   );
 }
 
-// ── Animated protein silhouette ─────────────────────────────
+// ── Hero screenshot (live EGFR target page) ─────────────────
 function ProteinVisual() {
   return (
-    <div className="relative mx-auto w-full max-w-3xl">
-      <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl">
-        {/* Simulated platform UI */}
+    <div className="relative mx-auto w-full max-w-5xl">
+      <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl shadow-black/50">
+        {/* Browser chrome */}
         <div className="flex items-center gap-2 border-b border-[var(--border)] px-4 py-2">
           <div className="flex gap-1.5">
             <div className="h-3 w-3 rounded-full bg-red-500/60" />
@@ -74,98 +74,16 @@ function ProteinVisual() {
           </div>
           <div className="flex-1 text-center text-xs text-muted">OpenDDE — EGFR (P00533)</div>
         </div>
-        <div className="relative flex h-[320px] sm:h-[380px]">
-          {/* Protein visualization area */}
-          <div className="flex-1 relative bg-[#0f172a] flex items-center justify-center">
-            <svg viewBox="0 0 400 300" className="w-full h-full p-8" xmlns="http://www.w3.org/2000/svg">
-              {/* Protein backbone - stylized helix */}
-              <path
-                d="M80,150 Q120,80 160,130 Q200,180 240,110 Q280,40 320,120"
-                fill="none"
-                stroke="#4f46e5"
-                strokeWidth="8"
-                strokeLinecap="round"
-                opacity="0.4"
-              >
-                <animate attributeName="d" dur="8s" repeatCount="indefinite" values="
-                  M80,150 Q120,80 160,130 Q200,180 240,110 Q280,40 320,120;
-                  M80,140 Q120,90 160,140 Q200,170 240,120 Q280,50 320,130;
-                  M80,150 Q120,80 160,130 Q200,180 240,110 Q280,40 320,120
-                " />
-              </path>
-              <path
-                d="M90,170 Q130,100 170,150 Q210,200 250,130 Q290,60 330,140"
-                fill="none"
-                stroke="#6366f1"
-                strokeWidth="6"
-                strokeLinecap="round"
-                opacity="0.3"
-              >
-                <animate attributeName="d" dur="10s" repeatCount="indefinite" values="
-                  M90,170 Q130,100 170,150 Q210,200 250,130 Q290,60 330,140;
-                  M90,160 Q130,110 170,160 Q210,190 250,140 Q290,70 330,150;
-                  M90,170 Q130,100 170,150 Q210,200 250,130 Q290,60 330,140
-                " />
-              </path>
-              {/* Pocket 1 - pulsing */}
-              <circle cx="160" cy="135" r="28" fill="#10b981" opacity="0.15">
-                <animate attributeName="r" dur="3s" repeatCount="indefinite" values="26;32;26" />
-                <animate attributeName="opacity" dur="3s" repeatCount="indefinite" values="0.1;0.25;0.1" />
-              </circle>
-              <circle cx="160" cy="135" r="4" fill="#10b981" opacity="0.8" />
-              <text x="160" y="175" textAnchor="middle" fill="#10b981" fontSize="10" fontWeight="600" opacity="0.8">Pocket 1</text>
-              {/* Pocket 2 */}
-              <circle cx="280" cy="105" r="22" fill="#3b82f6" opacity="0.15">
-                <animate attributeName="r" dur="4s" repeatCount="indefinite" values="20;26;20" />
-                <animate attributeName="opacity" dur="4s" repeatCount="indefinite" values="0.1;0.2;0.1" />
-              </circle>
-              <circle cx="280" cy="105" r="3" fill="#3b82f6" opacity="0.8" />
-              <text x="280" y="140" textAnchor="middle" fill="#3b82f6" fontSize="10" fontWeight="600" opacity="0.8">Pocket 2</text>
-              {/* Residue dots */}
-              {[
-                [145, 120], [155, 145], [170, 125], [175, 150], [148, 140],
-                [270, 95], [290, 110], [275, 115], [285, 95],
-              ].map(([cx, cy], i) => (
-                <circle key={i} cx={cx} cy={cy} r="2" fill={i < 5 ? '#10b981' : '#3b82f6'} opacity="0.5" />
-              ))}
-            </svg>
-          </div>
-          {/* Sidebar panel */}
-          <div className="hidden sm:flex w-48 flex-col border-l border-[var(--border)] bg-[var(--surface)] p-3">
-            <div className="mb-3 text-xs font-semibold text-foreground">Pockets</div>
-            <div className="space-y-2">
-              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-2">
-                <div className="flex justify-between text-xs">
-                  <span className="font-medium text-emerald-400">Pocket 1</span>
-                  <span className="text-emerald-400">87%</span>
-                </div>
-                <div className="mt-1 h-1 rounded-full bg-[var(--surface-alt)]">
-                  <div className="h-full w-[87%] rounded-full bg-emerald-500" />
-                </div>
-              </div>
-              <div className="rounded-lg bg-[var(--surface-alt)] p-2">
-                <div className="flex justify-between text-xs">
-                  <span className="font-medium text-blue-400">Pocket 2</span>
-                  <span className="text-blue-400">62%</span>
-                </div>
-                <div className="mt-1 h-1 rounded-full bg-[var(--surface-alt)]">
-                  <div className="h-full w-[62%] rounded-full bg-blue-500" />
-                </div>
-              </div>
-              <div className="rounded-lg bg-[var(--surface-alt)] p-2">
-                <div className="flex justify-between text-xs">
-                  <span className="font-medium text-muted">Pocket 3</span>
-                  <span className="text-muted">34%</span>
-                </div>
-                <div className="mt-1 h-1 rounded-full bg-[var(--surface-alt)]">
-                  <div className="h-full w-[34%] rounded-full bg-amber-500" />
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 text-xs font-semibold text-foreground">Ligands</div>
-            <div className="mt-1 text-xs text-muted">50 compounds</div>
-            <div className="mt-1 text-xs text-emerald-400">4 approved drugs</div>
-          </div>
+        {/* Real screenshot */}
+        <div className="relative aspect-[16/10] bg-[#0f172a]">
+          <Image
+            src="/screenshots/hero.png"
+            alt="OpenDDE target explorer — EGFR (P00533) with 22 druggable pockets"
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, 1100px"
+            className="object-cover object-top"
+          />
         </div>
       </div>
       {/* Glow effect behind the mockup */}
@@ -214,18 +132,6 @@ const walkthroughTabs = [
     gradient: 'from-blue-900/40 to-blue-950/60',
     accent: '#3b82f6',
     mockupLabel: '50 known compounds \u2014 4 approved drugs for EGFR',
-  },
-  {
-    id: 'prediction',
-    label: 'Complex prediction',
-    title: 'Complex prediction',
-    description: 'Generate AlphaFold 3-compatible input for protein-ligand binding predictions. Semi-automated workflow: prepare input, submit to AF3 Server, upload results, and visualize the predicted complex in 3D.',
-    checks: ['AF3 input generation', 'Confidence metrics', '3D comparison'],
-    href: '/app/dashboard',
-    cta: 'Try it now',
-    gradient: 'from-purple-900/40 to-purple-950/60',
-    accent: '#a78bfa',
-    mockupLabel: 'Erlotinib\u2013EGFR complex \u2014 ipTM 0.87, pLDDT 82.3',
   },
   {
     id: 'antibody',
@@ -301,7 +207,7 @@ function VisualWalkthrough() {
                   <div className="h-3 w-3 rounded-full bg-emerald-500/60" />
                 </div>
                 <div className="flex-1 text-center text-[11px] font-mono text-muted">
-                  opendde.org{tab.id === 'pockets' ? '/app/target/P00533' : tab.id === 'ligands' ? '/app/target/P00533/pocket/1' : tab.id === 'prediction' ? '/app/target/P00533/compare' : '/app/antibody'}
+                  opendde.org{tab.id === 'pockets' ? '/app/target/P00533' : tab.id === 'ligands' ? '/app/target/P00533/pocket/1' : '/app/antibody'}
                 </div>
                 <span className="text-[10px] font-medium text-emerald-400">{tab.mockupLabel}</span>
               </div>
@@ -383,22 +289,15 @@ const demoSteps = [
     url: '/app/target/P00533/pocket/1',
   },
   {
-    id: 'prediction',
-    title: '4. Compare predictions',
-    caption: 'Side-by-side evaluation of AlphaFold 3 complex predictions for each candidate.',
-    src: '/screenshots/prediction.png',
-    url: '/app/target/P00533/compare',
-  },
-  {
     id: 'antibody',
-    title: '5. Model antibodies',
+    title: '4. Model antibodies',
     caption: 'Predict VH/VL structures and CDR loops from sequence via ImmuneBuilder.',
     src: '/screenshots/antibody.png',
     url: '/app/antibody',
   },
   {
     id: 'analytics',
-    title: '6. Platform analytics',
+    title: '5. Platform analytics',
     caption: 'Druggability distribution, clinical phases, and exploration timeline at a glance.',
     src: '/screenshots/analytics.png',
     url: '/app/analytics',

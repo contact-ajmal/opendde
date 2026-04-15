@@ -121,6 +121,14 @@ export default function LearnHubPage() {
               <ArrowRight className="h-3 w-3" />
             </Link>
             <Link
+              href="https://www.linkedin.com/in/ajmalnazirbaba/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-7 items-center gap-1 rounded border border-[var(--border)] bg-[var(--bg)] px-3 text-[11px] font-medium text-foreground hover:border-[var(--border-hover)] transition-colors"
+            >
+              Contact
+            </Link>
+            <Link
               href="/docs/quick-start"
               className="flex h-7 items-center gap-1 rounded border border-[var(--border)] bg-[var(--bg)] px-3 text-[11px] font-medium text-foreground hover:border-[var(--border-hover)] transition-colors"
             >

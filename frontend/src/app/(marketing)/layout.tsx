@@ -236,7 +236,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
 
             {/* GitHub */}
             <a
-              href="https://github.com"
+              href="https://github.com/contact-ajmal/opendde"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-muted hover:text-foreground transition-colors"
@@ -245,6 +245,19 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
                 <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
               </svg>
               GitHub
+            </a>
+
+            {/* LinkedIn */}
+            <a
+              href="https://www.linkedin.com/in/ajmalnazirbaba/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-muted hover:text-foreground transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+              </svg>
+              Contact
             </a>
           </div>
 
@@ -342,17 +355,30 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
                   Documentation
                 </Link>
 
-                <div className="pt-4">
+                <div className="pt-4 space-y-2">
                   <Link
                     href="https://github.com/contact-ajmal/opendde"
                     onClick={() => setMobileOpen(false)}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-600 transition-colors"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-700 transition-colors border border-slate-700"
                   >
                     View on GitHub
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
                       <path d="M7 0C3.13 0 0 3.13 0 7c0 3.1 2 5.72 4.77 6.64.35.06.48-.15.48-.34 0-.17-.01-.61-.01-1.2-1.95.42-2.36-.94-2.36-.94-.32-.81-.78-1.02-.78-1.02-.63-.44.05-.43.05-.43.7.05 1.07.72 1.07.72.63 1.07 1.64.77 2.05.58.06-.45.24-.77.44-.95-1.55-.17-3.18-.78-3.18-3.45 0-.76.27-1.38.71-1.87-.07-.18-.31-.88.07-1.84 0 0 .58-.19 1.91.71.55-.16 1.15-.24 1.74-.24.6 0 1.2.08 1.74.24 1.33-.9 1.91-.71 1.91-.71.38.96.14 1.66.07 1.84.45.49.71 1.11.71 1.87 0 2.68-1.63 3.28-3.19 3.45.25.22.47.65.47 1.31 0 .95-.01 1.71-.01 1.95 0 .19.13.41.49.34C12 12.72 14 10.1 14 7c0-3.87-3.13-7-7-7z"/>
                     </svg>
                   </Link>
+
+                  <a
+                    href="https://www.linkedin.com/in/ajmalnazirbaba/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-600 transition-colors"
+                  >
+                    Contact (LinkedIn)
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                    </svg>
+                  </a>
                 </div>
               </div>
             </motion.div>

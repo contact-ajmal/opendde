@@ -48,7 +48,7 @@ export default function TargetToDrugPage() {
       <h2 id="step-1-search">Step 1: Search for the target</h2>
 
       <p>
-        Click <strong>&ldquo;Launch app&rdquo;</strong> on the homepage to reach the dashboard.
+        Once you have OpenDDE running locally, navigate to the dashboard.
         In the search bar, type <code>EGFR</code> or its UniProt ID <code>P00533</code>.
       </p>
 

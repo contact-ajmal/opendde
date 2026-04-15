@@ -252,12 +252,12 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           <div className="flex items-center gap-3">
             <ThemeToggle />
             <Link
-              href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`}
+              href="https://github.com/contact-ajmal/opendde"
               className="hidden sm:flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 active:scale-[0.97] transition-all"
             >
-              Launch app
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              View on GitHub
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                <path d="M7 0C3.13 0 0 3.13 0 7c0 3.1 2 5.72 4.77 6.64.35.06.48-.15.48-.34 0-.17-.01-.61-.01-1.2-1.95.42-2.36-.94-2.36-.94-.32-.81-.78-1.02-.78-1.02-.63-.44.05-.43.05-.43.7.05 1.07.72 1.07.72.63 1.07 1.64.77 2.05.58.06-.45.24-.77.44-.95-1.55-.17-3.18-.78-3.18-3.45 0-.76.27-1.38.71-1.87-.07-.18-.31-.88.07-1.84 0 0 .58-.19 1.91.71.55-.16 1.15-.24 1.74-.24.6 0 1.2.08 1.74.24 1.33-.9 1.91-.71 1.91-.71.38.96.14 1.66.07 1.84.45.49.71 1.11.71 1.87 0 2.68-1.63 3.28-3.19 3.45.25.22.47.65.47 1.31 0 .95-.01 1.71-.01 1.95 0 .19.13.41.49.34C12 12.72 14 10.1 14 7c0-3.87-3.13-7-7-7z"/>
               </svg>
             </Link>
 
@@ -344,13 +344,13 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
 
                 <div className="pt-4">
                   <Link
-                    href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`}
+                    href="https://github.com/contact-ajmal/opendde"
                     onClick={() => setMobileOpen(false)}
                     className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-600 transition-colors"
                   >
-                    Launch app
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    View on GitHub
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                      <path d="M7 0C3.13 0 0 3.13 0 7c0 3.1 2 5.72 4.77 6.64.35.06.48-.15.48-.34 0-.17-.01-.61-.01-1.2-1.95.42-2.36-.94-2.36-.94-.32-.81-.78-1.02-.78-1.02-.63-.44.05-.43.05-.43.7.05 1.07.72 1.07.72.63 1.07 1.64.77 2.05.58.06-.45.24-.77.44-.95-1.55-.17-3.18-.78-3.18-3.45 0-.76.27-1.38.71-1.87-.07-.18-.31-.88.07-1.84 0 0 .58-.19 1.91.71.55-.16 1.15-.24 1.74-.24.6 0 1.2.08 1.74.24 1.33-.9 1.91-.71 1.91-.71.38.96.14 1.66.07 1.84.45.49.71 1.11.71 1.87 0 2.68-1.63 3.28-3.19 3.45.25.22.47.65.47 1.31 0 .95-.01 1.71-.01 1.95 0 .19.13.41.49.34C12 12.72 14 10.1 14 7c0-3.87-3.13-7-7-7z"/>
                     </svg>
                   </Link>
                 </div>

@@ -115,8 +115,8 @@ const walkthroughTabs = [
     title: 'Pocket discovery',
     description: 'Enter any protein target and instantly see predicted binding pockets ranked by druggability. P2Rank\u2019s ML algorithm identifies sites that traditional methods might miss \u2014 including allosteric and cryptic pockets.',
     checks: ['Druggability scoring', '3D visualization', 'Residue mapping'],
-    href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`,
-    cta: 'Try it now',
+    href: 'https://github.com/contact-ajmal/opendde',
+    cta: 'View on GitHub',
     gradient: 'from-emerald-900/40 to-emerald-950/60',
     accent: '#10b981',
     mockupLabel: 'EGFR (P00533) — 3 druggable pockets detected',
@@ -127,8 +127,8 @@ const walkthroughTabs = [
     title: 'Ligand intelligence',
     description: 'Explore known drugs and bioactive compounds for any target. IC50, Ki, and Kd activity data, clinical trial phases, structure-activity relationships, and druglikeness scoring — all in one view.',
     checks: ['ChEMBL integration', 'SAR analysis', 'Activity cliffs'],
-    href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`,
-    cta: 'Try it now',
+    href: 'https://github.com/contact-ajmal/opendde',
+    cta: 'View on GitHub',
     gradient: 'from-blue-900/40 to-blue-950/60',
     accent: '#3b82f6',
     mockupLabel: '50 known compounds — 4 approved drugs for EGFR',
@@ -139,8 +139,8 @@ const walkthroughTabs = [
     title: 'Antibody modeling',
     description: 'Predict antibody 3D structures from VH/VL sequences using ABodyBuilder2. Identifies and visualizes all six CDR loops with Chothia numbering — essential for therapeutic antibody engineering.',
     checks: ['CDR identification', '3D structure', 'Sequence input'],
-    href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/antibody`,
-    cta: 'Try it now',
+    href: 'https://github.com/contact-ajmal/opendde',
+    cta: 'View on GitHub',
     gradient: 'from-amber-900/40 to-amber-950/60',
     accent: '#f59e0b',
     mockupLabel: 'Trastuzumab \u2014 6 CDR loops identified',
@@ -450,10 +450,10 @@ function VideoSection() {
         {/* CTA */}
         <div className="mt-8 text-center">
           <Link
-            href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`}
+            href="https://github.com/contact-ajmal/opendde"
             className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-600 transition-colors"
           >
-            Try it yourself
+            Explore the code
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -568,12 +568,12 @@ export default function HomePage() {
             </p>
             <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Link
-                href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`}
+                href="https://github.com/contact-ajmal/opendde"
                 className="flex items-center gap-2 rounded-lg bg-emerald-500 px-6 py-3 text-base font-medium text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 active:scale-[0.97] transition-all"
               >
-                Launch platform
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 8h10M10 5l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                View on GitHub
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
                 </svg>
               </Link>
               <a
@@ -1174,10 +1174,10 @@ export default function HomePage() {
             <div>
               <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-foreground">Platform</h4>
               <ul className="space-y-2.5 text-sm text-muted">
-                <li><Link href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`} className="hover:text-foreground transition-colors">Dashboard</Link></li>
-                <li><Link href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/target/P00533`} className="hover:text-foreground transition-colors">Target Explorer</Link></li>
-                <li><Link href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/antibody`} className="hover:text-foreground transition-colors">Antibody Prediction</Link></li>
-                <li><Link href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/analytics`} className="hover:text-foreground transition-colors">Analytics</Link></li>
+                <li><Link href="https://github.com/contact-ajmal/opendde" className="hover:text-foreground transition-colors">GitHub Repo</Link></li>
+                <li><Link href="https://github.com/contact-ajmal/opendde" className="hover:text-foreground transition-colors">Target Explorer</Link></li>
+                <li><Link href="https://github.com/contact-ajmal/opendde" className="hover:text-foreground transition-colors">Antibody Prediction</Link></li>
+                <li><Link href="https://github.com/contact-ajmal/opendde" className="hover:text-foreground transition-colors">Analytics</Link></li>
               </ul>
             </div>
 

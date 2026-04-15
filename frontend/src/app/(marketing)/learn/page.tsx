@@ -114,10 +114,10 @@ export default function LearnHubPage() {
           </div>
           <div className="flex gap-2">
             <Link
-              href={`${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard`}
+              href="https://github.com/contact-ajmal/opendde"
               className="flex h-7 items-center gap-1 rounded border border-emerald-500/40 bg-emerald-500/10 px-3 text-[11px] font-medium text-emerald-400 hover:bg-emerald-500/20 transition-colors"
             >
-              Launch app
+              View on GitHub
               <ArrowRight className="h-3 w-3" />
             </Link>
             <Link

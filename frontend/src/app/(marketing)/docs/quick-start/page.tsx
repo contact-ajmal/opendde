@@ -33,7 +33,7 @@ export default function QuickStartPage() {
 
       <h2 id="clone">2. Clone the repository</h2>
 
-      <pre><code>{`git clone https://github.com/your-org/opendde.git
+      <pre><code>{`git clone https://github.com/contact-ajmal/opendde.git
 cd opendde`}</code></pre>
 
       <h2 id="env">3. Set up environment variables</h2>
@@ -79,7 +79,7 @@ ALPHAFOLD_API_KEY=your_alphafold_key`}</code></pre>
       <h2 id="first-target">6. Search your first target</h2>
 
       <ol>
-        <li>Click <strong>&ldquo;Launch app&rdquo;</strong> on the homepage</li>
+        <li>Navigate to the dashboard</li>
         <li>Type a protein name or UniProt ID into the search bar (try <code>EGFR</code> or <code>P00533</code>)</li>
         <li>Wait for the target to resolve &mdash; you&rsquo;ll see the 3D structure load</li>
         <li>Binding pockets appear as colored spheres on the protein surface</li>

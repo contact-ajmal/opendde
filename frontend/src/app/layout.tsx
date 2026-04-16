@@ -4,6 +4,7 @@ import ThemeProvider from '@/components/ThemeProvider';
 import CommandPalette from '@/components/CommandPalette';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://opendde.pages.dev'),
   title: {
     default: 'OpenDDE — Open Drug Design Engine',
     template: '%s — OpenDDE',

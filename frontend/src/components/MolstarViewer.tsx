@@ -48,6 +48,7 @@ function MolstarViewerInner(
 
   useEffect(() => {
     let cancelled = false;
+    let localPlugin: any = null;
 
     async function init() {
       try {
@@ -63,6 +64,7 @@ function MolstarViewerInner(
         }
 
         plugin.initViewer(canvasRef.current, containerRef.current);
+        localPlugin = plugin;
         pluginRef.current = plugin;
 
         // Force pitch-black cinematic background
@@ -70,20 +72,17 @@ function MolstarViewerInner(
           renderer: { backgroundColor: Color(0x000000) },
         } as any);
 
-        // Fetch and load structure natively
         const format = structureUrl.endsWith('.cif') ? 'mmcif' : 'pdb';
         
         await plugin.clear();
         const data = await plugin.builders.data.download({ url: structureUrl, isBinary: false });
-        const trajectory = await plugin.builders.structure.parseTrajectory(data, format);
         
-        // This generates exactly the structure visualization used by AlphaFold, no sidebars attached
+        if (cancelled) return; // Cleanup function will handle disposal
+
+        const trajectory = await plugin.builders.structure.parseTrajectory(data, format);
         await plugin.builders.structure.hierarchy.applyPreset(trajectory, 'default');
 
-        if (cancelled) {
-          plugin.dispose();
-          return;
-        }
+        if (cancelled) return;
 
         setLoading(false);
         onReady?.();
@@ -100,8 +99,14 @@ function MolstarViewerInner(
 
     return () => {
       cancelled = true;
-      if (pluginRef.current) {
-        pluginRef.current.dispose();
+      if (localPlugin) {
+        try {
+          localPlugin.dispose();
+        } catch (e) {
+          // Soft ignore - often a null parent error during rapid unmounts
+          console.warn('Molstar soft cleanup:', e);
+        }
+        localPlugin = null;
         pluginRef.current = null;
       }
     };

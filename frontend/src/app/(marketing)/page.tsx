@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Crosshair, FlaskConical, Box, Beaker, Sparkles, BarChart3, Search, TrendingUp, Play, Pause, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Crosshair, FlaskConical, Box, Beaker, Sparkles, BarChart3, Search, TrendingUp, Play, Pause, ChevronLeft, ChevronRight, Github } from 'lucide-react';
+import { LogoAperture, MolecularArt, AccentMesh } from '@/components/brand/BrandAssets';
 
 // ── Scroll-triggered count-up ───────────────────────────────
 function useScrollCountUp(target: number, duration = 1200): [number, React.RefObject<HTMLDivElement>] {
@@ -44,18 +45,14 @@ function useScrollCountUp(target: number, duration = 1200): [number, React.RefOb
   return [value, ref];
 }
 
-// ── Animated background dots ────────────────────────────────
-function BackgroundGrid() {
+function HeroBackground() {
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.06]">
-      <svg width="100%" height="100%">
-        <defs>
-          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <circle cx="20" cy="20" r="1" fill="currentColor" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" className="text-emerald-400" />
-      </svg>
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <AccentMesh position="tl" intensity={0.12} />
+      <AccentMesh position="br" intensity={0.08} />
+      <div className="absolute left-1/2 top-0 h-full w-full -translate-x-1/2 opacity-[0.03]">
+        <MolecularArt variant="ribbon" width="100%" height="100%" className="scale-150" />
+      </div>
     </div>
   );
 }
@@ -96,11 +93,41 @@ function ProteinVisual() {
 const features = [
   { icon: Crosshair, title: 'Pocket Discovery', description: 'Machine-learning binding site prediction with P2Rank. Identifies druggable pockets with residue-level detail.' },
   { icon: FlaskConical, title: 'Ligand Intelligence', description: 'Fetch known drugs from ChEMBL with IC50, Ki activity data, clinical phase, and structure-activity relationships.' },
-  { icon: Box, title: 'Complex Prediction', description: 'Generate AlphaFold 3 input for protein-ligand binding. Semi-automated prediction workflow.' },
-  { icon: Beaker, title: 'Antibody Modeling', description: 'Predict antibody 3D structures from VH/VL sequences using ABodyBuilder2 with CDR visualization.' },
-  { icon: Sparkles, title: 'AI Assistant', description: 'Claude-powered drug design insights. Context-aware analysis of targets, pockets, and ligands.' },
-  { icon: BarChart3, title: 'Analytics & Reports', description: 'Druggability reports, SAR plots, activity cliffs, pocket comparison, and PDF export.' },
+  { icon: Box, title: 'Complex Prediction', description: 'Model binding with AlphaFold 3. Semi-automated prediction workflow for protein-ligand complexes.' },
+  { icon: Beaker, title: 'Antibody Modeling', description: 'Predict antibody 3D structures from sequences using ABodyBuilder2 with CDR visualization.' },
+  { icon: Sparkles, title: 'AI Assistant', description: 'Claude-powered drug design insights. Context-aware analysis of targets and pockets.' },
+  { icon: BarChart3, title: 'Analytics & Reports', description: 'Druggability reports, SAR plots, activity cliffs, and platform-wide data insights.' },
 ];
+
+const FeatureCard = ({ icon: Icon, title, description, delay }: any) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ delay }}
+    className="surface-card p-6"
+  >
+    <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--accent)]/10 text-[var(--accent)]">
+      <Icon size={20} strokeWidth={1.4} />
+    </div>
+    <h3 className="mb-2 text-lg font-semibold text-foreground tracking-tight">{title}</h3>
+    <p className="text-sm leading-relaxed text-muted">{description}</p>
+  </motion.div>
+);
+
+function Features() {
+  return (
+    <section className="px-4 py-24">
+      <div className="mx-auto max-w-6xl">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((f, i) => (
+            <FeatureCard key={f.title} {...f} delay={i * 0.1} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 // ── Trust logos ──────────────────────────────────────────────
 const trustItems = [
@@ -163,8 +190,9 @@ function VisualWalkthrough() {
   const tab = walkthroughTabs[activeTab];
 
   return (
-    <section className="border-y border-[var(--border)] bg-[var(--surface)] px-4 py-24">
-      <div className="mx-auto max-w-6xl">
+    <section className="relative overflow-hidden border-y border-[var(--border)] bg-[var(--surface)] px-4 py-24">
+      <AccentMesh position="tr" intensity={0.06} className="opacity-40" />
+      <div className="mx-auto max-w-6xl relative z-10">
         <div className="text-center mb-12">
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">Platform</p>
           <h2 className="text-3xl font-bold text-foreground sm:text-4xl">See OpenDDE in action</h2>
@@ -498,8 +526,9 @@ const useCases = [
 
 function UseCases() {
   return (
-    <section id="use-cases" className="border-y border-[var(--border)] bg-[var(--surface)] px-4 py-24">
-      <div className="mx-auto max-w-5xl">
+    <section id="use-cases" className="relative overflow-hidden border-y border-[var(--border)] bg-[var(--surface)] px-4 py-24">
+      <AccentMesh position="bl" intensity={0.08} className="opacity-30" />
+      <div className="mx-auto max-w-5xl relative z-10">
         <div className="text-center mb-14">
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">Use Cases</p>
           <h2 className="text-3xl font-bold text-foreground sm:text-4xl">Who is OpenDDE for?</h2>
@@ -545,7 +574,7 @@ export default function HomePage() {
     <main className="min-h-screen">
       {/* ── Hero Section ─────────────────────────────────────── */}
       <section className="relative overflow-hidden px-4 pt-24 pb-16 sm:pt-32 sm:pb-24">
-        <BackgroundGrid />
+        <HeroBackground />
         <div className="relative mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -557,7 +586,7 @@ export default function HomePage() {
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Open source &middot; MIT Licensed
             </div>
-            <h1 className="text-4xl font-bold leading-tight text-foreground sm:text-5xl lg:text-6xl">
+            <h1 className="text-display leading-tight text-foreground lg:text-6xl">
               Open-source AI-powered
               <br />
               <span className="text-[var(--accent)]">drug design platform</span>
@@ -569,12 +598,10 @@ export default function HomePage() {
             <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Link
                 href="https://github.com/contact-ajmal/opendde"
-                className="flex items-center gap-2 rounded-lg bg-emerald-500 px-6 py-3 text-base font-medium text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 active:scale-[0.97] transition-all"
+                className="brand-gradient group flex items-center gap-2 rounded-lg px-6 py-3 text-base font-semibold text-black shadow-lg shadow-emerald-500/20 active:scale-[0.97] transition-all"
               >
                 View on GitHub
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
-                </svg>
+                <Github size={18} className="transition-transform group-hover:scale-110" />
               </Link>
               <a
                 href="https://github.com"
@@ -620,6 +647,9 @@ export default function HomePage() {
           </motion.div>
         </div>
       </section>
+
+      {/* ── Features ─────────────────────────────────────────── */}
+      <Features />
 
       {/* ── Stats Bar ────────────────────────────────────────── */}
       <section className="border-y border-[var(--border)] bg-[var(--surface)]">

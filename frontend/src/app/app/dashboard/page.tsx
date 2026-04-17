@@ -92,8 +92,8 @@ function DashboardSearch({ autoFocus = false }: { autoFocus?: boolean }) {
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
-      <div className="relative flex h-12 items-center rounded-lg border border-[var(--border)] bg-[var(--surface)] transition-colors focus-within:border-emerald-500">
-        <Search className="ml-4 h-4 w-4 shrink-0 text-muted-2" />
+      <div className="relative flex h-12 items-center rounded-lg border border-[var(--border)] bg-[var(--surface)] transition-all focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)]/20 shadow-sm">
+        <Search className="ml-4 h-4 w-4 shrink-0 text-muted-2" strokeWidth={1.4} />
         <input
           type="text"
           value={query}
@@ -113,7 +113,7 @@ function DashboardSearch({ autoFocus = false }: { autoFocus?: boolean }) {
           ) : (
             <>
               Search
-              <ArrowRight className="h-3 w-3" />
+              <ArrowRight className="h-3 w-3" strokeWidth={1.4} />
             </>
           )}
         </button>
@@ -238,12 +238,12 @@ export default function DashboardPage() {
       {/* Main two-column row: recent targets + quick actions */}
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-5">
         {/* Recent targets (60%) */}
-        <div className="col-span-1 flex min-h-0 flex-col overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)] lg:col-span-3">
+        <div className="col-span-1 flex min-h-0 flex-col overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)] shadow-sm transition-all hover:border-[var(--border-hover)] lg:col-span-3">
           <div className="flex h-10 shrink-0 items-center justify-between border-b border-[var(--border)] px-4">
-            <h2 className="text-[11px] font-semibold uppercase tracking-widest text-muted-2">
+            <h2 className="text-mono-label">
               Recent targets
             </h2>
-            <span className="text-[10px] text-muted-2">{stats.recent_targets.length} shown</span>
+            <span className="text-[10px] text-muted-2 tabular-nums">{stats.recent_targets.length} entries</span>
           </div>
 
           {stats.recent_targets.length === 0 ? (
@@ -296,9 +296,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick actions (40%) */}
-        <div className="col-span-1 flex min-h-0 flex-col overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)] lg:col-span-2">
+        <div className="col-span-1 flex min-h-0 flex-col overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)] shadow-sm transition-all hover:border-[var(--border-hover)] lg:col-span-2">
           <div className="flex h-10 shrink-0 items-center border-b border-[var(--border)] px-4">
-            <h2 className="text-[11px] font-semibold uppercase tracking-widest text-muted-2">
+            <h2 className="text-mono-label">
               Quick actions
             </h2>
           </div>
@@ -306,17 +306,17 @@ export default function DashboardPage() {
           <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto p-2">
             <button
               onClick={() => document.querySelector<HTMLInputElement>('input[placeholder*="protein target"]')?.focus()}
-              className="flex h-10 items-center gap-2.5 rounded-md border border-[var(--border)] px-3 text-xs text-foreground transition-colors hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)]"
+              className="group flex h-10 items-center gap-2.5 rounded-md border border-[var(--border)] px-3 text-xs text-foreground transition-all hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)]"
             >
-              <Crosshair className="h-3.5 w-3.5 text-emerald-400" />
+              <Crosshair className="h-3.5 w-3.5 text-emerald-400" strokeWidth={1.4} />
               <span className="font-medium">New target search</span>
             </button>
 
             <Link
               href="/app/antibody"
-              className="flex h-10 items-center gap-2.5 rounded-md border border-[var(--border)] px-3 text-xs text-foreground transition-colors hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)]"
+              className="group flex h-10 items-center gap-2.5 rounded-md border border-[var(--border)] px-3 text-xs text-foreground transition-all hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)]"
             >
-              <Beaker className="h-3.5 w-3.5 text-blue-400" />
+              <Beaker className="h-3.5 w-3.5 text-blue-400" strokeWidth={1.4} />
               <span className="font-medium">Predict antibody</span>
             </Link>
 

@@ -34,13 +34,13 @@ export default function TargetDirectory() {
           <button
             key={cat}
             onClick={() => setActiveTab(cat)}
-            className={`whitespace-nowrap px-5 py-3 text-xs font-semibold uppercase tracking-wider transition-colors ${
+            className={`whitespace-nowrap px-5 py-3 text-mono-label transition-colors ${
               activeTab === cat
-                ? 'border-b-2 border-emerald-500 text-foreground'
+                ? 'border-b border-emerald-500 text-foreground'
                 : 'text-muted-2 hover:bg-[var(--surface-hover)] hover:text-foreground'
             }`}
           >
-            {cat} <span className="ml-1 opacity-50">{(POPULAR_TARGET_CATEGORIES[cat as keyof typeof POPULAR_TARGET_CATEGORIES]).length}</span>
+            {cat} <span className="ml-1 opacity-50 tabular-nums">{(POPULAR_TARGET_CATEGORIES[cat as keyof typeof POPULAR_TARGET_CATEGORIES]).length}</span>
           </button>
         ))}
       </div>
@@ -60,9 +60,9 @@ export default function TargetDirectory() {
                   {t.gene !== 'Unknown' ? t.gene : t.uniprot_id}
                 </span>
                 {loadingGene === t.gene ? (
-                  <Loader2 className="h-3 w-3 animate-spin text-muted-2" />
+                  <Loader2 className="h-3 w-3 animate-spin text-muted-2" strokeWidth={1.4} />
                 ) : (
-                  <ArrowRight className="h-3 w-3 text-muted-2 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100" />
+                  <ArrowRight className="h-3 w-3 text-muted-2 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100" strokeWidth={1.4} />
                 )}
               </div>
               <span className="mt-1 w-full truncate text-[10px] text-muted-2" title={t.desc}>

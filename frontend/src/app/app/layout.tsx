@@ -8,6 +8,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import AssistantProvider from '@/components/AssistantContext';
 import AssistantDrawer from '@/components/AssistantDrawer';
 import AssistantTrigger from '@/components/AssistantTrigger';
+import { LogoAperture } from '@/components/brand/BrandAssets';
 
 /* ── Sidebar nav items ───────────────────────────────────── */
 interface NavItem {
@@ -88,15 +89,7 @@ const sections: NavSection[] = [
   },
 ];
 
-/* ── Logo icon ───────────────────────────────────────────── */
-function LogoIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-      <path d="M14 2L24.39 8V20L14 26L3.61 20V8L14 2Z" stroke="#10b981" strokeWidth="2" fill="none" />
-      <circle cx="14" cy="14" r="3" fill="#10b981" />
-    </svg>
-  );
-}
+/* No longer needed here as we use LogoAperture from BrandAssets */
 
 /* ── Breadcrumb ──────────────────────────────────────────── */
 function Breadcrumbs() {
@@ -176,9 +169,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <nav className="flex h-full flex-col">
         {/* Logo area */}
         <div className={`flex h-12 shrink-0 items-center border-b border-[var(--border)] ${collapsed ? 'justify-center px-2' : 'gap-2 px-4'}`}>
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" onClick={onNavigate}>
-            <LogoIcon />
-            {!collapsed && <span className="text-sm font-bold text-[var(--accent)]">OpenDDE</span>}
+          <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity" onClick={onNavigate}>
+            <LogoAperture size={22} />
+            {!collapsed && <span className="text-[15px] font-bold tracking-tight text-[var(--text)]">Open<span className="text-[var(--accent)]">DDE</span></span>}
           </Link>
         </div>
 

@@ -137,16 +137,16 @@ function SummaryTab({ target, pockets }: { target: TargetInfo; pockets: PocketRe
     <div className="space-y-4 p-4">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <div className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
+          <div className="mb-1 text-mono-label">
             Identifier
           </div>
-          <div className="font-mono text-xs text-foreground">{target.uniprot_id}</div>
+          <div className="font-mono text-[11px] text-foreground leading-none">{target.uniprot_id}</div>
         </div>
         <div>
-          <div className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
+          <div className="mb-1 text-mono-label">
             Organism
           </div>
-          <div className="text-xs italic text-foreground">{target.organism}</div>
+          <div className="text-[11px] italic text-foreground leading-none">{target.organism}</div>
         </div>
         <div>
           <div className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-2">
@@ -174,18 +174,18 @@ function SummaryTab({ target, pockets }: { target: TargetInfo; pockets: PocketRe
         </div>
       </div>
       {best && (
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3 shadow-sm">
           <div className="flex items-baseline justify-between mb-1">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-2">
+            <span className="text-mono-label">
               Top pocket
             </span>
-            <span className="text-[10px] text-muted-2">#{best.rank}</span>
+            <span className="text-mono-label text-[9px]">#{best.rank}</span>
           </div>
           <div className="flex items-baseline gap-1">
-            <span className={`text-lg font-bold tabular-nums ${druggabilityText(best.druggability)}`}>
+            <span className={`text-xl font-bold tabular-nums ${druggabilityText(best.druggability)}`}>
               {Math.round(best.druggability * 100)}%
             </span>
-            <span className="text-[10px] text-muted-2">druggability</span>
+            <span className="text-[10px] text-muted-2 font-medium">druggability</span>
           </div>
         </div>
       )}
@@ -379,8 +379,8 @@ function AITab({
     <div className="flex h-full flex-col">
       <div className="flex-1 overflow-y-auto p-4">
         <div className="mb-3 flex items-center gap-1.5">
-          <Sparkles className="h-3 w-3 text-emerald-400" />
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-emerald-400">
+          <Sparkles className="h-3.5 w-3.5 text-emerald-400" strokeWidth={1.4} />
+          <span className="text-mono-label text-emerald-400">
             AI pocket analysis
           </span>
         </div>
@@ -618,9 +618,9 @@ export default function TargetPage() {
 
           {/* Pockets grid */}
           <div className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-foreground">Binding Pockets</h2>
-              <span className="text-[10px] text-muted-2">Click to highlight in 3D</span>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-foreground tracking-tight">Binding Pockets</h2>
+              <span className="text-mono-label text-[9px]">Click to highlight 3D structure</span>
             </div>
             {pocketsLoading ? (
               <div className="flex h-32 items-center justify-center">

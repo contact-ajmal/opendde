@@ -6,27 +6,7 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '@/components/ThemeToggle';
 
-/* ── Logo ────────────────────────────────────────────────── */
-function Logo() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M14 2L24.39 8V20L14 26L3.61 20V8L14 2Z" stroke="#10b981" strokeWidth="2" fill="none" />
-      <circle cx="14" cy="14" r="3" fill="#10b981" />
-      <circle cx="14" cy="6" r="1.5" fill="#10b981" opacity="0.6" />
-      <circle cx="20" cy="10" r="1.5" fill="#10b981" opacity="0.6" />
-      <circle cx="20" cy="18" r="1.5" fill="#10b981" opacity="0.6" />
-      <circle cx="14" cy="22" r="1.5" fill="#10b981" opacity="0.6" />
-      <circle cx="8" cy="18" r="1.5" fill="#10b981" opacity="0.6" />
-      <circle cx="8" cy="10" r="1.5" fill="#10b981" opacity="0.6" />
-      <line x1="14" y1="14" x2="14" y2="6" stroke="#10b981" strokeWidth="1" opacity="0.4" />
-      <line x1="14" y1="14" x2="20" y2="10" stroke="#10b981" strokeWidth="1" opacity="0.4" />
-      <line x1="14" y1="14" x2="20" y2="18" stroke="#10b981" strokeWidth="1" opacity="0.4" />
-      <line x1="14" y1="14" x2="14" y2="22" stroke="#10b981" strokeWidth="1" opacity="0.4" />
-      <line x1="14" y1="14" x2="8" y2="18" stroke="#10b981" strokeWidth="1" opacity="0.4" />
-      <line x1="14" y1="14" x2="8" y2="10" stroke="#10b981" strokeWidth="1" opacity="0.4" />
-    </svg>
-  );
-}
+import { LogoAperture } from '@/components/brand/BrandAssets';
 
 /* ── Dropdown types ──────────────────────────────────────── */
 interface DropdownItem {
@@ -185,9 +165,11 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       >
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
           {/* Left: Logo */}
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <Logo />
-            <span className="text-lg font-bold text-[var(--accent)]">OpenDDE</span>
+          <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+            <LogoAperture size={28} />
+            <span className="text-xl font-bold tracking-tight text-[var(--text)]">
+              Open<span className="text-[var(--accent)]">DDE</span>
+            </span>
           </Link>
 
           {/* Center: Dropdowns */}
@@ -311,7 +293,12 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
               className="fixed right-0 top-0 z-50 h-full w-72 border-l border-[var(--border)] bg-[var(--bg)] p-6 md:hidden"
             >
               <div className="mb-6 flex items-center justify-between">
-                <span className="text-lg font-bold text-[var(--accent)]">OpenDDE</span>
+                <div className="flex items-center gap-2">
+                  <LogoAperture size={24} />
+                  <span className="text-lg font-bold tracking-tight text-[var(--text)]">
+                    Open<span className="text-[var(--accent)]">DDE</span>
+                  </span>
+                </div>
                 <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="rounded p-1 text-muted hover:text-foreground">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M6 6l8 8M14 6l-8 8" />

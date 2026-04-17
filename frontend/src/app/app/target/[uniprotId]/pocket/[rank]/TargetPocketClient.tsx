@@ -281,8 +281,8 @@ export default function PocketDetailPage() {
   const druggPct = Math.round(pocket.druggability * 100);
 
   const tabs = [
-    { id: 'properties' as const, label: 'Properties & Profile', icon: LayoutDashboard, count: null },
-    { id: 'ligands' as const, label: 'Known ligands', icon: Beaker, count: ligands.length },
+    { id: 'properties' as const, label: 'Properties', icon: LayoutDashboard, count: null },
+    { id: 'ligands' as const, label: 'Ligands', icon: Beaker, count: ligands.length },
     { id: 'sar' as const, label: 'SAR plot', icon: ScatterChart, count: null },
     { id: 'cliffs' as const, label: 'Activity cliffs', icon: TrendingUp, count: null },
     { id: 'ai' as const, label: 'AI suggestions', icon: Sparkles, count: null },
@@ -372,17 +372,17 @@ export default function PocketDetailPage() {
               const Icon = tab.icon;
               const active = activeTab === tab.id;
               return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-medium transition-colors ${
-                    active
-                      ? 'bg-emerald-500/10 text-emerald-400'
-                      : 'text-muted-2 hover:text-foreground hover:bg-[var(--surface-hover)]'
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  {tab.label}
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition-colors ${
+                      active
+                        ? 'bg-emerald-500/10 text-emerald-400'
+                        : 'text-muted-2 hover:text-foreground hover:bg-[var(--surface-hover)]'
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" strokeWidth={1.4} />
+                    {tab.label}
                   {tab.count != null && (
                     <span
                       className={`rounded-full px-1.5 text-[9px] tabular-nums ${
@@ -410,8 +410,8 @@ export default function PocketDetailPage() {
                   {/* Column 2: Residue Map */}
                   <div className="lg:col-span-5 flex flex-col">
                     <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
-                      <div className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-2">
-                        <LayoutDashboard className="h-4 w-4" />
+                      <div className="mb-4 flex items-center gap-2 text-mono-label">
+                        <LayoutDashboard className="h-3.5 w-3.5" strokeWidth={1.4} />
                         Sequence Map
                       </div>
                       <PocketMap
@@ -426,7 +426,7 @@ export default function PocketDetailPage() {
                   <div className="lg:col-span-4 flex flex-col">
                     {structureUrl && (
                       <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
-                        <div className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-2">
+                        <div className="mb-4 flex items-center gap-2 text-mono-label">
                           Compare Envelopes
                         </div>
                         <PocketComparison3D
@@ -658,7 +658,7 @@ function LigandsTab({
       )}
 
       {/* Table header */}
-      <div className="flex h-8 shrink-0 items-center gap-2 border-b border-[var(--border)] bg-[var(--surface-alt)] px-4 text-[10px] font-semibold uppercase tracking-wider text-muted-2">
+      <div className="flex h-8 shrink-0 items-center gap-2 border-b border-[var(--border)] bg-[var(--surface-alt)] px-4 text-mono-label text-[9px]">
         <div className="w-10 shrink-0">2D</div>
         <button onClick={() => toggleSort('name')} className="flex-1 min-w-[140px] text-left hover:text-foreground">
           Name{sortArrow('name')}

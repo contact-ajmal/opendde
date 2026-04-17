@@ -108,60 +108,97 @@ body {
 .text-display {
   font-family: var(--font-heading);
   font-size: 3rem;
-  line-height: 3.5rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.025em;
 }
 
 .text-h1 {
   font-family: var(--font-heading);
   font-size: 2.25rem;
-  line-height: 2.75rem;
+  line-height: 1.1;
   font-weight: 600;
+  letter-spacing: -0.025em;
 }
 
 .text-h2 {
   font-family: var(--font-heading);
   font-size: 1.75rem;
-  line-height: 2.25rem;
+  line-height: 1.25;
   font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .text-h3 {
   font-family: var(--font-heading);
   font-size: 1.375rem;
-  line-height: 1.75rem;
+  line-height: 1.4;
   font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.text-mono-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
 }
 
 .text-body-lg {
   font-size: 1.125rem;
-  line-height: 1.75rem;
+  line-height: 1.7;
   font-weight: 400;
 }
 
 .text-body {
   font-size: 1rem;
-  line-height: 1.5rem;
+  line-height: 1.6;
   font-weight: 400;
 }
 
 .text-small {
   font-size: 0.875rem;
-  line-height: 1.25rem;
+  line-height: 1.5;
 }
 
 .text-caption {
   font-size: 0.75rem;
-  line-height: 1rem;
+  line-height: 1.4;
 }
 
 .font-heading {
   font-family: var(--font-heading);
 }
 
+.font-serif {
+  font-family: var(--font-serif);
+}
+
 .font-mono {
   font-family: var(--font-mono);
+}
+
+/* ── Brand Utilities ────────────────────────────────────────── */
+.brand-gradient {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+}
+
+.accent-glow {
+  box-shadow: 0 0 20px -5px var(--accent-muted);
+}
+
+.surface-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.surface-card:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
 }
 
 /* ── Shimmer loader ───────────────────────────────────────── */

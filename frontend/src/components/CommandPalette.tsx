@@ -206,8 +206,8 @@ export default function CommandPalette() {
         onClick={(e) => e.stopPropagation()}
         onKeyDown={onKeyDown}
       >
-        <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3">
-          <span className="text-muted-2">🔍</span>
+        <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3 bg-[var(--surface-alt)]/50">
+          <span className="text-muted-2 text-sm">/</span>
           <input
             ref={inputRef}
             type="text"
@@ -224,7 +224,7 @@ export default function CommandPalette() {
         <div className="max-h-80 overflow-y-auto py-2">
           {grouped.map((group) => (
             <div key={group.category}>
-              <div className="px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-2">
+              <div className="px-4 py-1.5 text-mono-label">
                 {group.category}
               </div>
               {group.items.map((item) => (
@@ -238,7 +238,9 @@ export default function CommandPalette() {
                   onClick={item.action}
                   onMouseEnter={() => setSelectedIdx(item.globalIdx)}
                 >
-                  <span className="text-base">{item.icon}</span>
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-[var(--surface-alt)] text-sm">
+                    {item.icon}
+                  </div>
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium">{highlight(item.label)}</div>
                     <div className="truncate text-xs text-muted-2">{highlight(item.sublabel)}</div>

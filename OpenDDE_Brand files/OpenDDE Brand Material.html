@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>OpenDDE — Brand Material</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; }
+  body { overscroll-behavior: none; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="brand/primitives.jsx"></script>
+<script type="text/babel" src="brand/logos.jsx"></script>
+<script type="text/babel" src="brand/artifacts.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+/* global React, ReactDOM, DesignCanvas, DCSection, DCArtboard, DCPostIt,
+          FONTS, PALETTE, GridDots, AccentMesh, Swatch, MolecularArt,
+          LogoHexMolecule, LogoRibbon, LogoAperture, Wordmark, Lockup, LockupStacked,
+          IconGrid, SocialOG, LinkedInBanner, TwitterCard, Avatar, PosterTile, FaviconStrip */
+
+// ── Tweak defaults (theme-lead) ────────────────────────────
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "dark"
+}/*EDITMODE-END*/;
+
+// ── Small helper: themed card background for an artboard ──
+function Board({ theme, width, height, children, style = {}, padding = 40 }) {
+  const c = PALETTE[theme];
+  return (
+    <div style={{
+      width, height, background: c.bg, color: c.text,
+      fontFamily: FONTS.body, padding, position: 'relative',
+      overflow: 'hidden', ...style,
+    }}>
+      {children}
+    </div>
+  );
+}
+
+// ── Logo direction artboard ───────────────────────────────
+function LogoDirectionBoard({ theme, Logo, name, concept, pros }) {
+  const c = PALETTE[theme];
+  return (
+    <Board theme={theme} width={520} height={560} padding={0}>
+      <div style={{ position: 'absolute', inset: 0, ...GridDots({ theme, opacity: theme === 'dark' ? 0.05 : 0.08 }) }} />
+      <AccentMesh theme={theme} position="br" intensity={0.16} />
+
+      {/* Header: direction label */}
+      <div style={{
+        position: 'relative', padding: '24px 28px 0',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+      }}>
+        <div style={{
+          fontFamily: FONTS.mono, fontSize: 11, color: c.accent,
+          letterSpacing: '0.16em', textTransform: 'uppercase',
+        }}>Direction · {name}</div>
+        <div style={{
+          fontFamily: FONTS.mono, fontSize: 10, color: c.textTertiary,
+          letterSpacing: '0.1em', textTransform: 'uppercase',
+        }}>{theme}</div>
+      </div>
+
+      {/* Hero logo */}
+      <div style={{
+        position: 'relative', marginTop: 20,
+        display: 'flex', justifyContent: 'center', alignItems: 'center',
+        height: 180,
+      }}>
+        <Logo theme={theme} size={150} />
+      </div>
+
+      {/* Lockups */}
+      <div style={{
+        position: 'relative', padding: '20px 28px',
+        borderTop: `1px solid ${c.border}`, borderBottom: `1px solid ${c.border}`,
+        display: 'flex', flexDirection: 'column', gap: 18,
+      }}>
+        <Lockup Logo={Logo} theme={theme} logoSize={36} textSize={22} />
+        <Lockup Logo={Logo} theme={theme} logoSize={44} textSize={24} showTag />
+      </div>
+
+      {/* Concept + pros */}
+      <div style={{ position: 'relative', padding: '18px 28px' }}>
+        <div style={{ fontFamily: FONTS.serif, fontSize: 13, fontStyle: 'italic', color: c.textSecondary, lineHeight: 1.5 }}>
+          {concept}
+        </div>
+        <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {pros.map(p => (
+            <span key={p} style={{
+              fontFamily: FONTS.mono, fontSize: 10, padding: '3px 8px',
+              background: c.accentMuted, color: c.accent, borderRadius: 4,
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+            }}>{p}</span>
+          ))}
+        </div>
+      </div>
+    </Board>
+  );
+}
+
+// ── Palette artboard (dark + light side by side) ───────────
+function PaletteBoard({ theme }) {
+  const c = PALETTE[theme];
+  const rows = [
+    { name: 'Background', hex: c.bg, color: c.bg, text: c.text },
+    { name: 'Surface', hex: c.surface, color: c.surface, text: c.text },
+    { name: 'Surface alt', hex: c.surfaceAlt, color: c.surfaceAlt, text: c.text },
+    { name: 'Accent', hex: c.accent, color: c.accent, text: '#050a18' },
+    { name: 'Accent hover', hex: c.accentHover, color: c.accentHover, text: '#050a18' },
+    { name: 'Text', hex: c.text, color: c.text, text: c.bg },
+    { name: 'Text secondary', hex: c.textSecondary, color: c.textSecondary, text: c.bg },
+    { name: 'Danger', hex: c.danger, color: c.danger, text: '#fff' },
+    { name: 'Warning', hex: c.warning, color: c.warning, text: '#050a18' },
+  ];
+  return (
+    <Board theme={theme} width={560} height={560} padding={32}>
+      <div style={{ position: 'absolute', inset: 0, ...GridDots({ theme, opacity: 0.04 }) }} />
+      <div style={{ position: 'relative' }}>
+        <div style={{
+          fontFamily: FONTS.mono, fontSize: 11, color: c.accent,
+          letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 6,
+        }}>{theme === 'dark' ? 'Primary palette · Dark' : 'Primary palette · Light'}</div>
+        <div style={{
+          fontFamily: FONTS.heading, fontSize: 26, fontWeight: 600,
+          letterSpacing: '-0.02em', marginBottom: 24,
+        }}>
+          {theme === 'dark' ? 'Midnight lab' : 'Paper notebook'}
+        </div>
+
+        {/* Color rows */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+          {rows.map(r => (
+            <div key={r.name} style={{
+              background: r.color,
+              border: `1px solid ${c.border}`,
+              borderRadius: 8,
+              padding: '12px 12px 14px',
+              height: 84,
+              display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+            }}>
+              <span style={{ fontFamily: FONTS.mono, fontSize: 9, color: r.text, opacity: 0.75, letterSpacing: '0.04em' }}>Aa · 128</span>
+              <div>
+                <div style={{ fontFamily: FONTS.body, fontSize: 11, fontWeight: 600, color: r.text }}>{r.name}</div>
+                <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: r.text, opacity: 0.65, marginTop: 1 }}>{r.hex}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Usage ratios */}
+        <div style={{ marginTop: 22 }}>
+          <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: c.textSecondary, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>
+            Usage ratio (60 / 30 / 10)
+          </div>
+          <div style={{ display: 'flex', height: 36, borderRadius: 6, overflow: 'hidden', border: `1px solid ${c.border}` }}>
+            <div style={{ flex: 60, background: c.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONTS.mono, fontSize: 10, color: c.textSecondary }}>60% bg</div>
+            <div style={{ flex: 30, background: c.surfaceAlt, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONTS.mono, fontSize: 10, color: c.textSecondary }}>30% surface</div>
+            <div style={{ flex: 10, background: c.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONTS.mono, fontSize: 10, color: c.bg, fontWeight: 600 }}>10% accent</div>
+          </div>
+          <div style={{ marginTop: 14, fontFamily: FONTS.serif, fontSize: 12, fontStyle: 'italic', color: c.textSecondary, lineHeight: 1.5 }}>
+            {theme === 'dark'
+              ? 'Deep navy holds the stage. Surface panels carry structure. Emerald reserved for signal — bindings, pockets, actions.'
+              : 'Warm off-white invites long reading. Surfaces break content. Muted teal accents never shout.'}
+          </div>
+        </div>
+      </div>
+    </Board>
+  );
+}
+
+// ── Iconography board ─────────────────────────────────────
+function IconographyBoard({ theme }) {
+  const c = PALETTE[theme];
+  return (
+    <Board theme={theme} width={560} height={560} padding={32}>
+      <AccentMesh theme={theme} position="tr" intensity={0.14} />
+      <div style={{ position: 'relative' }}>
+        <div style={{
+          fontFamily: FONTS.mono, fontSize: 11, color: c.accent,
+          letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 6,
+        }}>Iconography</div>
+        <div style={{ fontFamily: FONTS.heading, fontSize: 26, fontWeight: 600, letterSpacing: '-0.02em', marginBottom: 4 }}>
+          Lines, not fills
+        </div>
+        <div style={{ fontFamily: FONTS.serif, fontSize: 13, fontStyle: 'italic', color: c.textSecondary, marginBottom: 22, lineHeight: 1.5 }}>
+          24-grid, 1.4 stroke, rounded joins. Accent dots reserved for the <em>active element</em> of each glyph.
+        </div>
+        <IconGrid theme={theme} />
+        <div style={{
+          marginTop: 26, padding: '14px 16px',
+          background: c.surfaceAlt, borderRadius: 8, border: `1px solid ${c.border}`,
+          fontFamily: FONTS.mono, fontSize: 11, color: c.textSecondary, lineHeight: 1.6,
+        }}>
+          <div style={{ color: c.accent }}>// rules</div>
+          stroke: 1.4px · cap: round · join: round<br/>
+          grid: 24 · padding: 2 · corner: 3<br/>
+          accent: reserved for signal, ≤1 per icon
+        </div>
+      </div>
+    </Board>
+  );
+}
+
+// ── Typography board ──────────────────────────────────────
+function TypographyBoard({ theme }) {
+  const c = PALETTE[theme];
+  return (
+    <Board theme={theme} width={620} height={560} padding={36}>
+      <div style={{
+        fontFamily: FONTS.mono, fontSize: 11, color: c.accent,
+        letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 16,
+      }}>Typography</div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {/* Display */}
+        <div>
+          <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: c.textTertiary, letterSpacing: '0.1em' }}>
+            JAKARTA · 48 / 600 / -0.025em
+          </div>
+          <div style={{
+            fontFamily: FONTS.heading, fontSize: 48, fontWeight: 600,
+            letterSpacing: '-0.025em', lineHeight: 1.02, marginTop: 2,
+          }}>
+            Druggability,<br/>in minutes.
+          </div>
+        </div>
+
+        {/* H2 */}
+        <div>
+          <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: c.textTertiary, letterSpacing: '0.1em' }}>
+            JAKARTA · 22 / 600
+          </div>
+          <div style={{ fontFamily: FONTS.heading, fontSize: 22, fontWeight: 600, marginTop: 2 }}>
+            Pocket discovery, explained
+          </div>
+        </div>
+
+        {/* Body */}
+        <div>
+          <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: c.textTertiary, letterSpacing: '0.1em' }}>
+            INTER · 15 / 400 / 1.6
+          </div>
+          <div style={{ fontSize: 15, lineHeight: 1.6, color: c.textSecondary, marginTop: 4 }}>
+            Enter any protein drug target and instantly discover where drugs can bind. Ranked by druggability score, with residue-level composition analysis.
+          </div>
+        </div>
+
+        {/* Serif — editorial / learn */}
+        <div>
+          <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: c.textTertiary, letterSpacing: '0.1em' }}>
+            SOURCE SERIF 4 · 16 italic · long-form / learn
+          </div>
+          <div style={{ fontFamily: FONTS.serif, fontSize: 16, fontStyle: 'italic', lineHeight: 1.65, color: c.textSecondary, marginTop: 4 }}>
+            "The most exciting phrase in science, the one that heralds new discoveries, is not 'Eureka!' but 'That's funny…'"
+          </div>
+        </div>
+
+        {/* Mono */}
+        <div>
+          <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: c.textTertiary, letterSpacing: '0.1em' }}>
+            JETBRAINS MONO · 12 · code / labels
+          </div>
+          <div style={{
+            fontFamily: FONTS.mono, fontSize: 12, lineHeight: 1.55,
+            color: c.accent, background: c.surfaceAlt, padding: '10px 12px',
+            border: `1px solid ${c.border}`, borderRadius: 6, marginTop: 4,
+          }}>
+            <span style={{ color: c.textSecondary }}>$</span> opendde predict --target P00533 --engine p2rank
+          </div>
+        </div>
+      </div>
+    </Board>
+  );
+}
+
+// ── Imagery direction board ───────────────────────────────
+function ImageryBoard({ theme }) {
+  const c = PALETTE[theme];
+  return (
+    <Board theme={theme} width={760} height={560} padding={32}>
+      <div style={{
+        fontFamily: FONTS.mono, fontSize: 11, color: c.accent,
+        letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 6,
+      }}>Imagery · 3 motifs</div>
+      <div style={{ fontFamily: FONTS.heading, fontSize: 26, fontWeight: 600, letterSpacing: '-0.02em', marginBottom: 4 }}>
+        Data as ornament
+      </div>
+      <div style={{ fontFamily: FONTS.serif, fontSize: 13, fontStyle: 'italic', color: c.textSecondary, marginBottom: 22, lineHeight: 1.5 }}>
+        Generate visuals from real science — ribbons, scatters, graphs. No stock photos. No generic "AI" renders.
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+        {[
+          { v: 'ribbon', label: 'Protein ribbon', caption: 'α-helix coil. Hero imagery.' },
+          { v: 'scatter', label: 'SAR scatter', caption: 'Activity cliffs. Analytics.' },
+          { v: 'network', label: 'Molecular graph', caption: 'Ligand structure. Iconic.' },
+        ].map(m => (
+          <div key={m.v} style={{
+            background: c.surface, border: `1px solid ${c.border}`, borderRadius: 10, overflow: 'hidden',
+          }}>
+            <div style={{ background: c.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', height: 160 }}>
+              <MolecularArt theme={theme} width={220} height={140} variant={m.v} />
+            </div>
+            <div style={{ padding: '12px 14px' }}>
+              <div style={{ fontFamily: FONTS.body, fontSize: 12, fontWeight: 600, color: c.text }}>{m.label}</div>
+              <div style={{ fontFamily: FONTS.serif, fontStyle: 'italic', fontSize: 11, color: c.textSecondary, marginTop: 2 }}>{m.caption}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{
+        marginTop: 22, padding: '16px 18px',
+        background: c.surfaceAlt, borderRadius: 8, border: `1px dashed ${c.border}`,
+        fontFamily: FONTS.body, fontSize: 12, color: c.textSecondary, lineHeight: 1.6,
+      }}>
+        <div style={{ fontFamily: FONTS.mono, fontSize: 10, color: c.accent, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>
+          Photography — when used
+        </div>
+        Lab benches, pipettes, and researchers at work. Shot cool — desaturated, single warm highlight.
+        Never stock "hands on keyboard". Never molecule renders with bright gradients. When in doubt, ship data viz.
+      </div>
+    </Board>
+  );
+}
+
+// ── Tone voice board ──────────────────────────────────────
+function VoiceBoard({ theme }) {
+  const c = PALETTE[theme];
+  const pairs = [
+    { bad: "Revolutionary AI unlocks drug discovery.", good: "Predicts druggable pockets with P2Rank in under 10 s." },
+    { bad: "Seamlessly integrates with your workflow.", good: "Runs locally via Docker. No cloud GPU required." },
+    { bad: "Enterprise-grade molecular intelligence.", good: "Free, MIT-licensed, for academic and commercial use." },
+  ];
+  return (
+    <Board theme={theme} width={560} height={560} padding={36}>
+      <div style={{
+        fontFamily: FONTS.mono, fontSize: 11, color: c.accent,
+        letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 6,
+      }}>Voice</div>
+      <div style={{ fontFamily: FONTS.heading, fontSize: 26, fontWeight: 600, letterSpacing: '-0.02em', marginBottom: 4 }}>
+        Measured. Precise. Generous.
+      </div>
+      <div style={{ fontFamily: FONTS.serif, fontSize: 13, fontStyle: 'italic', color: c.textSecondary, marginBottom: 22, lineHeight: 1.5 }}>
+        Write like a scientist explaining their work to a colleague — not like a marketing page. Specific numbers beat superlatives.
+      </div>
+
+      {pairs.map((p, i) => (
+        <div key={i} style={{ marginBottom: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{
+            fontFamily: FONTS.body, fontSize: 13, color: c.danger, opacity: 0.9,
+            textDecoration: 'line-through', textDecorationColor: c.danger,
+          }}>
+            <span style={{ fontFamily: FONTS.mono, fontSize: 9, marginRight: 8, letterSpacing: '0.1em' }}>NOT</span>
+            {p.bad}
+          </div>
+          <div style={{ fontFamily: FONTS.body, fontSize: 14, fontWeight: 500, color: c.text }}>
+            <span style={{ fontFamily: FONTS.mono, fontSize: 9, marginRight: 8, letterSpacing: '0.1em', color: c.accent }}>YES</span>
+            {p.good}
+          </div>
+        </div>
+      ))}
+    </Board>
+  );
+}
+
+// ── App — tweaks-aware root ───────────────────────────────
+function App() {
+  const [state, setState] = React.useState(TWEAK_DEFAULTS);
+
+  // Tweaks protocol — listener first, announce second
+  React.useEffect(() => {
+    function onMsg(e) {
+      const d = e.data;
+      if (!d || typeof d !== 'object') return;
+      if (d.type === '__activate_edit_mode') setTweaksVisible(true);
+      if (d.type === '__deactivate_edit_mode') setTweaksVisible(false);
+    }
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+  const [tweaksVisible, setTweaksVisible] = React.useState(false);
+
+  function setTheme(t) {
+    setState(s => ({ ...s, theme: t }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { theme: t } }, '*');
+  }
+
+  const t = state.theme;
+  const other = t === 'dark' ? 'light' : 'dark';
+
+  return (
+    <>
+      <DesignCanvas>
+        {/* Title */}
+        <div style={{ padding: '0 60px 36px' }}>
+          <div style={{
+            fontFamily: FONTS.mono, fontSize: 11, color: 'rgba(0,80,60,0.8)',
+            letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8,
+          }}>OpenDDE · Brand Material · v1</div>
+          <div style={{
+            fontFamily: FONTS.heading, fontSize: 42, fontWeight: 700,
+            color: '#1a1a2e', letterSpacing: '-0.025em', lineHeight: 1.05,
+          }}>
+            Open Drug Design Engine
+          </div>
+          <div style={{
+            fontFamily: FONTS.serif, fontStyle: 'italic', fontSize: 16,
+            color: 'rgba(40,30,20,0.7)', marginTop: 6, maxWidth: 720, lineHeight: 1.5,
+          }}>
+            Two tonal directions — <strong>futuristic / molecular-mesh</strong> and <strong>academic / editorial</strong> — with three logo explorations, live across both themes. Scroll, drag, and pinch-zoom the canvas.
+          </div>
+        </div>
+
+        {/* Logo directions */}
+        <DCSection
+          title="Logo directions"
+          subtitle={`Three marks. Each shown in the active theme (${t}). The current mark is "Hex Molecule". Ribbon and Aperture are proposals.`}
+        >
+          <DCArtboard label="A · Hex Molecule (existing, refined)">
+            <LogoDirectionBoard
+              theme={t}
+              Logo={LogoHexMolecule}
+              name="Hex Molecule"
+              concept="Refinement of the current mark. Hexagon = chemistry, molecular graph = the payload. Closest to what's shipping today."
+              pros={['Familiar', 'Geometric', 'Scalable']}
+            />
+          </DCArtboard>
+          <DCArtboard label="B · Ribbon (editorial)">
+            <LogoDirectionBoard
+              theme={t}
+              Logo={LogoRibbon}
+              name="Ribbon"
+              concept="Stylized α-helix ribbon. Reads instantly as 'protein' to the target audience. Nature-journal editorial register."
+              pros={['Scientific', 'Distinctive', 'Serif-friendly']}
+            />
+          </DCArtboard>
+          <DCArtboard label="C · Aperture (mesh/AI)">
+            <LogoDirectionBoard
+              theme={t}
+              Logo={LogoAperture}
+              name="Aperture"
+              concept="Concentric aperture = binding site. Center dot = ligand docked. Strongest as a 16-px favicon; most 'AI-computational' of the three."
+              pros={['Iconic', 'Tiny-legible', 'Future-forward']}
+            />
+          </DCArtboard>
+          <DCPostIt top={-10} right={-40} rotate={4}>
+            Pick one direction — B or C reads as more distinctive than the current A at 16px.
+          </DCPostIt>
+        </DCSection>
+
+        {/* Wordmark + lockups */}
+        <DCSection title="Wordmarks & lockups" subtitle="Same wordmark, three marks. Swap lock mark as Direction is chosen.">
+          <DCArtboard label="Horizontal lockup">
+            <Board theme={t} width={480} height={260} padding={40}>
+              <div style={{ position: 'absolute', inset: 0, ...GridDots({ theme: t, opacity: 0.04 }) }} />
+              <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 28 }}>
+                <Lockup Logo={LogoHexMolecule} theme={t} logoSize={38} textSize={26} />
+                <Lockup Logo={LogoRibbon} theme={t} logoSize={38} textSize={26} />
+                <Lockup Logo={LogoAperture} theme={t} logoSize={38} textSize={26} />
+              </div>
+            </Board>
+          </DCArtboard>
+          <DCArtboard label="Stacked lockup + tagline">
+            <Board theme={t} width={360} height={260} padding={0}>
+              <div style={{ position: 'absolute', inset: 0, ...GridDots({ theme: t, opacity: 0.04 }) }} />
+              <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <LockupStacked Logo={LogoAperture} theme={t} logoSize={56} textSize={22} />
+              </div>
+            </Board>
+          </DCArtboard>
+          <DCArtboard label="Favicon · Hex Molecule">
+            <Board theme={t} width={420} height={180} padding={24}>
+              <FaviconStrip theme={t} Logo={LogoHexMolecule} />
+            </Board>
+          </DCArtboard>
+          <DCArtboard label="Favicon · Aperture">
+            <Board theme={t} width={420} height={180} padding={24}>
+              <FaviconStrip theme={t} Logo={LogoAperture} />
+            </Board>
+          </DCArtboard>
+        </DCSection>
+
+        {/* Palettes — always show BOTH themes */}
+        <DCSection title="Color system" subtitle="Dark and light shown together; the app ships with both. Same semantic roles in each.">
+          <DCArtboard label="Dark · midnight lab">
+            <PaletteBoard theme="dark" />
+          </DCArtboard>
+          <DCArtboard label="Light · paper notebook">
+            <PaletteBoard theme="light" />
+          </DCArtboard>
+        </DCSection>
+
+        {/* Typography */}
+        <DCSection title="Typography" subtitle="Jakarta · Inter · Source Serif 4 · JetBrains Mono. Four voices, one stack.">
+          <DCArtboard label={`Scale · ${t}`}>
+            <TypographyBoard theme={t} />
+          </DCArtboard>
+          <DCArtboard label={`Scale · ${other}`}>
+            <TypographyBoard theme={other} />
+          </DCArtboard>
+        </DCSection>
+
+        {/* Iconography */}
+        <DCSection title="Iconography" subtitle="Stroke-based, 24-grid. Accent dots reserved for the active element of the glyph.">
+          <DCArtboard label={`Icon set · ${t}`}>
+            <IconographyBoard theme={t} />
+          </DCArtboard>
+          <DCArtboard label={`Icon set · ${other}`}>
+            <IconographyBoard theme={other} />
+          </DCArtboard>
+        </DCSection>
+
+        {/* Imagery direction */}
+        <DCSection title="Imagery direction" subtitle="Visuals derive from the science. Three motifs: ribbon, scatter, graph.">
+          <DCArtboard label={`Imagery · ${t}`}>
+            <ImageryBoard theme={t} />
+          </DCArtboard>
+        </DCSection>
+
+        {/* Avatars */}
+        <DCSection title="Profile avatars" subtitle="GitHub, X, LinkedIn, Discord. Consistent across platforms.">
+          <DCArtboard label="Hex Molecule">
+            <Board theme={t} width={260} height={260} padding={0}>
+              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Avatar theme={t} Logo={LogoHexMolecule} size={180} />
+              </div>
+            </Board>
+          </DCArtboard>
+          <DCArtboard label="Ribbon">
+            <Board theme={t} width={260} height={260} padding={0}>
+              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Avatar theme={t} Logo={LogoRibbon} size={180} />
+              </div>
+            </Board>
+          </DCArtboard>
+          <DCArtboard label="Aperture">
+            <Board theme={t} width={260} height={260} padding={0}>
+              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Avatar theme={t} Logo={LogoAperture} size={180} />
+              </div>
+            </Board>
+          </DCArtboard>
+          <DCArtboard label="Aperture · light">
+            <Board theme={other} width={260} height={260} padding={0}>
+              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Avatar theme={other} Logo={LogoAperture} size={180} />
+              </div>
+            </Board>
+          </DCArtboard>
+        </DCSection>
+
+        {/* Social — OG / Twitter / LinkedIn */}
+        <DCSection title="Social templates" subtitle="OG card, X/Twitter post, LinkedIn banner. Composable from the same primitives.">
+          <DCArtboard label="OG card · 1200×630">
+            <SocialOG theme={t} Logo={LogoAperture} width={600} height={315} />
+          </DCArtboard>
+          <DCArtboard label="X / Twitter · 1600×900">
+            <TwitterCard theme={t} Logo={LogoAperture} width={500} />
+          </DCArtboard>
+          <DCArtboard label={`OG · ${other} theme`}>
+            <SocialOG theme={other} Logo={LogoAperture} width={600} height={315} />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection title="LinkedIn banner" subtitle="1584 × 396 — company page header.">
+          <DCArtboard label={`Banner · ${t}`}>
+            <LinkedInBanner theme={t} Logo={LogoAperture} width={900} />
+          </DCArtboard>
+        </DCSection>
+
+        {/* Posters */}
+        <DCSection title="Poster / one-pager" subtitle="A-ratio. Conference handouts, sticker-sheet printouts.">
+          <DCArtboard label="Ribbon direction">
+            <PosterTile theme={t} Logo={LogoRibbon} width={320} />
+          </DCArtboard>
+          <DCArtboard label="Aperture direction">
+            <PosterTile theme={t} Logo={LogoAperture} width={320} />
+          </DCArtboard>
+          <DCArtboard label={`Aperture · ${other}`}>
+            <PosterTile theme={other} Logo={LogoAperture} width={320} />
+          </DCArtboard>
+          <DCArtboard label="Hex Molecule">
+            <PosterTile theme={t} Logo={LogoHexMolecule} width={320} />
+          </DCArtboard>
+        </DCSection>
+
+        {/* Voice */}
+        <DCSection title="Voice & tone" subtitle="How OpenDDE writes. Scientists explaining work, not marketing pages.">
+          <DCArtboard label={`Voice · ${t}`}>
+            <VoiceBoard theme={t} />
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+
+      {/* Tweaks floating panel */}
+      {tweaksVisible && (
+        <div style={{
+          position: 'fixed', right: 20, bottom: 20, zIndex: 9999,
+          background: '#0c1222', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 12, padding: 16, width: 240,
+          fontFamily: FONTS.body, fontSize: 13,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+        }}>
+          <div style={{
+            fontFamily: FONTS.mono, fontSize: 10, color: '#00d4aa',
+            letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10,
+          }}>Tweaks</div>
+          <div style={{ fontSize: 12, color: '#8892a4', marginBottom: 8 }}>Theme lead</div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {['dark', 'light'].map(opt => (
+              <button
+                key={opt}
+                onClick={() => setTheme(opt)}
+                style={{
+                  flex: 1, padding: '8px 10px', borderRadius: 6,
+                  border: `1px solid ${t === opt ? '#00d4aa' : 'rgba(255,255,255,0.1)'}`,
+                  background: t === opt ? 'rgba(0,212,170,0.15)' : 'transparent',
+                  color: t === opt ? '#00f0c0' : '#e2e8f0',
+                  fontFamily: FONTS.body, fontSize: 12, cursor: 'pointer', textTransform: 'capitalize',
+                }}
+              >{opt}</button>
+            ))}
+          </div>
+          <div style={{ marginTop: 12, fontSize: 11, color: '#5a6478', lineHeight: 1.5 }}>
+            Swaps the "lead" theme across the canvas. Palette & side-by-side sections always show both.
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+</body>
+</html>

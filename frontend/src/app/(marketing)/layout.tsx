@@ -168,7 +168,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
           <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
             <LogoAperture size={28} />
             <span className="text-xl font-bold tracking-tight text-[var(--text)]">
-              Open<span className="text-[var(--accent)]">DDE</span>
+              OpenDDE
             </span>
           </Link>
 

@@ -43,7 +43,7 @@ services:
       - P2RANK_SERVICE_URL=http://p2rank:8001
       - IMMUNEBUILDER_SERVICE_URL=http://immunebuilder:8002
       - RDKIT_SERVICE_URL=http://rdkit:8003
-      - VINA_SERVICE_URL=http://vina:8004
+      - BOLTZ_SERVICE_URL=http://boltz:8004
       - CLAUDE_API_KEY=${CLAUDE_API_KEY}
     volumes:
       - ./backend:/app
@@ -142,12 +142,22 @@ services:
           cpus: '0.5'
           memory: 512M
 
-  vina:
+  boltz:
     build:
-      context: ./services/vina
+      context: ./services/boltz
       dockerfile: Dockerfile
+      args:
+        TORCH_VARIANT: ${TORCH_VARIANT:-cpu}
     ports:
       - "8004:8004"
+    environment:
+      - BOLTZ_MAX_CONCURRENT=${BOLTZ_MAX_CONCURRENT:-1}
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - boltz-cache:/app/.boltz_cache
+    depends_on:
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
       interval: 30s
@@ -156,8 +166,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '4'
-          memory: 4G
+          cpus: '4.0'
+          memory: 8G
         reservations:
           cpus: '1'
           memory: 1G
@@ -213,3 +223,4 @@ volumes:
   redis-data:
   antibody-data:
   postgres-data:
+  boltz-cache:

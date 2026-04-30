@@ -138,3 +138,83 @@ async def get_analytics():
         "clinical_phase_distribution": phase_dist,
         "timeline": timeline,
     }
+
+
+@router.get("/analytics/affinity")
+async def get_affinity_analytics():
+    empty = {
+        "total": 0,
+        "status_breakdown": {},
+        "avg_runtime_seconds": None,
+        "top_targets": [],
+        "recent_campaigns": [],
+    }
+    if not database.pool:
+        return empty
+
+    try:
+        with database.pool.connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT COUNT(*) FROM affinity_predictions")
+                r = cur.fetchone()
+                total = r[0] if r else 0
+
+            with conn.cursor(row_factory=dict_row) as dict_cur:
+                dict_cur.execute(
+                    "SELECT status, COUNT(*) AS c FROM affinity_predictions GROUP BY status"
+                )
+                status_breakdown = {r["status"]: r["c"] for r in dict_cur.fetchall()}
+
+                dict_cur.execute(
+                    """
+                    SELECT EXTRACT(EPOCH FROM AVG(completed_at - created_at))::float AS avg_seconds
+                    FROM affinity_predictions
+                    WHERE status = 'complete' AND completed_at IS NOT NULL
+                    """
+                )
+                row = dict_cur.fetchone()
+                avg_runtime = row["avg_seconds"] if row and row["avg_seconds"] is not None else None
+
+                dict_cur.execute(
+                    """
+                    SELECT uniprot_id, COUNT(*) AS prediction_count
+                    FROM affinity_predictions
+                    GROUP BY uniprot_id
+                    ORDER BY prediction_count DESC
+                    LIMIT 5
+                    """
+                )
+                top_targets = [
+                    {"uniprot_id": r["uniprot_id"], "prediction_count": r["prediction_count"]}
+                    for r in dict_cur.fetchall()
+                ]
+
+                dict_cur.execute(
+                    """
+                    SELECT id, uniprot_id, name, total_ligands, completed_count,
+                           failed_count, created_at, completed_at
+                    FROM screening_campaigns
+                    ORDER BY created_at DESC
+                    LIMIT 10
+                    """
+                )
+                recent_campaigns = []
+                for r in dict_cur.fetchall():
+                    d = dict(r)
+                    d["id"] = str(d["id"])
+                    if d.get("created_at"):
+                        d["created_at"] = d["created_at"].isoformat()
+                    if d.get("completed_at"):
+                        d["completed_at"] = d["completed_at"].isoformat()
+                    recent_campaigns.append(d)
+    except Exception as e:
+        print(f"Error fetching affinity analytics: {e}")
+        return empty
+
+    return {
+        "total": total,
+        "status_breakdown": status_breakdown,
+        "avg_runtime_seconds": avg_runtime,
+        "top_targets": top_targets,
+        "recent_campaigns": recent_campaigns,
+    }

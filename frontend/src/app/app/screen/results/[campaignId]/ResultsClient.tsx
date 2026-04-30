@@ -13,7 +13,14 @@ import {
   XCircle,
 } from 'lucide-react';
 import { apiPost } from '@/lib/api';
-import { getCampaign, pollCampaign } from '@/lib/affinity';
+import {
+  getCampaign,
+  pollCampaign,
+  buildAffinityTooltip,
+  confidenceTier,
+  friendlyAffinityError,
+  pic50TextColor,
+} from '@/lib/affinity';
 import { formatNm } from '@/lib/screen-utils';
 import type {
   AffinityPrediction,
@@ -373,9 +380,22 @@ function ResultRow({
           {p.ligand_smiles}
         </div>
       </div>
-      <div className="w-14 shrink-0 text-right tabular-nums">
+      <div
+        className="w-14 shrink-0 text-right tabular-nums"
+        title={p.status === 'complete' ? buildAffinityTooltip(p) : undefined}
+      >
         {p.pic50 != null ? (
-          <span className={pic50Color(p.pic50)}>{p.pic50.toFixed(2)}</span>
+          (() => {
+            const tier = confidenceTier(p.confidence?.iptm);
+            return (
+              <span className={`${pic50TextColor(p.pic50, tier)} ${p.pic50 >= 7 && tier !== 'low' ? 'font-semibold' : ''}`}>
+                {p.pic50.toFixed(2)}
+                {tier === 'low' && <span className="ml-0.5">*</span>}
+              </span>
+            );
+          })()
+        ) : p.status === 'failed' ? (
+          <span className="text-red-400" title={friendlyAffinityError(p.error)}>—</span>
         ) : (
           <span className="text-muted-2">—</span>
         )}
@@ -428,12 +448,6 @@ function StatusPill({ status, progress }: { status: AffinityPrediction['status']
       {label}
     </span>
   );
-}
-
-function pic50Color(p: number): string {
-  if (p >= 7) return 'font-semibold text-emerald-400';
-  if (p >= 5) return 'text-amber-400';
-  return 'text-muted';
 }
 
 function sortVal(p: AffinityPrediction, key: SortKey): number | string | null | undefined {

@@ -51,7 +51,13 @@ import {
   pollCampaign,
   isTerminal,
   nmToPic50,
+  buildAffinityTooltip,
+  confidenceTier,
+  friendlyAffinityError,
+  pic50TextColor,
 } from '@/lib/affinity';
+import AboutBoltz2 from '@/components/AboutBoltz2';
+import BoltzWarmupBanner from '@/components/BoltzWarmupBanner';
 
 const StructureViewer = dynamic(() => import('@/components/MolstarViewer'), {
   ssr: false,
@@ -763,8 +769,12 @@ function LigandsTab({
     );
   }
 
+  const hasSubmittedAffinity = Object.keys(affinityBySmiles).length > 0;
+
   return (
     <div className="flex h-full w-full flex-col">
+      <BoltzWarmupBanner armed={hasSubmittedAffinity} />
+
       {/* Controls */}
       <div className="flex h-11 shrink-0 items-center gap-3 border-b border-[var(--border)] bg-[var(--surface)] px-4">
         <span className="text-[11px] text-muted-2 tabular-nums">
@@ -864,6 +874,10 @@ function LigandsTab({
         </div>
       )}
 
+      <div className="shrink-0 border-b border-[var(--border)] bg-[var(--surface)] px-4 py-2">
+        <AboutBoltz2 />
+      </div>
+
       {/* Table header */}
       <div className="flex h-8 shrink-0 items-center gap-2 border-b border-[var(--border)] bg-[var(--surface-alt)] px-4 text-mono-label text-[9px]">
         <div className="w-10 shrink-0">2D</div>
@@ -938,12 +952,6 @@ function LigandsTab({
   );
 }
 
-function pic50Color(p: number): string {
-  if (p >= 7) return 'text-emerald-400';
-  if (p >= 5) return 'text-amber-400';
-  return 'text-muted';
-}
-
 function PredictedPkiCell({
   affinity,
   onSubmit,
@@ -988,8 +996,9 @@ function PredictedPkiCell({
     );
   }
   if (affinity.status === 'failed' || affinity.status === 'expired') {
+    const tip = friendlyAffinityError(affinity.error) || affinity.status;
     return (
-      <div className="w-20 shrink-0 text-right" title={affinity.error || affinity.status}>
+      <div className="w-20 shrink-0 text-right" title={tip}>
         <span className="rounded-full bg-red-500/20 px-1.5 py-0.5 text-[9px] text-red-300">
           {affinity.status === 'expired' ? 'Expired' : 'Failed'}
         </span>
@@ -1004,9 +1013,17 @@ function PredictedPkiCell({
       <div className="w-20 shrink-0 text-right text-[11px] text-muted-2">{'\u2014'}</div>
     );
   }
+  const tier = confidenceTier(affinity.confidence?.iptm);
+  const lowConfidence = tier === 'low';
   return (
-    <div className="w-20 shrink-0 text-right tabular-nums">
-      <div className={`text-[12px] font-semibold ${pic50Color(pic50)}`}>{pic50.toFixed(1)}</div>
+    <div
+      className="w-20 shrink-0 text-right tabular-nums"
+      title={buildAffinityTooltip(affinity)}
+    >
+      <div className={`text-[12px] font-semibold ${pic50TextColor(pic50, tier)}`}>
+        {pic50.toFixed(1)}
+        {lowConfidence && <span className="ml-0.5 text-amber-400">*</span>}
+      </div>
       {ic50 != null && (
         <div className="text-[9px] text-muted-2">IC50: {formatActivity(ic50)}</div>
       )}

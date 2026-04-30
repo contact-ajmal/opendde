@@ -19,6 +19,7 @@ const platformItems: DropdownItem[] = [
   { label: 'Pocket Discovery', description: 'Find druggable binding sites with P2Rank', icon: '🎯', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard` },
   { label: 'Ligand Intelligence', description: 'Explore known drugs from ChEMBL', icon: '💊', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard` },
   { label: 'Complex Prediction', description: 'Model binding with AlphaFold 3', icon: '🔬', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard` },
+  { label: 'Virtual Screening', description: 'Predict binding affinity with Boltz-2', icon: '⚡', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/screen` },
   { label: 'Antibody Modeling', description: 'Predict structures with ImmuneBuilder', icon: '🧬', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/antibody` },
   { label: 'AI Assistant', description: 'Claude-powered drug design insights', icon: '✨', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/dashboard` },
   { label: 'Analytics', description: 'Platform-wide data insights', icon: '📊', href: `${process.env.NEXT_PUBLIC_APP_URL || ''}/app/analytics` },

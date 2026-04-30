@@ -16,6 +16,8 @@ import {
 import { apiGet, apiPost } from '@/lib/api';
 import { submitScreen, pollCampaign } from '@/lib/affinity';
 import { parseLigandText, ligandsToText, formatNm, type ParsedLigand } from '@/lib/screen-utils';
+import AboutBoltz2 from '@/components/AboutBoltz2';
+import BoltzWarmupBanner from '@/components/BoltzWarmupBanner';
 import type {
   AffinityPrediction,
   CampaignStatusResponse,
@@ -295,6 +297,8 @@ function ScreenInner() {
         </span>
       </header>
 
+      <BoltzWarmupBanner armed={!!campaignId} />
+
       <div className="flex flex-1 min-h-0">
         {/* ── Left: configuration ─────────────────────────── */}
         <section className="flex w-1/2 min-w-[420px] flex-col gap-4 overflow-y-auto border-r border-[var(--border)] p-5">
@@ -447,6 +451,10 @@ function ScreenInner() {
                 Add at least one valid SMILES to enable screening.
               </p>
             )}
+          </div>
+
+          <div className="mt-2">
+            <AboutBoltz2 />
           </div>
         </section>
 

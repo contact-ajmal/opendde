@@ -33,6 +33,8 @@ const navSections: NavSection[] = [
       { title: 'Pocket discovery', href: '/docs/pocket-discovery', keywords: ['p2rank', 'binding site', 'druggability'] },
       { title: 'Ligand intelligence', href: '/docs/ligand-intelligence', keywords: ['chembl', 'bioactivity', 'ic50', 'compounds'] },
       { title: 'Complex prediction', href: '/docs/complex-prediction', keywords: ['alphafold', 'docking', 'binding pose'] },
+      { title: 'Affinity prediction', href: '/docs/affinity-prediction', keywords: ['boltz', 'pki', 'pic50', 'binder probability', 'iptm'] },
+      { title: 'Virtual screening', href: '/docs/virtual-screening', keywords: ['screen', 'campaign', 'batch', 'hits', 'fda drugs'] },
       { title: 'Antibody modeling', href: '/docs/antibody-modeling', keywords: ['immunebuilder', 'cdr', 'heavy chain', 'light chain'] },
       { title: 'AI assistant', href: '/docs/ai-assistant', keywords: ['claude', 'chat', 'analysis', 'reasoning'] },
       { title: 'Druglikeness scoring', href: '/docs/druglikeness-scoring', keywords: ['lipinski', 'veber', 'molecular properties'] },

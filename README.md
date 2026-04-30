@@ -38,6 +38,9 @@ Browse all known bioactive compounds from **ChEMBL** with experimental binding d
 ### Complex Prediction
 Predict how drugs bind to targets using **AlphaFold 3**. Semi-automated workflow generates AF3 job files, handles upload, and renders predicted complexes in 3D with confidence metrics (iPTM, pLDDT).
 
+### Affinity Prediction
+Predict binding affinity (pIC50, IC50, binder probability) for protein-ligand pairs using **Boltz-2**. The pocket detail page shows predicted pKi alongside experimental ChEMBL values; the dedicated `/app/screen` page runs full virtual-screening campaigns across hundreds of ligands with live progress, ranked top-hits, and CSV export.
+
 ### Antibody Modeling
 Predict antibody 3D structures from heavy and light chain sequences using **ImmuneBuilder**. CDR loops (H1-H3, L1-L3) are annotated and color-coded in the interactive viewer.
 
@@ -184,16 +187,34 @@ class FPocketEngine(PocketEngine):
 |----------|---------------|----------------------|
 | Pocket prediction | P2Rank | FPocket, DeepSite, SiteMap |
 | Structure prediction | AlphaFold 3 | Boltz-2, Chai-1, ESMFold |
+| Affinity prediction | Boltz-2 | DiffDock, FEP+, AutoDock-GPU |
 | Antibody modeling | ImmuneBuilder | ABodyBuilder3, IgFold |
 | Cheminformatics | RDKit | OpenBabel, CDK |
+
+### Using a remote GPU for Boltz-2
+
+Local CPU inference takes 3–8 minutes per prediction, which is fine for trying things out but slow for real screening. For production use or large-scale screens, set `BOLTZ_SERVICE_URL` in `.env` to an endpoint running the same API on a GPU instance and the rest of the platform just works:
+
+```bash
+# .env
+BOLTZ_SERVICE_URL=https://my-boltz-gpu.example.com
+```
+
+Compatible options:
+
+- **NVIDIA Boltz2 NIM** — drop-in API, fastest path to production-grade throughput.
+- **Self-hosted** — run the bundled `services/boltz` container on a GPU VM (AWS g5.xlarge, Lambda Labs A10, etc.) with `TORCH_VARIANT=cu121`.
+- **Modal / Replicate / Runpod** — wrap the same service entrypoint in any of these serverless GPU platforms.
+
+The frontend warmup banner and `/affinity/health` endpoint surface model-cache state regardless of where the service runs.
 
 ---
 
 ## Roadmap
 
-- [ ] **Boltz-2 integration** — Open-source structure prediction as AlphaFold alternative
+- [x] **Boltz-2 integration** — Affinity prediction shipped in v3.2.0
+- [x] **Batch screening** — `/app/screen` campaign runner shipped in v3.2.0
 - [ ] **AutoDock Vina** — Local molecular docking without AlphaFold Server dependency
-- [ ] **Batch screening** — Screen compound libraries against multiple pockets
 - [ ] **Collaborative features** — Shared workspaces and annotation
 - [ ] **IsoDDE integration** — When API access becomes available
 - [ ] **Protein-protein interaction** druggability analysis

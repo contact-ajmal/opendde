@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { ArrowRight, BarChart3 } from 'lucide-react';
 import { apiGet } from '@/lib/api';
+import AffinityAnalyticsCard from '@/components/AffinityAnalyticsCard';
 
 interface Analytics {
   overview: {
@@ -223,6 +224,8 @@ export default function AnalyticsPage() {
             </ChartCard>
           </div>
         </div>
+
+        <AffinityAnalyticsCard />
 
         {/* Top targets table */}
         {data.top_targets.length > 0 && (

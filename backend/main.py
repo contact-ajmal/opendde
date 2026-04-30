@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import targets, pockets, ligands, predictions, antibody, export, search, stats, properties, reports, report_pdf, similar, safety, assistant, analytics, activity_cliffs, interactions
+from routers import targets, pockets, ligands, predictions, antibody, export, search, stats, properties, reports, report_pdf, similar, safety, assistant, analytics, activity_cliffs, interactions, affinity
 from services.database import init_db, close_db
 
 # Simple in-memory response cache for GET endpoints (1 hour TTL)
@@ -17,6 +17,11 @@ CACHE_MAX_ENTRIES = 200
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("OpenDDE backend starting...")
+    try:
+        from migrations.run import apply_pending
+        apply_pending()
+    except Exception as e:
+        print(f"[migrations] startup migration failed: {e}")
     init_db()
     yield
     _response_cache.clear()
@@ -139,6 +144,7 @@ app.include_router(assistant.router, prefix="/api/v1")
 app.include_router(analytics.router, prefix="/api/v1")
 app.include_router(activity_cliffs.router, prefix="/api/v1")
 app.include_router(interactions.router, prefix="/api/v1")
+app.include_router(affinity.router, prefix="/api/v1")
 
 
 @app.get("/api/v1/health")

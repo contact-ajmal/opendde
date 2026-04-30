@@ -146,3 +146,40 @@ export interface Prediction {
   structure_url: string | null;
   created_at: string;
 }
+
+export interface AffinityPrediction {
+  job_id: string;
+  uniprot_id: string;
+  ligand_smiles: string;
+  ligand_name?: string;
+  ligand_external_id?: string;
+  status: 'queued' | 'running' | 'complete' | 'failed' | 'expired';
+  affinity_pred_value?: number;
+  affinity_probability_binary?: number;
+  pic50?: number;
+  ic50_nm?: number;
+  confidence?: { ptm?: number; iptm?: number; plddt?: number };
+  error?: string;
+  progress?: number;
+  created_at?: string;
+  completed_at?: string;
+}
+
+export interface AffinityCampaign {
+  id: string;
+  uniprot_id: string;
+  pocket_rank: number | null;
+  name: string | null;
+  total_ligands: number;
+  completed_count: number;
+  failed_count: number;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export interface CampaignStatusResponse {
+  campaign: AffinityCampaign;
+  completed_count: number;
+  failed_count: number;
+  predictions: AffinityPrediction[];
+}

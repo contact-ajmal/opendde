@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -18,6 +18,8 @@ import {
   Link2,
   ChevronDown,
   LayoutDashboard,
+  FlaskConical,
+  Info,
 } from 'lucide-react';
 import type { PocketHighlight } from '@/components/MolstarViewer';
 import PocketMap from '@/components/PocketMap';
@@ -38,7 +40,18 @@ import type {
   LigandsResponse,
   Prediction,
   InteractionsResponse,
+  AffinityPrediction,
+  CampaignStatusResponse,
 } from '@/lib/types';
+import {
+  submitAffinity,
+  submitScreen,
+  listForTarget,
+  pollJob,
+  pollCampaign,
+  isTerminal,
+  nmToPic50,
+} from '@/lib/affinity';
 
 const StructureViewer = dynamic(() => import('@/components/MolstarViewer'), {
   ssr: false,
@@ -62,6 +75,11 @@ const InteractionView = dynamic(() => import('@/components/InteractionView'), {
 const InteractionDiagram2D = dynamic(() => import('@/components/InteractionDiagram2D'), {
   ssr: false,
   loading: () => <div className="shimmer h-full w-full rounded" />,
+});
+
+const LigandAffinityScatter = dynamic(() => import('@/components/LigandAffinityScatter'), {
+  ssr: false,
+  loading: () => <div className="shimmer h-72 w-full rounded" />,
 });
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -443,6 +461,8 @@ export default function PocketDetailPage() {
             )}
             {activeTab === 'ligands' && (
               <LigandsTab
+                uniprotId={params.uniprotId}
+                pocketRank={rankNum}
                 ligands={ligands}
                 lipinski={lipinski}
                 onPredict={handlePredict}
@@ -529,10 +549,14 @@ function EmptyTab({ message }: { message: string }) {
 
 /* ── Ligands tab ─────────────────────────────────────── */
 function LigandsTab({
+  uniprotId,
+  pocketRank,
   ligands,
   lipinski,
   onPredict,
 }: {
+  uniprotId: string;
+  pocketRank: number;
   ligands: KnownLigand[];
   lipinski: Record<string, boolean | null>;
   onPredict: (lig: { smiles: string; name: string }) => void;
@@ -543,6 +567,80 @@ function LigandsTab({
   const [customOpen, setCustomOpen] = useState(false);
   const [customSmiles, setCustomSmiles] = useState('');
   const [customName, setCustomName] = useState('');
+  const [showPredicted, setShowPredicted] = useState(false);
+  const [scatterOpen, setScatterOpen] = useState(false);
+
+  // Affinity state, keyed by SMILES so each row can look up its prediction
+  const [affinityBySmiles, setAffinityBySmiles] = useState<Record<string, AffinityPrediction>>({});
+  const [campaign, setCampaign] = useState<CampaignStatusResponse | null>(null);
+  const [bulkSubmitting, setBulkSubmitting] = useState(false);
+  const cancellersRef = useRef<Map<string, () => void>>(new Map());
+
+  function applyJobUpdate(job: AffinityPrediction) {
+    setAffinityBySmiles((prev) => ({ ...prev, [job.ligand_smiles]: job }));
+    if (isTerminal(job.status)) {
+      const c = cancellersRef.current.get(job.job_id);
+      if (c) {
+        c();
+        cancellersRef.current.delete(job.job_id);
+      }
+    }
+  }
+
+  function startPoll(job: AffinityPrediction) {
+    if (cancellersRef.current.has(job.job_id)) return;
+    setAffinityBySmiles((prev) => ({ ...prev, [job.ligand_smiles]: job }));
+    const cancel = pollJob(job.job_id, applyJobUpdate);
+    cancellersRef.current.set(job.job_id, cancel);
+  }
+
+  // Hydrate from server on mount; resume polling for any in-flight rows.
+  useEffect(() => {
+    let cancelled = false;
+    listForTarget(uniprotId)
+      .then((preds) => {
+        if (cancelled) return;
+        const map: Record<string, AffinityPrediction> = {};
+        for (const p of preds) {
+          // listForTarget already orders DESC by created_at, so first hit per SMILES wins
+          if (!map[p.ligand_smiles]) map[p.ligand_smiles] = p;
+        }
+        setAffinityBySmiles(map);
+        for (const p of preds) {
+          if (!isTerminal(p.status)) startPoll(p);
+        }
+      })
+      .catch(() => { /* hydration is best-effort */ });
+    const cancellers = cancellersRef.current;
+    return () => {
+      cancelled = true;
+      cancellers.forEach((c) => c());
+      cancellers.clear();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uniprotId]);
+
+  async function handleSubmitOne(lig: KnownLigand) {
+    const placeholder: AffinityPrediction = {
+      job_id: `pending:${lig.chembl_id}`,
+      uniprot_id: uniprotId,
+      ligand_smiles: lig.smiles,
+      ligand_name: lig.name,
+      status: 'queued',
+      progress: 0,
+    };
+    setAffinityBySmiles((prev) => ({ ...prev, [lig.smiles]: placeholder }));
+    setShowPredicted(true);
+    try {
+      const { job_id } = await submitAffinity(uniprotId, lig.smiles, lig.name, lig.chembl_id);
+      startPoll({ ...placeholder, job_id });
+    } catch (e) {
+      setAffinityBySmiles((prev) => ({
+        ...prev,
+        [lig.smiles]: { ...placeholder, status: 'failed', error: (e as Error).message },
+      }));
+    }
+  }
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortAsc(!sortAsc);
@@ -571,6 +669,72 @@ function LigandsTab({
     setCustomSmiles('');
     setCustomName('');
   }
+
+  async function handlePredictAll() {
+    if (bulkSubmitting || filtered.length === 0) return;
+    // Skip ligands that already have an active or completed prediction
+    const targets = filtered.filter((l) => {
+      const a = affinityBySmiles[l.smiles];
+      return !a || (a.status !== 'complete' && a.status !== 'running' && a.status !== 'queued');
+    });
+    if (targets.length === 0) return;
+    setBulkSubmitting(true);
+    setShowPredicted(true);
+    try {
+      const resp = await submitScreen(
+        uniprotId,
+        targets.map((l) => ({ smiles: l.smiles, name: l.name, external_id: l.chembl_id })),
+        { pocket_rank: pocketRank },
+      );
+      setAffinityBySmiles((prev) => {
+        const next = { ...prev };
+        for (const l of targets) {
+          next[l.smiles] = {
+            job_id: `pending:${l.chembl_id}`,
+            uniprot_id: uniprotId,
+            ligand_smiles: l.smiles,
+            ligand_name: l.name,
+            status: 'queued',
+            progress: 0,
+          };
+        }
+        return next;
+      });
+      // One shared poller drives all rows by job_id — saves us N parallel polls
+      const cancel = pollCampaign(resp.campaign_id, (status) => {
+        setCampaign(status);
+        setAffinityBySmiles((prev) => {
+          const next = { ...prev };
+          for (const p of status.predictions) next[p.ligand_smiles] = p;
+          return next;
+        });
+      });
+      cancellersRef.current.set(`campaign:${resp.campaign_id}`, cancel);
+    } catch {
+      setAffinityBySmiles((prev) => {
+        const next = { ...prev };
+        for (const l of targets) {
+          if (next[l.smiles]?.job_id?.startsWith('pending:')) delete next[l.smiles];
+        }
+        return next;
+      });
+    } finally {
+      setBulkSubmitting(false);
+    }
+  }
+
+  // Boltz on CPU averages roughly 5 min/ligand. Once at least one job is terminal
+  // we refine the ETA from observed throughput.
+  const campaignEta = useMemo(() => {
+    if (!campaign) return null;
+    const { total_ligands, completed_count, failed_count, created_at } = campaign.campaign;
+    const done = completed_count + failed_count;
+    const remaining = total_ligands - done;
+    if (remaining <= 0) return null;
+    const elapsedMs = Date.now() - new Date(created_at).getTime();
+    const perJob = done > 0 ? elapsedMs / done : 5 * 60_000;
+    return Math.max(1, Math.round((perJob * remaining) / 60_000));
+  }, [campaign]);
 
   if (ligands.length === 0) {
     return (
@@ -641,8 +805,28 @@ function LigandsTab({
         </select>
 
         <button
+          onClick={handlePredictAll}
+          disabled={bulkSubmitting}
+          className="ml-auto flex h-7 items-center gap-1 rounded-md border border-blue-500/40 bg-blue-500/10 px-2.5 text-[11px] font-medium text-blue-300 hover:bg-blue-500/20 disabled:opacity-50 transition-colors"
+          title="Submit a Boltz-2 affinity job for every visible ligand"
+        >
+          <FlaskConical className="h-3 w-3" />
+          {bulkSubmitting ? 'Submitting…' : 'Predict affinity for all'}
+        </button>
+
+        <label className="flex h-7 items-center gap-1.5 text-[11px] text-muted">
+          <input
+            type="checkbox"
+            checked={showPredicted}
+            onChange={(e) => setShowPredicted(e.target.checked)}
+            className="h-3 w-3 accent-emerald-400"
+          />
+          Show predicted
+        </label>
+
+        <button
           onClick={() => setCustomOpen(!customOpen)}
-          className="ml-auto flex h-7 items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--bg)] px-2.5 text-[11px] font-medium text-foreground hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-colors"
+          className="flex h-7 items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--bg)] px-2.5 text-[11px] font-medium text-foreground hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)] transition-colors"
         >
           <Pencil className="h-3 w-3 text-emerald-400" />
           Test custom SMILES
@@ -657,6 +841,29 @@ function LigandsTab({
         />
       )}
 
+      {campaign && (
+        <div className="flex h-9 shrink-0 items-center justify-between gap-3 border-b border-[var(--border)] bg-blue-500/5 px-4 text-[11px]">
+          <div className="flex items-center gap-2 text-foreground">
+            <Loader2 className="h-3 w-3 animate-spin text-blue-400" />
+            <span className="tabular-nums">
+              Screening {campaign.campaign.total_ligands} ligands ·{' '}
+              <span className="font-semibold text-emerald-400">
+                {campaign.completed_count}/{campaign.campaign.total_ligands} complete
+              </span>
+              {campaign.failed_count > 0 && (
+                <>
+                  {' '}
+                  · <span className="text-red-400">{campaign.failed_count} failed</span>
+                </>
+              )}
+            </span>
+          </div>
+          {campaignEta != null && (
+            <span className="text-muted-2 tabular-nums">ETA ~{campaignEta} min</span>
+          )}
+        </div>
+      )}
+
       {/* Table header */}
       <div className="flex h-8 shrink-0 items-center gap-2 border-b border-[var(--border)] bg-[var(--surface-alt)] px-4 text-mono-label text-[9px]">
         <div className="w-10 shrink-0">2D</div>
@@ -667,6 +874,21 @@ function LigandsTab({
         <button onClick={() => toggleSort('activity_value_nm')} className="w-20 shrink-0 text-right hover:text-foreground">
           Activity{sortArrow('activity_value_nm')}
         </button>
+        <div
+          className="flex w-20 shrink-0 items-center justify-end gap-1 text-right"
+          title="Boltz-2 predicted pIC50. Strong binary classifier (binder vs decoy); less accurate at fine ranking of close analogs."
+        >
+          Pred. pKi
+          <Info className="h-2.5 w-2.5 text-muted-2" />
+        </div>
+        {showPredicted && (
+          <div
+            className="w-16 shrink-0 text-right"
+            title="Boltz-2 binder probability"
+          >
+            Binder %
+          </div>
+        )}
         <button onClick={() => toggleSort('clinical_phase')} className="w-14 shrink-0 text-center hover:text-foreground">
           Phase{sortArrow('clinical_phase')}
         </button>
@@ -682,10 +904,128 @@ function LigandsTab({
               key={lig.chembl_id}
               lig={lig}
               lipinskiPass={lipinski[lig.chembl_id]}
+              affinity={affinityBySmiles[lig.smiles]}
+              showBinder={showPredicted}
+              onSubmitAffinity={() => handleSubmitOne(lig)}
               onPredict={() => onPredict({ smiles: lig.smiles, name: lig.name })}
             />
           ))}
         </div>
+      </div>
+
+      {/* Experimental vs predicted scatter */}
+      <div className="shrink-0 border-t border-[var(--border)] bg-[var(--surface)]">
+        <button
+          onClick={() => setScatterOpen(!scatterOpen)}
+          className="flex h-9 w-full items-center justify-between px-4 text-[11px] font-medium text-foreground hover:bg-[var(--surface-hover)] transition-colors"
+          aria-expanded={scatterOpen}
+        >
+          <span className="flex items-center gap-2">
+            <ScatterChart className="h-3.5 w-3.5 text-blue-400" />
+            Experimental vs predicted
+          </span>
+          <ChevronDown
+            className={`h-3.5 w-3.5 text-muted-2 transition-transform ${scatterOpen ? 'rotate-180' : ''}`}
+          />
+        </button>
+        {scatterOpen && (
+          <div className="border-t border-[var(--border)] p-4">
+            <LigandAffinityScatter ligands={ligands} predictions={affinityBySmiles} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function pic50Color(p: number): string {
+  if (p >= 7) return 'text-emerald-400';
+  if (p >= 5) return 'text-amber-400';
+  return 'text-muted';
+}
+
+function PredictedPkiCell({
+  affinity,
+  onSubmit,
+}: {
+  affinity: AffinityPrediction | undefined;
+  onSubmit: () => void;
+}) {
+  if (!affinity) {
+    return (
+      <div className="flex w-20 shrink-0 items-center justify-end gap-1 text-right text-[11px]">
+        <span className="text-muted-2">{'\u2014'}</span>
+        <button
+          onClick={onSubmit}
+          className="rounded border border-blue-500/40 bg-blue-500/10 px-1.5 text-[9px] font-medium text-blue-300 hover:bg-blue-500/20 transition-colors"
+          title="Submit Boltz-2 affinity prediction"
+        >
+          Predict {'\u2197'}
+        </button>
+      </div>
+    );
+  }
+  if (affinity.status === 'queued') {
+    return (
+      <div className="w-20 shrink-0 text-right">
+        <span className="rounded-full bg-slate-500/20 px-1.5 py-0.5 text-[9px] text-slate-300 tabular-nums">
+          Queued
+        </span>
+      </div>
+    );
+  }
+  if (affinity.status === 'running') {
+    const pct = affinity.progress ?? 0;
+    return (
+      <div className="w-20 shrink-0 text-right">
+        <span className="rounded-full bg-blue-500/20 px-1.5 py-0.5 text-[9px] text-blue-300 tabular-nums">
+          Running \u00b7 {pct}%
+        </span>
+        <div className="mt-0.5 h-px w-full overflow-hidden bg-[var(--border)]">
+          <div className="h-full bg-blue-400 transition-all" style={{ width: `${pct}%` }} />
+        </div>
+      </div>
+    );
+  }
+  if (affinity.status === 'failed' || affinity.status === 'expired') {
+    return (
+      <div className="w-20 shrink-0 text-right" title={affinity.error || affinity.status}>
+        <span className="rounded-full bg-red-500/20 px-1.5 py-0.5 text-[9px] text-red-300">
+          {affinity.status === 'expired' ? 'Expired' : 'Failed'}
+        </span>
+      </div>
+    );
+  }
+  // complete
+  const pic50 = affinity.pic50;
+  const ic50 = affinity.ic50_nm;
+  if (pic50 == null) {
+    return (
+      <div className="w-20 shrink-0 text-right text-[11px] text-muted-2">{'\u2014'}</div>
+    );
+  }
+  return (
+    <div className="w-20 shrink-0 text-right tabular-nums">
+      <div className={`text-[12px] font-semibold ${pic50Color(pic50)}`}>{pic50.toFixed(1)}</div>
+      {ic50 != null && (
+        <div className="text-[9px] text-muted-2">IC50: {formatActivity(ic50)}</div>
+      )}
+    </div>
+  );
+}
+
+function BinderProbabilityCell({ affinity }: { affinity: AffinityPrediction | undefined }) {
+  const p = affinity?.affinity_probability_binary;
+  if (p == null) {
+    return <div className="w-16 shrink-0 text-right text-[10px] text-muted-2">{'\u2014'}</div>;
+  }
+  const pct = Math.round(p * 100);
+  const color = p >= 0.7 ? 'bg-emerald-400' : p >= 0.4 ? 'bg-amber-400' : 'bg-slate-400';
+  return (
+    <div className="w-16 shrink-0 text-right">
+      <div className="text-[11px] tabular-nums text-foreground">{pct}%</div>
+      <div className="mt-0.5 h-px w-full overflow-hidden bg-[var(--border)]">
+        <div className={`h-full ${color}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -694,10 +1034,16 @@ function LigandsTab({
 function LigandRow({
   lig,
   lipinskiPass,
+  affinity,
+  showBinder,
+  onSubmitAffinity,
   onPredict,
 }: {
   lig: KnownLigand;
   lipinskiPass: boolean | null | undefined;
+  affinity: AffinityPrediction | undefined;
+  showBinder: boolean;
+  onSubmitAffinity: () => void;
   onPredict: () => void;
 }) {
   return (
@@ -723,6 +1069,10 @@ function LigandRow({
       <div className="w-20 shrink-0 text-right text-[11px] tabular-nums text-foreground">
         {formatActivity(lig.activity_value_nm)}
       </div>
+
+      <PredictedPkiCell affinity={affinity} onSubmit={onSubmitAffinity} />
+
+      {showBinder && <BinderProbabilityCell affinity={affinity} />}
 
       <div className="flex w-14 shrink-0 items-center justify-center gap-1.5" title={lig.clinical_phase_label}>
         <span className={`h-2 w-2 rounded-full ${phaseDotColor(lig.clinical_phase)}`} />

@@ -58,6 +58,17 @@ const sections: NavSection[] = [
     title: 'Predict',
     items: [
       {
+        label: 'Screen',
+        href: '/app/screen',
+        match: '/app/screen',
+        icon: (
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 2h8M6 2v3.5L3 13a2 2 0 0 0 1.7 3h8.6A2 2 0 0 0 15 13l-3-7.5V2" />
+            <path d="M5 9h8" />
+          </svg>
+        ),
+      },
+      {
         label: 'Antibody',
         href: '/app/antibody',
         match: '/app/antibody',
@@ -105,6 +116,11 @@ function Breadcrumbs() {
     crumbs.push({ label: 'Antibody' });
   } else if (segments[1] === 'analytics') {
     crumbs.push({ label: 'Analytics' });
+  } else if (segments[1] === 'screen') {
+    crumbs.push({ label: 'Screen', href: '/app/screen' });
+    if (segments[2] === 'results' && segments[3]) {
+      crumbs.push({ label: 'Results' });
+    }
   } else if (segments[1] === 'target' && segments[2]) {
     crumbs.push({ label: segments[2], href: `/app/target/${segments[2]}` });
     if (segments[3] === 'pocket' && segments[4]) {

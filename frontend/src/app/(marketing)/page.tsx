@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Crosshair, FlaskConical, Box, Beaker, Sparkles, BarChart3, Search, TrendingUp, Play, Pause, ChevronLeft, ChevronRight, Github } from 'lucide-react';
+import { Crosshair, FlaskConical, Box, Beaker, Sparkles, BarChart3, Search, TrendingUp, Play, Pause, ChevronLeft, ChevronRight, Github, Zap, ListChecks } from 'lucide-react';
 import { LogoAperture, MolecularArt, AccentMesh } from '@/components/brand/BrandAssets';
 
 // ── Scroll-triggered count-up ───────────────────────────────
@@ -91,6 +91,8 @@ const features = [
   { icon: Crosshair, title: 'Pocket Discovery', description: 'Machine-learning binding site prediction with P2Rank. Identifies druggable pockets with residue-level detail.' },
   { icon: FlaskConical, title: 'Ligand Intelligence', description: 'Fetch known drugs from ChEMBL with IC50, Ki activity data, clinical phase, and structure-activity relationships.' },
   { icon: Box, title: 'Complex Prediction', description: 'Model binding with AlphaFold 3. Semi-automated prediction workflow for protein-ligand complexes.' },
+  { icon: Zap, title: 'Affinity Prediction', description: 'Boltz-2 predicts pIC50, IC50, and binder probability with iPTM/pLDDT confidence. Compare predicted vs experimental ChEMBL values side-by-side.' },
+  { icon: ListChecks, title: 'Virtual Screening', description: 'Run Boltz-2 across hundreds of ligands as a single campaign. Live progress, ranked top hits, CSV export, persistent results.' },
   { icon: Beaker, title: 'Antibody Modeling', description: 'Predict antibody 3D structures from sequences using ABodyBuilder2 with CDR visualization.' },
   { icon: Sparkles, title: 'AI Assistant', description: 'Claude-powered drug design insights. Context-aware analysis of targets and pockets.' },
   { icon: BarChart3, title: 'Analytics & Reports', description: 'Druggability reports, SAR plots, activity cliffs, and platform-wide data insights.' },
@@ -128,7 +130,7 @@ function Features() {
 
 // ── Trust logos ──────────────────────────────────────────────
 const trustItems = [
-  'AlphaFold 3', 'P2Rank', 'ChEMBL', 'ImmuneBuilder', 'RDKit', 'OpenTargets',
+  'AlphaFold 3', 'Boltz-2', 'P2Rank', 'ChEMBL', 'ImmuneBuilder', 'RDKit', 'OpenTargets',
 ];
 
 // ── Section 4: Visual walkthrough (tabbed showcase) ─────────
@@ -564,7 +566,7 @@ function UseCases() {
 // ── Main page ───────────────────────────────────────────────
 export default function HomePage() {
   const [stat1, ref1] = useScrollCountUp(200);
-  const [stat2, ref2] = useScrollCountUp(4);
+  const [stat2, ref2] = useScrollCountUp(5);
   const [stat3, ref3] = useScrollCountUp(50);
 
   return (
@@ -589,8 +591,8 @@ export default function HomePage() {
               <span>drug design platform</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted sm:text-xl">
-              From protein target to druggable pocket to molecular prediction — in minutes, not months.
-              Built on AlphaFold 3, P2Rank, and the latest open-source computational biology tools.
+              From protein target to druggable pocket to predicted binding affinity — in minutes, not months.
+              Built on AlphaFold 3, Boltz-2, P2Rank, and the latest open-source computational biology tools.
             </p>
             <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Link
@@ -788,9 +790,9 @@ export default function HomePage() {
               {
                 step: 4,
                 title: 'Predict how drugs bind',
-                description: 'Before testing in a lab, computational tools predict how a drug molecule will sit inside the pocket \u2014 its orientation, molecular contacts, and binding stability.',
+                description: 'Before testing in a lab, computational tools predict how a drug molecule will sit inside the pocket \u2014 its orientation, molecular contacts, and the strength of the interaction. OpenDDE pairs AlphaFold 3 for binding poses with Boltz-2 for predicted affinity (pIC50, IC50, binder probability), so you can both visualize and rank.',
                 icon: Box,
-                badge: 'OpenDDE: AlphaFold 3 complex prediction',
+                badge: 'OpenDDE: AlphaFold 3 poses + Boltz-2 affinity',
                 side: 'left' as const,
               },
               {
@@ -962,6 +964,7 @@ export default function HomePage() {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {[
               { name: 'AlphaFold 3', provides: 'Structure prediction', org: 'Google DeepMind', href: 'https://alphafold.ebi.ac.uk/' },
+              { name: 'Boltz-2', provides: 'Affinity prediction', org: 'MIT Jameel Clinic', href: 'https://github.com/jwohlwend/boltz' },
               { name: 'P2Rank', provides: 'Pocket detection', org: 'Czech Technical University', href: 'https://github.com/rdk/p2rank' },
               { name: 'ChEMBL', provides: 'Bioactivity data', org: 'EMBL-EBI', href: 'https://www.ebi.ac.uk/chembl/' },
               { name: 'RDKit', provides: 'Cheminformatics', org: 'Open-source community', href: 'https://www.rdkit.org/' },

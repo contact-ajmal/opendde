@@ -29,6 +29,14 @@ export default function DocsIntroduction() {
           targets
         </li>
         <li>
+          <strong>Predict affinity</strong> &mdash; Use <Link href="/docs/affinity-prediction">Boltz-2</Link>
+          {' '}to estimate pIC50, IC50, and binder probability for protein&ndash;ligand pairs
+        </li>
+        <li>
+          <strong>Run virtual screens</strong> &mdash; Triage hundreds of ligands per target via
+          the <Link href="/docs/virtual-screening">screening campaign</Link> page
+        </li>
+        <li>
           <strong>Analyze antibodies</strong> &mdash; Predict antibody structures with CDR loop
           annotation using ImmuneBuilder
         </li>

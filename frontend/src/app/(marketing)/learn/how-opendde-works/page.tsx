@@ -130,6 +130,18 @@ export default function HowOpenDDEWorksPage() {
         </p>
       </div>
 
+      <h3 id="boltz2">Boltz-2 affinity prediction</h3>
+      <p>
+        For triaging large libraries before committing to a full pose prediction, OpenDDE
+        runs a <strong>Boltz-2</strong> microservice that returns predicted pIC50, IC50,
+        and binder probability for each protein-ligand pair. It approaches FEP accuracy
+        at roughly 1000&times; the speed and is the engine behind the <Link href="/app/screen">virtual
+        screening page</Link>. See <Link href="/docs/affinity-prediction">Affinity
+        prediction</Link> for the model&rsquo;s strengths (binary binder/decoy
+        classification) and known limits (fine ranking of close analogs, metal-containing
+        ligands).
+      </p>
+
       {/* ── AI assistant ───────────────────────────────────── */}
       <h2 id="ai-assistant">AI assistant</h2>
 
@@ -156,32 +168,33 @@ export default function HowOpenDDEWorksPage() {
       <h2 id="architecture">Architecture</h2>
 
       <p>
-        OpenDDE is a <strong>Docker Compose</strong> application with six containers:
+        OpenDDE is a <strong>Docker Compose</strong> application with seven containers:
       </p>
 
       <div className="my-6 overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6">
         <pre className="text-xs leading-relaxed" style={{ fontFamily: 'monospace' }}><code>{`  Browser (localhost:3000)
       │
       ▼
-┌──────────────┐     ┌───────────────────────────────┐
-│   Frontend   │────▶│         Backend (FastAPI)       │
-│   Next.js    │     │                                 │
-└──────────────┘     │  ┌─────────┐ ┌──────┐ ┌─────┐ │
-                     │  │ P2Rank  │ │ RDKit│ │Immun│ │
-                     │  │  :5001  │ │:5002 │ │:5003│ │
-                     │  └─────────┘ └──────┘ └─────┘ │
-                     │       ▲                         │
-                     │  Redis cache    Supabase (ext.) │
-                     └───────────────────────────────┘
+┌──────────────┐     ┌──────────────────────────────────────┐
+│   Frontend   │────▶│           Backend (FastAPI)           │
+│   Next.js    │     │                                        │
+└──────────────┘     │  ┌───────┐ ┌─────┐ ┌─────┐ ┌──────┐  │
+                     │  │P2Rank │ │RDKit│ │Immun│ │Boltz │  │
+                     │  │ :8001 │ │:8003│ │:8002│ │ :8004│  │
+                     │  └───────┘ └─────┘ └─────┘ └──────┘  │
+                     │       ▲                                │
+                     │  Redis cache + Postgres (campaigns)    │
+                     └──────────────────────────────────────┘
                           │
                      External APIs:
                      ChEMBL, UniProt, AlphaFold DB, Claude`}</code></pre>
       </div>
 
       <p>
-        Every computational engine can be swapped without changing the rest of the system. P2Rank
-        could become FPocket, AlphaFold could become Boltz-2, ImmuneBuilder could become
-        ABodyBuilder3 &mdash; all through a standardized adapter interface.
+        Every computational engine can be swapped without changing the rest of the system.
+        P2Rank could become FPocket, the Boltz-2 endpoint can be pointed at any compatible
+        GPU host (NIM, Modal, a self-hosted A10), ImmuneBuilder could become ABodyBuilder3
+        &mdash; all through a standardized adapter interface.
       </p>
 
       <p>

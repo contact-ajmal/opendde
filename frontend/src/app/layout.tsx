@@ -10,11 +10,11 @@ export const metadata: Metadata = {
     template: '%s — OpenDDE',
   },
   description:
-    'Open-source drug design workbench. Discover druggable pockets, explore known ligands, predict binding complexes with AlphaFold 3, P2Rank, and ImmuneBuilder.',
+    'Open-source drug design workbench. Discover druggable pockets, explore known ligands, predict binding complexes with AlphaFold 3, and predict binding affinity at scale with Boltz-2.',
   openGraph: {
     title: 'OpenDDE — Open Drug Design Engine',
     description:
-      'Self-hosted drug design platform: pocket discovery, ligand intelligence, complex prediction, and antibody modeling.',
+      'Self-hosted drug design platform: pocket discovery, ligand intelligence, complex prediction, Boltz-2 affinity + virtual screening, and antibody modeling.',
     siteName: 'OpenDDE',
     type: 'website',
     images: [
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'OpenDDE — Open Drug Design Engine',
     description:
-      'Self-hosted drug design platform: pocket discovery, ligand intelligence, complex prediction, and antibody modeling.',
+      'Self-hosted drug design platform: pocket discovery, ligand intelligence, complex prediction, Boltz-2 affinity + virtual screening, and antibody modeling.',
     images: ['/og-image.png'],
   },
   robots: 'index, follow',

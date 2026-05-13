@@ -78,12 +78,12 @@ Track exploration history with charts and metrics: targets explored over time, p
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/opendde.git
+git clone https://github.com/contact-ajmal/opendde.git
 cd opendde
 
 # Set up environment variables
 cp .env.example .env
-# Edit .env with your Supabase URL/key and optional API keys
+# Edit .env with your CLAUDE_API_KEY (Postgres runs locally in Docker)
 
 # Build and start all services
 docker compose up --build
@@ -112,13 +112,14 @@ First build takes 5–10 minutes (downloading Docker images). Subsequent starts 
 │  ┌──────────┐    ┌──────────┐    ┌──────────────────┐  │
 │  │ Frontend  │───▶│ Backend  │───▶│  Microservices   │  │
 │  │ Next.js   │    │ FastAPI  │    │                  │  │
-│  │ :3000     │    │ :8000    │    │  P2Rank  :5001   │  │
-│  └──────────┘    │          │    │  RDKit   :5002   │  │
-│                  │          │───▶│  Immune  :5003   │  │
+│  │ :3000     │    │ :8000    │    │  P2Rank   :8001  │  │
+│  └──────────┘    │          │    │  RDKit    :8003  │  │
+│                  │          │───▶│  Immune   :8002  │  │
+│                  │          │    │  Boltz-2  :8004  │  │
 │                  │          │    └──────────────────┘  │
 │                  │          │                           │
-│                  │          │───▶ Redis :6379           │
-│                  │          │───▶ Supabase (external)   │
+│                  │          │───▶ Postgres :5432        │
+│                  │          │───▶ Redis    :6379        │
 │                  │          │───▶ ChEMBL API            │
 │                  │          │───▶ UniProt API           │
 │                  │          │───▶ Claude API            │
@@ -130,9 +131,11 @@ First build takes 5–10 minutes (downloading Docker images). Subsequent starts 
 |---------|------|------------|---------|
 | **frontend** | 3000 | Next.js 14 | React UI with App Router |
 | **backend** | 8000 | FastAPI | REST API, orchestration, caching |
-| **p2rank** | 5001 | Java + Flask | ML pocket prediction |
-| **rdkit** | 5002 | Python + RDKit | Molecular properties, similarity |
-| **immunebuilder** | 5003 | Python + PyTorch | Antibody structure prediction |
+| **p2rank** | 8001 | Java + Flask | ML pocket prediction |
+| **immunebuilder** | 8002 | Python + PyTorch | Antibody structure prediction |
+| **rdkit** | 8003 | Python + RDKit | Molecular properties, similarity |
+| **boltz** | 8004 | Python + PyTorch | Boltz-2 binding affinity prediction |
+| **postgres** | 5432 | PostgreSQL 15 | Target/pocket/ligand cache |
 | **redis** | 6379 | Redis 7 | Response caching |
 
 ---
@@ -230,7 +233,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed gu
 
 ```bash
 # Clone and install
-git clone https://github.com/your-org/opendde.git
+git clone https://github.com/contact-ajmal/opendde.git
 cd opendde
 
 # Start with hot reload
@@ -259,7 +262,7 @@ If you use OpenDDE in your research, please cite:
   title     = {OpenDDE: Open Drug Design Engine},
   author    = {Ajmal},
   year      = {2026},
-  url       = {https://github.com/your-org/opendde},
+  url       = {https://github.com/contact-ajmal/opendde},
   license   = {MIT},
   note      = {Open-source computational drug design platform}
 }

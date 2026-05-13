@@ -50,18 +50,20 @@ Be respectful, constructive, and collaborative. We're building tools to help res
 ```bash
 # Copy environment template
 cp .env.example .env
-# Edit .env with your Supabase credentials
+# Edit .env with your Anthropic CLAUDE_API_KEY (Postgres runs locally in Docker)
 
 # Start all services with hot reload
 docker compose up --build
 ```
 
-This starts 6 containers with live reload:
+This starts 8 containers with live reload:
 - **Frontend** (Next.js): http://localhost:3000 — Fast Refresh on file save
 - **Backend** (FastAPI): http://localhost:8000 — Uvicorn auto-reload
-- **P2Rank**: http://localhost:5001
-- **RDKit**: http://localhost:5002
-- **ImmuneBuilder**: http://localhost:5003
+- **P2Rank**: http://localhost:8001
+- **ImmuneBuilder**: http://localhost:8002
+- **RDKit**: http://localhost:8003
+- **Boltz-2**: http://localhost:8004
+- **Postgres**: localhost:5432
 - **Redis**: localhost:6379
 
 ### Running frontend standalone
@@ -109,7 +111,8 @@ opendde/
 ├── services/                 # Computational microservices
 │   ├── p2rank/               # Pocket prediction
 │   ├── rdkit/                # Cheminformatics
-│   └── immunebuilder/        # Antibody modeling
+│   ├── immunebuilder/        # Antibody modeling
+│   └── boltz/                # Binding affinity prediction
 │
 ├── docker-compose.yml        # Development orchestration
 ├── docker-compose.prod.yml   # Production orchestration
